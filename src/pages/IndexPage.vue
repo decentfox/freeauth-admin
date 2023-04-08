@@ -13,7 +13,8 @@
 import { defineComponent, ref } from 'vue';
 
 import ExampleComponent from 'components/ExampleComponent.vue';
-import { Meta, Todo } from 'components/models';
+
+import { Meta, Todo } from '../type';
 
 export default defineComponent({
   name: 'IndexPage',

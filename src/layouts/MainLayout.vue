@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -17,16 +17,35 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      class="bg-grey-2 text-grey-9 text-weight-bold"
+      :width="220"
+      :breakpoint="400"
+    >
+      <q-scroll-area class="fit">
+        <q-list class="q-py-lg">
+          <q-expansion-item
+            v-for="(section, idx) in essentialLinks"
+            :key="idx"
+            :content-inset-level="0"
+            expand-separator
+            :icon="section.icon"
+            :label="section.header"
+            group="somegroup"
+            expand-icon="arrow_drop_down"
+          >
+            <EssentialLink
+              v-for="(link, lIdx) in section.links"
+              :key="lIdx"
+              v-bind="link"
+              class="text-weight-regular essential-link"
+            />
+          </q-expansion-item>
+        </q-list>
+      </q-scroll-area>
     </q-drawer>
 
     <q-page-container>
@@ -40,48 +59,29 @@ import { defineComponent, ref } from 'vue';
 
 import EssentialLink from 'components/EssentialLink.vue';
 
-const linksList = [
+import { MainMenu } from '../type';
+
+const linksList: MainMenu[] = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
+    header: 'Demo',
+    icon: 'account_tree',
+    links: [
+      {
+        title: '组织管理',
+        link: '/orgs_demo',
+      },
+      {
+        title: '角色管理',
+        link: '/roles_demo',
+      },
+      {
+        title: '用户管理',
+        link: '/users_demo',
+      },
+      {
+        title: '权限设置',
+      },
+    ],
   },
 ];
 
@@ -105,3 +105,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.essential-link {
+  padding-left: 72px;
+}
+</style>

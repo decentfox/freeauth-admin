@@ -15,7 +15,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, Ref, ref, toRef } from 'vue';
 
-import { Meta, Todo } from './models';
+import { Meta, Todo } from '../type';
 
 function useClickCount() {
   const clickCount = ref(0);

@@ -13,12 +13,3 @@ export interface MainMenuLink {
   /** 菜单链接，可空 */
   link?: string;
 }
-
-export interface Todo {
-  id: number;
-  content: string;
-}
-
-export interface Meta {
-  totalCount: number;
-}

@@ -58,8 +58,7 @@
 import { defineComponent, ref } from 'vue';
 
 import EssentialLink from 'components/EssentialLink.vue';
-
-import { MainMenu } from '../type';
+import { MainMenu } from 'components/type';
 
 const linksList: MainMenu[] = [
   {

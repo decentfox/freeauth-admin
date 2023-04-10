@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lFf">
-    <q-header elevated>
+    <q-header elevated class="bg-white text-grey-9">
       <q-toolbar>
         <q-btn
           flat
@@ -10,10 +10,26 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
+        <q-toolbar-title>
+          <a href="/">
+            <img
+              class="logo q-mt-sm"
+              src="~assets/logo.png"
+              alt="logo"
+              width="120"
+            />
+          </a>
+        </q-toolbar-title>
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <div class="q-pl-md q-gutter-xs row no-wrap items-center text-grey-8">
+          <q-btn flat label="帮助文档" />
+          <q-btn round flat>
+            <q-avatar size="26px">
+              <q-icon name="admin_panel_settings"></q-icon>
+            </q-avatar>
+            <q-tooltip>Account</q-tooltip>
+          </q-btn>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -21,29 +37,34 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      class="bg-grey-2 text-grey-9 text-weight-bold"
-      :width="220"
+      class="bg-secondary"
+      :width="200"
       :breakpoint="400"
     >
       <q-scroll-area class="fit">
         <q-list class="q-py-lg">
-          <q-expansion-item
-            v-for="(section, idx) in essentialLinks"
-            :key="idx"
-            :content-inset-level="0"
-            expand-separator
-            :icon="section.icon"
-            :label="section.header"
-            group="somegroup"
-            expand-icon="arrow_drop_down"
-          >
-            <EssentialLink
-              v-for="(link, lIdx) in section.links"
-              :key="lIdx"
-              v-bind="link"
-              class="text-weight-regular essential-link"
+          <div v-for="(group, idx) in mainMenu" :key="idx">
+            <q-item
+              v-for="(item, itemIdx) in group.links"
+              :key="itemIdx"
+              v-ripple
+              :to="item.link"
+              clickable
+              active-class="active-link"
+            >
+              <q-item-section avatar>
+                <q-icon :name="item.icon" color="grey-8" size="xs" class="" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ item.title }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator
+              v-if="idx !== mainMenu.length - 1"
+              inset
+              class="q-my-sm"
             />
-          </q-expansion-item>
+          </div>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -57,28 +78,50 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
-import EssentialLink from 'components/EssentialLink.vue';
-import { MainMenu } from 'components/type';
+import { MainMenuSection } from 'components/type';
 
-const linksList: MainMenu[] = [
+const menuLinkList: MainMenuSection[] = [
   {
-    header: 'Demo',
-    icon: 'account_tree',
+    header: '业务范围',
     links: [
       {
         title: '组织管理',
-        link: '/orgs_demo',
+        icon: 'account_tree',
+        link: '/org_admin_panel',
       },
       {
         title: '角色管理',
-        link: '/roles_demo',
+        icon: 'people_alt',
       },
       {
         title: '用户管理',
-        link: '/users_demo',
+        icon: 'contacts',
+        link: '/user_admin_panel',
+      },
+      {
+        title: '应用管理',
+        icon: 'apps',
       },
       {
         title: '权限设置',
+        icon: 'room_preferences',
+      },
+    ],
+  },
+  {
+    header: '技术范围',
+    links: [
+      {
+        title: '登录配置',
+        icon: 'password',
+      },
+      {
+        title: '安全设置',
+        icon: 'add_moderator',
+      },
+      {
+        title: '审计日志',
+        icon: 'mark_chat_read',
       },
     ],
   },
@@ -87,15 +130,13 @@ const linksList: MainMenu[] = [
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-    EssentialLink,
-  },
+  components: {},
 
   setup() {
     const leftDrawerOpen = ref(false);
 
     return {
-      essentialLinks: linksList,
+      mainMenu: menuLinkList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -105,8 +146,26 @@ export default defineComponent({
 });
 </script>
 
+<style lang="scss">
+.dark-select {
+  .q-field__native,
+  .q-field__marginal {
+    color: white !important;
+  }
+}
+
+.q-item__section--avatar {
+  min-width: 36px;
+}
+</style>
+
 <style lang="scss" scoped>
-.essential-link {
-  padding-left: 72px;
+.active-link {
+  background: $info;
+  color: $primary;
+
+  .q-icon {
+    color: $primary !important;
+  }
 }
 </style>

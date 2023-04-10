@@ -1,6 +1,6 @@
-# DAuth Management (dauth-ui-quasar)
+# FreeAuth Management (freeauth-ui-quasar)
 
-DAuth management
+FreeAuth management
 
 ## Install the dependencies
 

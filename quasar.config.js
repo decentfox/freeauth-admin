@@ -189,7 +189,7 @@ module.exports = configure(function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'dauth-ui-quasar',
+        appId: 'freeauth-ui-quasar',
       },
     },
 

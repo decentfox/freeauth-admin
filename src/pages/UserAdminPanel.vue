@@ -1,33 +1,61 @@
 <template>
   <q-page class="full-width q-pa-md">
-    <data-table :rows="users" :columns="columns" sticky-action-column>
+    <data-table
+      :rows="users"
+      :columns="columns"
+      sticky-action-column
+      :actions="['批量禁用', '批量启用', '批量删除']"
+    >
       <template #body-cell-status="props">
         <q-td :props="props">
           <q-chip
             square
             size="12px"
-            :color="props.row.status ? 'info' : 'red-1'"
-            :text-color="props.row.status ? 'primary' : 'red-8'"
             :label="props.row.status ? '正常' : '禁用'"
             class="text-weight-bold q-pa-sm"
+            :class="props.row.status ? 'chip-status-on' : 'chip-status-off'"
           />
         </q-td>
+      </template>
+
+      <template #table-action>
+        <q-btn unelevated label="创建用户" class="q-ml-md primary-btn" />
       </template>
       <template #body-cell-actions="props">
         <q-td :props="props">
           <div class="text-grey-8 q-gutter-xs">
-            <q-btn size="12px" flat dense round icon="more_horiz">
-              <q-menu>
-                <q-list class="text-body2">
+            <q-btn size="12px" flat dense icon="more_horiz" class="flat-btn">
+              <q-menu class="q-px-xs actions-menu">
+                <q-list dense>
                   <q-item
+                    v-if="props.row.status"
                     v-close-popup
                     clickable
+                    class="q-my-xs"
                     @click="blockUser(props.row.name)"
                   >
-                    <q-item-section>禁用账号</q-item-section>
+                    <q-item-section avatar>
+                      <q-icon name="remove_circle_outline" size="16px" />
+                    </q-item-section>
+                    <q-item-section> 禁用账号 </q-item-section>
                   </q-item>
-                  <q-separator />
-                  <q-item v-close-popup clickable>
+                  <q-item
+                    v-else
+                    v-close-popup
+                    clickable
+                    class="q-my-xs"
+                    @click="blockUser(props.row.name)"
+                  >
+                    <q-item-section avatar>
+                      <q-icon name="task_alt" size="16px" />
+                    </q-item-section>
+                    <q-item-section> 启用账号 </q-item-section>
+                  </q-item>
+                  <!-- <q-separator inset /> -->
+                  <q-item v-close-popup clickable class="q-my-xs">
+                    <q-item-section avatar>
+                      <q-icon name="delete_outline" size="16px" />
+                    </q-item-section>
                     <q-item-section>删除账号</q-item-section>
                   </q-item>
                 </q-list>
@@ -198,3 +226,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.actions-menu .q-item__section--avatar {
+  min-width: 28px;
+  padding-right: 0;
+}
+</style>

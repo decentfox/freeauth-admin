@@ -1,5 +1,6 @@
 <template>
   <q-table
+    v-model:selected="selected"
     flat
     class="sticky-table selectable"
     :class="{ 'sticky-action-cell': stickyActionColumn }"
@@ -32,11 +33,116 @@
           />
         </template>
       </q-input>
+      <q-btn
+        unelevated
+        dense
+        icon="tune"
+        class="q-ml-sm"
+        :class="hasBeenFiltered ? 'primary-btn' : 'flat-btn'"
+      >
+        <q-menu class="q-pa-sm" anchor="bottom left" self="top middle">
+          <div
+            v-for="(conditoin, idx) in filters"
+            :key="idx"
+            class="row no-wrap q-py-sm text-h6"
+            style="width: 560px"
+          >
+            <div class="col-4 q-px-xs">
+              <q-select
+                v-model="conditoin.field"
+                filled
+                dense
+                :options="['姓名', '用户名', '手机号']"
+                label="选择字段"
+                stack-label
+              >
+              </q-select>
+            </div>
+            <div class="col-3 q-px-xs">
+              <q-select
+                v-model="conditoin.operator"
+                filled
+                dense
+                :options="['等于', '不等于']"
+                label="选择运算符"
+                stack-label
+              >
+              </q-select>
+            </div>
+            <div class="col-5 q-px-xs">
+              <div class="row">
+                <q-input
+                  v-model="conditoin.value"
+                  dense
+                  filled
+                  class="col"
+                  label="数值"
+                  stack-label
+                />
+                <q-btn
+                  v-if="filters.length > 1"
+                  flat
+                  dense
+                  size="10px"
+                  icon="remove_circle_outline"
+                  class="flat-btn q-ml-xs"
+                  @click="removeFilter(idx)"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row no-wrap q-px-xs q-my-sm" style="width: 560px">
+            <q-btn flat class="flat-btn" @click="addFilter">
+              <q-icon size="18px" name="add_circle_outline" class="q-mr-xs" />
+              添加筛选条件
+            </q-btn>
+            <q-space />
+            <q-btn
+              unelevated
+              class="secondary-btn"
+              color="secondary"
+              @click="resetFilter"
+            >
+              <q-icon size="18px" name="restart_alt" />重置
+            </q-btn>
+            <q-btn unelevated class="q-ml-sm primary-btn" @click="search">
+              <q-icon size="18px" name="search" />搜索
+            </q-btn>
+          </div>
+        </q-menu>
+      </q-btn>
       <q-space />
       <div class="q-gutter-sm">
-        <q-btn unelevated color="secondary" text-color="grey-9" label="导入" />
-        <q-btn unelevated color="secondary" text-color="grey-9" label="导出" />
+        <q-btn unelevated class="secondary-btn" color="secondary">
+          <q-icon size="18px" name="upload" />导入
+        </q-btn>
+        <q-btn unelevated class="secondary-btn" color="secondary">
+          <q-icon size="18px" name="download" />导出
+        </q-btn>
       </div>
+      <slot name="table-action"></slot>
+
+      <q-slide-transition
+        appear
+        enter-active-class="animated fadeIn"
+        leave-active-class="animated fadeOut"
+      >
+        <div
+          v-if="actions && selected.length > 0"
+          class="row col-12 justify-center"
+        >
+          <q-card class="bg-secondary">
+            <q-btn
+              v-for="(action, i) in actions"
+              :key="i"
+              unelevated
+              :label="action"
+              class="q-ma-sm"
+              @click="$emit(action.replace(' ', '-'), selected)"
+            />
+          </q-card>
+        </div>
+      </q-slide-transition>
     </template>
 
     <template
@@ -60,9 +166,9 @@
         <q-pagination
           v-model="current"
           active-design="unelevated"
-          active-color="info"
-          color="grey-8"
-          active-text-color="primary"
+          active-color="primary"
+          :color="$q.dark.isActive ? 'grey-2' : 'grey-10'"
+          active-text-color="white"
           :max="10"
           :max-pages="6"
           boundary-numbers
@@ -103,7 +209,7 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { QTableColumn, QTableSlots } from 'quasar';
 
-import { Pagination } from 'components/table/type';
+import { FilterCondition, Pagination } from 'components/table/type';
 
 const defaultPagination: Pagination = {
   sortBy: 'desc',
@@ -134,14 +240,49 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    actions: {
+      type: [Array, Object],
+      default: null,
+    },
   },
 
   setup() {
     return {
+      // Search
       keyword: ref(''),
+
+      // Pagination
       pagination: ref(defaultPagination),
       current: ref(6),
+
+      // Row Check
+      selected: ref([]),
+
+      // Filter
+      filters: ref<FilterCondition[]>([
+        { field: null, operator: null, value: null },
+      ]),
+      hasBeenFiltered: ref(false),
     };
+  },
+
+  methods: {
+    addFilter() {
+      this.filters.push({ field: null, operator: null, value: null });
+    },
+
+    removeFilter(index: number) {
+      this.filters.splice(index, 1);
+    },
+
+    resetFilter() {
+      this.filters = [{ field: null, operator: null, value: null }];
+      this.hasBeenFiltered = false;
+    },
+
+    search() {
+      this.hasBeenFiltered = true;
+    },
   },
 });
 </script>
@@ -207,6 +348,22 @@ export default defineComponent({
   .q-field__marginal {
     min-height: 30px !important;
     height: 30px !important;
+  }
+}
+
+body.body--dark {
+  .sticky-table {
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th {
+      background-color: $dark;
+    }
+  }
+
+  .sticky-action-cell {
+    tr > td:last-child {
+      background-color: $dark;
+    }
   }
 }
 </style>

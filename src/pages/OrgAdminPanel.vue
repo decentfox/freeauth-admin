@@ -88,3 +88,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.dark-select {
+  .q-field__native,
+  .q-field__marginal {
+    color: white !important;
+  }
+}
+</style>

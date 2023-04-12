@@ -6,3 +6,9 @@ export type Pagination = {
   rowsPerPage: number;
   rowsNumber: number;
 };
+
+export type FilterCondition = {
+  field: string | null;
+  operator: string | null;
+  value: string | null;
+};

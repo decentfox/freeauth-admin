@@ -1,1 +1,85 @@
 // app global css in SCSS form
+.q-btn__content {
+  font-weight: normal;
+}
+
+.q-item__section--avatar {
+  min-width: 36px;
+}
+
+/* the style for ticked checkbox */
+.q-checkbox__inner--truthy .q-checkbox__bg {
+  color: $primary;
+  border: 1px solid $primary !important;
+}
+
+// Light Mode
+.primary-btn {
+  background-color: $primary;
+  .q-btn__content {
+    color: $grey-2;
+  }
+}
+
+.secondary-btn {
+  .q-btn__content {
+    color: $grey-10;
+  }
+}
+
+.flat-btn {
+  color: $grey-10;
+}
+
+.main-header {
+  background: white;
+}
+
+.q-layout__shadow:after {
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.2), 0 0px 5px rgba(0, 0, 0, 0.24) !important;
+}
+
+.chip-status-on {
+  background-color: $blue-1;
+  color: $blue-14;
+}
+
+.chip-status-off {
+  background-color: $red-1;
+  color: $red-8;
+}
+
+// Dark Mode
+.body--dark {
+  --q-primary: #215ae5;
+  --q-secondary: rgba(255, 255, 255, 0.07);
+
+  .secondary-btn {
+    .q-btn__content {
+      color: $grey-2;
+    }
+  }
+
+  .flat-btn {
+    color: $grey-2;
+  }
+
+  .main-header {
+    background: $dark;
+  }
+
+  .q-layout__shadow:after {
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.2),
+      0 0px 5px rgba(255, 255, 255, 0.24) !important;
+  }
+
+  .chip-status-on {
+    background-color: rgb(54, 72, 113);
+    color: $blue-1;
+  }
+
+  .chip-status-off {
+    background-color: #6f3a3a;
+    color: $red-1;
+  }
+}

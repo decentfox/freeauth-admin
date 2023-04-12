@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lFf">
-    <q-header elevated class="bg-white text-grey-9">
+    <q-header elevated class="main-header">
       <q-toolbar>
         <q-btn
           flat
@@ -8,12 +8,21 @@
           round
           icon="menu"
           aria-label="Menu"
+          class="flat-btn"
           @click="toggleLeftDrawer"
         />
         <q-toolbar-title>
           <a href="/">
             <img
-              class="logo q-mt-sm"
+              v-if="$q.dark.isActive"
+              class="q-mt-sm"
+              src="~assets/logo-dark.png"
+              alt="logo"
+              width="120"
+            />
+            <img
+              v-else
+              class="q-mt-sm"
               src="~assets/logo.png"
               alt="logo"
               width="120"
@@ -21,13 +30,24 @@
           </a>
         </q-toolbar-title>
 
-        <div class="q-pl-md q-gutter-xs row no-wrap items-center text-grey-8">
-          <q-btn flat label="帮助文档" />
-          <q-btn round flat>
+        <div class="q-pl-md q-gutter-xs row no-wrap items-center">
+          <q-btn flat label="帮助文档" class="flat-btn" />
+          <q-btn round flat class="flat-btn">
             <q-avatar size="26px">
-              <q-icon name="admin_panel_settings"></q-icon>
+              <q-icon name="admin_panel_settings" />
             </q-avatar>
             <q-tooltip>Account</q-tooltip>
+          </q-btn>
+          <q-btn
+            round
+            flat
+            class="flat-btn"
+            @click="$q.dark.isActive ? $q.dark.set(false) : $q.dark.set(true)"
+          >
+            <q-avatar size="26px">
+              <q-icon :name="$q.dark.isActive ? 'sunny' : 'dark_mode'" />
+            </q-avatar>
+            <q-tooltip>{{ $q.dark.isActive ? 'Light' : 'Dark' }}</q-tooltip>
           </q-btn>
         </div>
       </q-toolbar>
@@ -37,12 +57,11 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      class="bg-secondary"
       :width="200"
       :breakpoint="400"
     >
       <q-scroll-area class="fit">
-        <q-list class="q-py-lg">
+        <q-list class="q-py-lg main-menu">
           <div v-for="(group, idx) in mainMenu" :key="idx">
             <q-item
               v-for="(item, itemIdx) in group.links"
@@ -50,10 +69,11 @@
               v-ripple
               :to="item.link"
               clickable
+              :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-9'"
               active-class="active-link"
             >
               <q-item-section avatar>
-                <q-icon :name="item.icon" color="grey-8" size="xs" class="" />
+                <q-icon :name="item.icon" size="xs" />
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ item.title }}</q-item-label>
@@ -146,26 +166,13 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.dark-select {
-  .q-field__native,
-  .q-field__marginal {
-    color: white !important;
-  }
-}
-
-.q-item__section--avatar {
-  min-width: 36px;
-}
-</style>
-
 <style lang="scss" scoped>
 .active-link {
-  background: $info;
-  color: $primary;
+  background: $primary;
+  color: white !important;
 
   .q-icon {
-    color: $primary !important;
+    color: white !important;
   }
 }
 </style>

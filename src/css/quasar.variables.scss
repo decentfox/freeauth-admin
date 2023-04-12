@@ -13,13 +13,21 @@
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
 $primary: #215ae5;
-$secondary: #f7f8fa;
+$secondary: rgba(0, 0, 0, 0.05);
 $accent: #f5ae1f;
 
-$dark: #1d1d1d;
-$dark-page: #121212;
+$dark: #333333;
+$dark-page: #333333;
 
 $positive: #21ba45;
 $negative: #c10015;
 $info: #e9effd;
 $warning: #f2c037;
+
+// Light Mode
+// $light-primary: #215ae5;
+// $light-secondary: rgba(0, 0, 0, 0.05);
+
+// // Dark Mode
+// $dark-primary: #215ae5;
+// $dark-secondary: rgba(255, 255, 255, 0.07);

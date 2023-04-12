@@ -18,14 +18,14 @@
               class="q-mt-sm"
               src="~assets/logo-dark.png"
               alt="logo"
-              width="120"
+              width="110"
             />
             <img
               v-else
               class="q-mt-sm"
               src="~assets/logo.png"
               alt="logo"
-              width="120"
+              width="110"
             />
           </a>
         </q-toolbar-title>
@@ -57,11 +57,11 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      :width="200"
+      :width="185"
       :breakpoint="400"
     >
       <q-scroll-area class="fit">
-        <q-list class="q-py-lg main-menu">
+        <q-list class="q-py-lg q-pr-sm main-menu">
           <div v-for="(group, idx) in mainMenu" :key="idx">
             <q-item
               v-for="(item, itemIdx) in group.links"
@@ -73,17 +73,13 @@
               active-class="active-link"
             >
               <q-item-section avatar>
-                <q-icon :name="item.icon" size="xs" />
+                <q-icon :name="item.icon" size="xs" class="q-ml-sm" />
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ item.title }}</q-item-label>
               </q-item-section>
             </q-item>
-            <q-separator
-              v-if="idx !== mainMenu.length - 1"
-              inset
-              class="q-my-sm"
-            />
+            <q-separator v-if="idx !== mainMenu.length - 1" class="q-my-sm" />
           </div>
         </q-list>
       </q-scroll-area>
@@ -167,12 +163,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.active-link {
-  background: $primary;
-  color: white !important;
+.main-menu {
+  .q-item {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
 
-  .q-icon {
+  .active-link {
+    background: $primary;
     color: white !important;
+
+    .q-icon {
+      color: white !important;
+    }
   }
 }
 </style>

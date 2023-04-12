@@ -146,7 +146,7 @@
     </template>
 
     <template
-      v-for="(_, name) in ($slots as Readonly<QTableSlots>)"
+      v-for="(_, name) in ($slots as Readonly<unknown>)"
       #[name]="slotData"
     >
       <slot :name="name" v-bind="slotData || {}" />
@@ -207,7 +207,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { QTableColumn, QTableSlots } from 'quasar';
+import { QTableColumn } from 'quasar';
 
 import { FilterCondition, Pagination } from 'components/table/type';
 

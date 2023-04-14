@@ -10,5 +10,7 @@ export interface User {
   mobile?: string;
   email?: string;
   username: string;
+  lastLogin?: Date;
+  createdTime: Date;
   status: boolean;
 }

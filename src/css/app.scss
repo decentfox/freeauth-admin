@@ -4,7 +4,7 @@
 }
 
 .q-item__section--avatar {
-  min-width: 36px;
+  min-width: 28px;
 }
 
 /* the style for ticked checkbox */
@@ -13,9 +13,28 @@
   border: 1px solid $primary !important;
 }
 
+.input-label {
+  opacity: 0.5;
+  padding-left: 5px;
+  padding-bottom: 8px;
+}
+
+.no-hover-btn {
+  .q-focus-helper {
+    display: none;
+  }
+}
+
 // Light Mode
 .primary-btn {
   background-color: $primary;
+  .q-btn__content {
+    color: $grey-2;
+  }
+}
+
+.accent-btn {
+  background-color: $accent;
   .q-btn__content {
     color: $grey-2;
   }
@@ -53,10 +72,18 @@
 .body--dark {
   --q-primary: #215ae5;
   --q-secondary: rgba(255, 255, 255, 0.07);
+  --q-negative: #c95b5b;
 
   .secondary-btn {
     .q-btn__content {
       color: $grey-2;
+    }
+  }
+
+  .accent-btn {
+    background-color: $accent;
+    .q-btn__content {
+      color: $grey-10;
     }
   }
 

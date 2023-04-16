@@ -1,5 +1,6 @@
 <template>
   <q-table
+    v-model:pagination="pagination"
     v-model:selected="selected"
     flat
     class="sticky-table selectable"
@@ -8,8 +9,9 @@
     :columns="columns"
     row-key="id"
     selection="multiple"
-    :pagination="pagination"
-    :rows-per-page-options="[5, 10, 50, 100]"
+    binary-state-sort
+    :loading="loading"
+    @request="onRequest"
   >
     <template #top>
       <q-input
@@ -164,18 +166,19 @@
       <q-space />
       <div class="row q-py-md">
         <q-pagination
-          v-model="current"
+          v-model="pagination.page"
           active-design="unelevated"
           active-color="primary"
           :color="$q.dark.isActive ? 'grey-2' : 'grey-10'"
           active-text-color="white"
-          :max="10"
+          :max="pagination.last"
           :max-pages="6"
           boundary-numbers
           direction-links
           icon-prev="arrow_left"
           icon-next="arrow_right"
           gutter="2px"
+          @update:model-value="onPaginate"
         />
         <q-separator vertical />
         <q-select
@@ -184,6 +187,7 @@
           dense
           :options="[5, 7, 10]"
           class="q-ml-md rows-per-page"
+          @update:model-value="onPaginate"
         >
           <template #append>
             <q-item-label class="text-body2">/ 页</q-item-label>
@@ -207,26 +211,27 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { QTableColumn } from 'quasar';
+import { QTableColumn, QTableProps } from 'quasar';
 
-import { FilterCondition, Pagination } from 'components/table/type';
-
-const defaultPagination: Pagination = {
-  sortBy: 'desc',
-  descending: false,
-  page: 1,
-  last: 1,
-  rowsPerPage: 10,
-  rowsNumber: 0,
-};
+import { FilterCondition, Pagination, QueryData } from 'components/table/type';
 
 export default defineComponent({
   name: 'DataTable',
 
   props: {
-    rows: {
-      type: Array<unknown>,
-      default: () => [],
+    apiUrl: {
+      type: String,
+      default: null,
+    },
+    apiMethod: {
+      type: String,
+      default: 'GET',
+    },
+    params: {
+      type: Object,
+      default: () => {
+        return {};
+      },
     },
     columns: {
       type: Array as PropType<QTableColumn[]>,
@@ -248,12 +253,26 @@ export default defineComponent({
 
   setup() {
     return {
+      // Server side request
+      loading: ref(false),
+      queryData: ref<QueryData>({
+        page: 1,
+        per_page: 10,
+      }),
+      rows: ref([]),
+
       // Search
       keyword: ref(''),
 
       // Pagination
-      pagination: ref(defaultPagination),
-      current: ref(6),
+      pagination: ref<Pagination>({
+        sortBy: '',
+        descending: false,
+        page: 1,
+        last: 1,
+        rowsPerPage: 10,
+        rowsNumber: 0,
+      }),
 
       // Row Check
       selected: ref([]),
@@ -266,7 +285,56 @@ export default defineComponent({
     };
   },
 
+  mounted() {
+    this.fetchRows();
+  },
+
   methods: {
+    async fetchRows() {
+      if (!this.apiUrl) {
+        return;
+      }
+      this.loading = true;
+      try {
+        const resp = await this.$api.request({
+          url: this.apiUrl,
+          method: this.apiMethod,
+          data: this.apiMethod === 'POST' ? this.queryData : null,
+          params: this.apiMethod === 'GET' ? this.queryData : null,
+        });
+        const data = resp.data;
+        this.rows = data.rows;
+        this.pagination = Object.assign({}, this.pagination, {
+          page: data.page,
+          rowsPerPage: data.per_page,
+          rowsNumber: data.total,
+          last: data.last,
+        });
+      } catch (e) {
+        throw e;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async onRequest(
+      props: Parameters<NonNullable<QTableProps['onRequest']>>[0]
+    ) {
+      const { sortBy, descending } = props.pagination;
+      this.queryData.order_by = !!sortBy
+        ? [`${descending ? '-' : ''}${sortBy}`]
+        : [];
+      this.pagination.sortBy = sortBy;
+      this.pagination.descending = descending;
+      this.fetchRows();
+    },
+
+    onPaginate() {
+      this.queryData.page = this.pagination.page;
+      this.queryData.per_page = this.pagination.rowsPerPage;
+      this.fetchRows();
+    },
+
     addFilter() {
       this.filters.push({ field: null, operator: null, value: null });
     },

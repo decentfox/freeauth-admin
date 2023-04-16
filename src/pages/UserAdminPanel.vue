@@ -1,19 +1,22 @@
 <template>
   <q-page class="full-width q-pa-md">
     <data-table
-      :rows="users"
       :columns="columns"
+      api-url="/users/query"
+      api-method="POST"
       sticky-action-column
       :actions="['批量禁用', '批量启用', '批量删除']"
     >
-      <template #body-cell-status="props">
+      <template #body-cell-is_deleted="props">
         <q-td :props="props">
           <q-chip
             square
             size="12px"
-            :label="props.row.status ? '正常' : '禁用'"
+            :label="!props.row.is_deleted ? '正常' : '禁用'"
             class="text-weight-bold q-pa-sm"
-            :class="props.row.status ? 'chip-status-on' : 'chip-status-off'"
+            :class="
+              !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
+            "
           />
         </q-td>
       </template>
@@ -154,128 +157,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QTableProps } from 'quasar';
+import { date, QTableProps } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DataTable from 'components/table/DataTable.vue';
 
 import { User } from './type';
-
-const userData: User[] = [
-  {
-    id: 1,
-    name: '王伟力',
-    mobile: '15701259715',
-    username: 'un1',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 2,
-    name: 'Xenia',
-    mobile: '15901259713',
-    email: 'xenia.lyy@gmail.com',
-    username: 'un2',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 3,
-    name: 'Daisy',
-    mobile: '15901259713',
-    email: 'daichen.daisy@gmail.com',
-    username: 'un3',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 4,
-    name: '王川',
-    mobile: '13801259713',
-    username: 'un4',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 5,
-    name: 'Mico',
-    email: 'mico@decentfox.com',
-    username: 'un5',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 6,
-    name: '王昕',
-    mobile: '15901259713',
-    username: 'un6',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 7,
-    name: '小明',
-    mobile: '15701259714',
-    username: 'un7',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 8,
-    name: '小丽',
-    mobile: '15901259712',
-    email: 'xen@gmail.com',
-    username: 'un8',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 9,
-    name: '小红',
-    mobile: '15901259711',
-    email: 'dai@gmail.com',
-    username: 'un9',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: false,
-  },
-  {
-    id: 10,
-    name: '小青',
-    mobile: '13801259710',
-    username: 'un10',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-  {
-    id: 11,
-    name: '小方',
-    email: 'mico@decent.com',
-    username: 'un11',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: false,
-  },
-  {
-    id: 12,
-    name: '阿强',
-    mobile: '15901359713',
-    username: 'un12',
-    lastLogin: new Date('2023-01-02T00:00:00.000Z'),
-    createdTime: new Date('2023-01-01T00:00:00.000Z'),
-    status: true,
-  },
-];
 
 const columns: QTableProps['columns'] = [
   {
@@ -303,22 +191,31 @@ const columns: QTableProps['columns'] = [
     field: 'email',
   },
   {
-    name: 'last_login',
+    name: 'last_login_at',
     label: '最后登录时间',
     align: 'left',
-    field: (row) => row.lastLogin.toLocaleString(),
+    field: (row) =>
+      row.last_login_at
+        ? date.formatDate(
+            new Date(row.last_login_at).toLocaleString(),
+            'YYYY-MM-DD HH:mm:ss'
+          )
+        : null,
+    sortable: true,
   },
   {
-    name: 'created_time',
+    name: 'created_at',
     label: '创建时间',
     align: 'left',
-    field: (row) => row.createdTime.toLocaleString(),
+    field: (row) =>
+      date.formatDate(new Date(row.created_at), 'YYYY-MM-DD HH:mm:ss'),
+    sortable: true,
   },
   {
-    name: 'status',
+    name: 'is_deleted',
     label: '状态',
     align: 'center',
-    field: 'status',
+    field: 'is_deleted',
     sortable: true,
   },
   {
@@ -336,7 +233,6 @@ export default defineComponent({
 
   setup() {
     return {
-      users: userData,
       columns: columns,
       createUserForm: ref(false),
       isSubmitted: ref(false),

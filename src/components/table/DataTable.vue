@@ -228,12 +228,6 @@ export default defineComponent({
       type: String,
       default: 'GET',
     },
-    params: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
     columns: {
       type: Array as PropType<QTableColumn[]>,
       default: () => [],

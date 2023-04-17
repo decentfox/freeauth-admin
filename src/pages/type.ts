@@ -14,3 +14,18 @@ export interface User {
   created_at: Date;
   is_deleted: boolean;
 }
+
+export interface UserPostData {
+  name?: string;
+  mobile?: string;
+  email?: string;
+  username?: string;
+}
+
+export interface UserPostError {
+  name?: string;
+  mobile?: string;
+  email?: string;
+  username?: string;
+  __root__?: string;
+}

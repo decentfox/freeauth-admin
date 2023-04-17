@@ -102,6 +102,7 @@
       title="创建新用户"
       width="450px"
       @confirm="createUser"
+      @close="resetCreateUserForm"
     >
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
@@ -117,15 +118,18 @@
                 placeholder="请填写用户名"
                 hide-bottom-space
                 class="col"
+                :error="!!createUserFormError.username"
+                :error-message="createUserFormError.username"
               />
               <q-input
                 v-model="newUser.mobile"
                 filled
                 dense
                 placeholder="请填写手机号"
-                maxlength="11"
                 hide-bottom-space
                 class="col"
+                :error="!!createUserFormError.mobile"
+                :error-message="createUserFormError.mobile"
               />
               <q-input
                 v-model="newUser.email"
@@ -134,13 +138,15 @@
                 placeholder="请填写邮箱"
                 hide-bottom-space
                 class="col"
+                :error="!!createUserFormError.email"
+                :error-message="createUserFormError.email"
               />
             </div>
             <div
-              v-if="!isValid && isSubmitted"
+              v-if="!!createUserFormError.__root__"
               class="error-hint text-negative"
             >
-              用户名、手机、邮箱至少填写1项
+              {{ createUserFormError.__root__ }}
             </div>
           </div>
           <q-separator />
@@ -154,6 +160,8 @@
               dense
               placeholder="请填写用户姓名"
               hide-bottom-space
+              :error="!!createUserFormError.name"
+              :error-message="createUserFormError.name"
             />
           </div>
           <div>
@@ -180,7 +188,7 @@ import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DataTable from 'components/table/DataTable.vue';
 
-import { User } from './type';
+import { User, UserPostData, UserPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -256,26 +264,11 @@ export default defineComponent({
     return {
       columns: columns,
       createUserForm: ref(false),
-      isSubmitted: ref(false),
+      createUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(true),
       passwordChangingRequired: ref(false),
-      newUser: ref({
-        username: '',
-        mobile: '',
-        email: '',
-        name: '',
-      }),
+      newUser: ref<UserPostData>({}),
     };
-  },
-
-  computed: {
-    isValid() {
-      return (
-        this.newUser.username !== '' ||
-        this.newUser.mobile !== '' ||
-        this.newUser.email !== ''
-      );
-    },
   },
 
   methods: {
@@ -302,6 +295,25 @@ export default defineComponent({
       } finally {
         (this.$refs.table as HTMLFormElement).fetchRows();
       }
+    },
+
+    async createUser() {
+      try {
+        this.createUserFormError = {};
+        await this.$api.post('/users', this.newUser, {
+          successMsg: '成员创建成功',
+        });
+        (this.$refs.createUserDialog as HTMLFormElement).hide();
+        (this.$refs.table as HTMLFormElement).fetchRows();
+        this.resetCreateUserForm();
+      } catch (e) {
+        this.createUserFormError = (e as Error).cause || {};
+      }
+    },
+
+    resetCreateUserForm() {
+      this.createUserFormError = {};
+      this.newUser = {};
     },
 
     disableUser(item: User) {
@@ -362,10 +374,6 @@ export default defineComponent({
             this.toggleUsersStatus([item.id], false);
           }
         });
-    },
-
-    createUser() {
-      this.isSubmitted = true;
     },
 
     deleteUser(item: User) {

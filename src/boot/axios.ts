@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { get } from 'lodash';
 import { Loading, Notify } from 'quasar';
 import { boot } from 'quasar/wrappers';
 
@@ -57,16 +58,27 @@ export default boot(({ app }) => {
           message: response.config.successMsg,
         });
       }
-
-      if (response.data.success === false) {
-        return Promise.reject(response);
-      }
-
-      return response;
+      return Promise.resolve(response);
     },
     (err) => {
       Loading.hide();
-      return Promise.reject(err.response);
+
+      const error = get(err.response, 'data.detail');
+      let message = '请求失败';
+      if (typeof error === 'string') {
+        message = error;
+      } else if (error) {
+        message = error.message;
+      }
+      Notify.create({
+        type: 'negative',
+        message: message,
+      });
+      return Promise.reject(
+        new Error(err.response.status, {
+          cause: get(error, 'errors'),
+        })
+      );
     }
   );
 });

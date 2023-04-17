@@ -10,6 +10,7 @@
     row-key="id"
     selection="multiple"
     binary-state-sort
+    :filter="keyword"
     :loading="loading"
     @request="onRequest"
   >
@@ -291,7 +292,7 @@ export default defineComponent({
 
   methods: {
     async fetchRows() {
-      if (!this.apiUrl) {
+      if (!this.apiUrl || this.loading) {
         return;
       }
       this.loading = true;
@@ -301,6 +302,7 @@ export default defineComponent({
           method: this.apiMethod,
           data: this.apiMethod === 'POST' ? this.queryData : null,
           params: this.apiMethod === 'GET' ? this.queryData : null,
+          hideProgress: true,
         });
         const data = resp.data;
         this.rows = data.rows;
@@ -321,6 +323,7 @@ export default defineComponent({
       props: Parameters<NonNullable<QTableProps['onRequest']>>[0]
     ) {
       const { sortBy, descending } = props.pagination;
+      this.queryData.q = props.filter;
       this.queryData.order_by = !!sortBy
         ? [`${descending ? '-' : ''}${sortBy}`]
         : [];

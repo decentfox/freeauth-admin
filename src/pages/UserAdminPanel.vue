@@ -1,11 +1,27 @@
 <template>
   <q-page class="full-width q-pa-md">
     <data-table
+      ref="table"
       :columns="columns"
       api-url="/users/query"
       api-method="POST"
       sticky-action-column
       :actions="['批量禁用', '批量启用', '批量删除']"
+      @批量禁用="
+        (selected) =>
+          toggleUsersStatus(
+            selected.map((u: User) => u.id),
+            true
+          )
+      "
+      @批量启用="
+        (selected) =>
+          toggleUsersStatus(
+            selected.map((u: User) => u.id),
+            false
+          )
+      "
+      @批量删除="(selected) => deleteUsers(selected.map((u: User) => u.id))"
     >
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
@@ -36,7 +52,7 @@
               <q-menu class="q-px-xs">
                 <q-list dense>
                   <q-item
-                    v-if="props.row.status"
+                    v-if="!props.row.is_deleted"
                     v-close-popup
                     clickable
                     class="q-my-xs"
@@ -107,6 +123,7 @@
                 filled
                 dense
                 placeholder="请填写手机号"
+                maxlength="11"
                 hide-bottom-space
                 class="col"
               />
@@ -171,24 +188,28 @@ const columns: QTableProps['columns'] = [
     label: '姓名',
     align: 'left',
     field: 'name',
+    sortable: true,
   },
   {
     name: 'username',
     label: '用户名',
     align: 'left',
     field: 'username',
+    sortable: true,
   },
   {
     name: 'mobile',
     label: '手机号',
     align: 'left',
     field: 'mobile',
+    sortable: true,
   },
   {
     name: 'email',
     label: '邮箱',
     align: 'left',
     field: 'email',
+    sortable: true,
   },
   {
     name: 'last_login_at',
@@ -258,9 +279,35 @@ export default defineComponent({
   },
 
   methods: {
+    async toggleUsersStatus(user_ids: string[], is_deleted: boolean) {
+      try {
+        await this.$api.put(
+          '/users/status',
+          { user_ids, is_deleted },
+          { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
+        );
+      } finally {
+        (this.$refs.table as HTMLFormElement).fetchRows();
+      }
+    },
+
+    async deleteUsers(user_ids: string[]) {
+      try {
+        await this.$api.request({
+          method: 'DELETE',
+          url: '/users',
+          data: { user_ids },
+          successMsg: '成员删除成功',
+        });
+      } finally {
+        (this.$refs.table as HTMLFormElement).fetchRows();
+      }
+    },
+
     disableUser(item: User) {
-      const userDesc =
-        item.name + (item.mobile ? '（' + item.mobile + '）' : '');
+      const userDesc = `${item.name || item.username}${
+        item.mobile ? `（${item.mobile}）` : ''
+      }`;
       this.$q
         .dialog({
           component: ConfirmDialog,
@@ -274,21 +321,23 @@ export default defineComponent({
               { label: '取消' },
               {
                 label: '禁用',
-                actionsType: 'disable',
+                actionType: 'disable',
                 class: 'accent-btn',
               },
             ],
           },
         })
-        .onOk(async ({ type }) => {
+        .onOk(({ type }) => {
           if (type === 'disable') {
+            this.toggleUsersStatus([item.id], true);
           }
         });
     },
 
     enableUser(item: User) {
-      const userDesc =
-        item.name + (item.mobile ? '（' + item.mobile + '）' : '');
+      const userDesc = `${item.name || item.username}${
+        item.mobile ? `（${item.mobile}）` : ''
+      }`;
       this.$q
         .dialog({
           component: ConfirmDialog,
@@ -302,14 +351,15 @@ export default defineComponent({
               { label: '取消' },
               {
                 label: '恢复',
-                actionsType: 'enable',
+                actionType: 'enable',
                 class: 'accent-btn',
               },
             ],
           },
         })
-        .onOk(async ({ type }) => {
+        .onOk(({ type }) => {
           if (type === 'enable') {
+            this.toggleUsersStatus([item.id], false);
           }
         });
     },
@@ -319,8 +369,9 @@ export default defineComponent({
     },
 
     deleteUser(item: User) {
-      const userDesc =
-        item.name + (item.mobile ? '（' + item.mobile + '）' : '');
+      const userDesc = `${item.name || item.username}${
+        item.mobile ? `（${item.mobile}）` : ''
+      }`;
       this.$q
         .dialog({
           component: ConfirmDialog,
@@ -334,21 +385,15 @@ export default defineComponent({
               { label: '取消' },
               {
                 label: '删除',
-                actionsType: 'delete',
+                actionType: 'delete',
                 class: 'accent-btn',
               },
             ],
           },
         })
-        .onOk(async ({ type }) => {
+        .onOk(({ type }) => {
           if (type === 'delete') {
-            // try {
-            //   await this.$api.delete(`/users/${row.id}`, {
-            //     successMsg: '已删除成员：' + row.name,
-            //   });
-            // } finally {
-            //   this.$refs.table.onUpdateRow();
-            // }
+            this.deleteUsers([item.id]);
           }
         });
     },

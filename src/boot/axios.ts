@@ -1,10 +1,19 @@
 import axios, { AxiosInstance } from 'axios';
+import { Loading, Notify } from 'quasar';
 import { boot } from 'quasar/wrappers';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $axios: AxiosInstance;
     $api: AxiosInstance;
+  }
+}
+
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    successMsg?: string;
+    showProgress?: boolean;
+    hideProgress?: boolean;
   }
 }
 
@@ -26,6 +35,40 @@ export default boot(({ app }) => {
   app.config.globalProperties.$api = api;
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
+
+  api.interceptors.request.use((config) => {
+    if (
+      config.showProgress ||
+      (!config.hideProgress &&
+        config.method &&
+        ['put', 'post', 'patch', 'delete'].includes(config.method))
+    ) {
+      Loading.show();
+    }
+    return config;
+  });
+
+  api.interceptors.response.use(
+    (response) => {
+      Loading.hide();
+      if (response.config.successMsg) {
+        Notify.create({
+          type: 'positive',
+          message: response.config.successMsg,
+        });
+      }
+
+      if (response.data.success === false) {
+        return Promise.reject(response);
+      }
+
+      return response;
+    },
+    (err) => {
+      Loading.hide();
+      return Promise.reject(err.response);
+    }
+  );
 });
 
 export { api };

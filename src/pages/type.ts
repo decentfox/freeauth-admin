@@ -5,12 +5,12 @@ export interface OrgType {
 }
 
 export interface User {
-  id: number;
+  id: string;
   name?: string;
   mobile?: string;
   email?: string;
   username: string;
-  lastLogin?: Date;
-  createdTime: Date;
-  status: boolean;
+  last_login_at?: Date;
+  created_at: Date;
+  is_deleted: boolean;
 }

@@ -256,6 +256,85 @@ const columns: QTableProps['columns'] = [
   },
 ];
 
+const filterColumns: FilterColumn[] = [
+  {
+    field: 'name',
+    label: '姓名',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.ct,
+      FilterOperator.nct,
+    ],
+  },
+  {
+    field: 'username',
+    label: '用户名',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.ct,
+      FilterOperator.nct,
+    ],
+  },
+  {
+    field: 'mobile',
+    label: '手机号',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.ct,
+      FilterOperator.nct,
+    ],
+  },
+  {
+    field: 'email',
+    label: '邮箱',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.ct,
+      FilterOperator.nct,
+    ],
+  },
+  {
+    field: 'last_login_at',
+    label: '最后登录时间',
+    type: 'datetime',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.gt,
+      FilterOperator.gte,
+      FilterOperator.lt,
+      FilterOperator.lte,
+    ],
+  },
+  {
+    field: 'created_at',
+    label: '创建时间',
+    type: 'datetime',
+    operatorOptions: [
+      FilterOperator.eq,
+      FilterOperator.neq,
+      FilterOperator.gt,
+      FilterOperator.gte,
+      FilterOperator.lt,
+      FilterOperator.lte,
+    ],
+  },
+  {
+    field: 'is_deleted',
+    label: '状态',
+    type: 'select',
+    operatorOptions: [FilterOperator.eq, FilterOperator.neq],
+    options: [
+      { value: false, label: '正常' },
+      { value: true, label: '禁用' },
+    ],
+  },
+];
+
 export default defineComponent({
   name: 'UserAdminPanel',
 
@@ -264,96 +343,13 @@ export default defineComponent({
   setup() {
     return {
       columns: columns,
+      filterColumns: filterColumns,
       createUserForm: ref(false),
       createUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(true),
       passwordChangingRequired: ref(false),
       newUser: ref<UserPostData>({}),
     };
-  },
-
-  computed: {
-    filterColumns() {
-      const columns: FilterColumn[] = [
-        {
-          field: 'name',
-          label: '姓名',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.ct,
-            FilterOperator.nct,
-          ],
-        },
-        {
-          field: 'username',
-          label: '用户名',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.ct,
-            FilterOperator.nct,
-          ],
-        },
-        {
-          field: 'mobile',
-          label: '手机号',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.ct,
-            FilterOperator.nct,
-          ],
-        },
-        {
-          field: 'email',
-          label: '邮箱',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.ct,
-            FilterOperator.nct,
-          ],
-        },
-        {
-          field: 'last_login_at',
-          label: '最后登录时间',
-          type: 'datetime',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.gt,
-            FilterOperator.gte,
-            FilterOperator.lt,
-            FilterOperator.lte,
-          ],
-        },
-        {
-          field: 'created_at',
-          label: '创建时间',
-          type: 'datetime',
-          operatorOptions: [
-            FilterOperator.eq,
-            FilterOperator.neq,
-            FilterOperator.gt,
-            FilterOperator.gte,
-            FilterOperator.lt,
-            FilterOperator.lte,
-          ],
-        },
-        {
-          field: 'is_deleted',
-          label: '状态',
-          type: 'select',
-          operatorOptions: [FilterOperator.eq, FilterOperator.neq],
-          options: [
-            { value: true, label: '正常' },
-            { value: false, label: '禁用' },
-          ],
-        },
-      ];
-      return columns;
-    },
   },
 
   methods: {

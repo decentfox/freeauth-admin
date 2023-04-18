@@ -9,11 +9,11 @@ export type Pagination = {
 
 export type FilterCondition = {
   /** 筛选条件字段标识 */
-  field: string | null;
+  field?: string;
   /** 当前选中的运算符 */
-  operator: string | null;
+  operator?: string;
   /** 当前填写或选择的参数值 */
-  value: string | null;
+  value?: string;
 };
 
 export enum FilterOperator {
@@ -26,6 +26,17 @@ export enum FilterOperator {
   ct = 'ct',
   nct = 'nct',
 }
+
+export const FilterOperatorMap = {
+  [FilterOperator.eq]: '等于',
+  [FilterOperator.neq]: '不等于',
+  [FilterOperator.gt]: '大于',
+  [FilterOperator.gte]: '大于等于',
+  [FilterOperator.lt]: '小于',
+  [FilterOperator.lte]: '小于等于',
+  [FilterOperator.ct]: '包含',
+  [FilterOperator.nct]: '不包含',
+};
 
 export type FilterColumnOption = {
   value: string | number | boolean;

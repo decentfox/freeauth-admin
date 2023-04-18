@@ -37,7 +37,11 @@
           />
         </template>
       </q-input>
-      <filter-panel v-if="filterColumns?.length > 0" :columns="filterColumns" />
+      <filter-panel
+        v-if="filterColumns?.length > 0"
+        :columns="filterColumns"
+        @filtered="onFiltered"
+      />
       <slot name="table-filter"></slot>
       <q-space />
       <div class="q-gutter-sm">
@@ -142,7 +146,7 @@ import { defineComponent, PropType, ref } from 'vue';
 import { QTableColumn, QTableProps } from 'quasar';
 
 import FilterPanel from './FilterPanel.vue';
-import { FilterColumn, Pagination, QueryData } from './type';
+import { FilterColumn, FilterCondition, Pagination, QueryData } from './type';
 
 export default defineComponent({
   name: 'DataTable',
@@ -257,6 +261,11 @@ export default defineComponent({
     onPaginate() {
       this.queryData.page = this.pagination.page;
       this.queryData.per_page = this.pagination.rowsPerPage;
+      this.fetchRows();
+    },
+
+    onFiltered(filters: FilterCondition[]) {
+      this.queryData.filter_by = filters;
       this.fetchRows();
     },
   },

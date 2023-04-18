@@ -1,99 +1,932 @@
 <template>
-  <q-page class="full-width">
-    <div class="row q-col-gutter-sm q-mx-auto q-pa-lg">
-      <div class="col-6">
-        <CascadeSelect
-          v-model="selectedDept"
-          required
-          label="请选择部门（示例）"
-          :options="departments"
-          opt-label="name"
-          opt-value="id"
-        />
-      </div>
+  <div style="min-width: 1060px">
+    <q-toolbar class="q-mt-md">
+      <q-item-label class="q-ml-xs">组织类型</q-item-label>
+      <q-btn
+        unelevated
+        dense
+        icon="playlist_add"
+        text-color="primary"
+        class="q-ml-xs flat-btn"
+      >
+        <q-tooltip>新增组织类型</q-tooltip>
+      </q-btn>
       <q-select
         v-model="currentOrgType"
-        filled
         dense
-        bg-color="primary"
+        filled
         :options="orgTypeOptions"
-        class="dark-select q-pa-md"
+        style="width: 150px"
+        class="q-ml-sm"
+        @update:model-value="changeOrgType"
+      />
+      <q-space />
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey-7"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
       >
-        <template #prepend>
-          <q-icon name="fitbit" />
-        </template>
-      </q-select>
-    </div>
-  </q-page>
+        <q-tab name="users" label="用户列表" />
+        <q-tab name="enterprises" label="企业信息" />
+        <q-tab name="new" label="成员入职" />
+      </q-tabs>
+    </q-toolbar>
+
+    <q-splitter
+      v-model="splitterModel"
+      class="q-py-sm"
+      unit="px"
+      :limits="[250, 500]"
+    >
+      <!--the first splitted screen-->
+      <template #before>
+        <div class="q-px-md">
+          <q-toolbar class="q-pa-none">
+            <q-input
+              ref="filterRef"
+              v-model="filter"
+              dense
+              filled
+              debounce="300"
+              placeholder="搜索组织"
+              class="full-width"
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+              <template #append>
+                <q-icon
+                  v-if="filter !== ''"
+                  name="close"
+                  size="xs"
+                  class="cursor-pointer"
+                  @click="resetOrgFilter"
+                />
+              </template>
+            </q-input>
+            <q-space />
+            <q-btn
+              unelevated
+              class="q-ml-sm secondary-btn"
+              label="新建"
+              style="width: 75px; height: 40px"
+            >
+              <q-tooltip>新增组织</q-tooltip>
+            </q-btn>
+          </q-toolbar>
+          <q-tab-panel
+            name="structure"
+            class="scroll q-px-none"
+            style="height: calc(100vh - 200px)"
+          >
+            <q-tree
+              ref="orgTree"
+              v-model:selected="selected"
+              :nodes="simple"
+              node-key="id"
+              selected-color="white"
+              :filter="filter"
+              default-expand-all
+            >
+              <template #default-header="prop">
+                <div class="row items-center tree-item" style="width: 100%">
+                  <div class="row" style="width: calc(100% - 25px)">
+                    <q-icon v-if="prop.node.icon" :name="prop.node.icon" />
+                    <div
+                      class="q-pl-xs ellipsis"
+                      :style="prop.node.icon ? 'width: calc(100% - 25px)' : ''"
+                    >
+                      {{ prop.node.label }}
+                    </div>
+                  </div>
+                  <div class="absolute-right">
+                    <q-btn
+                      :id="'more' + prop.node.id"
+                      icon="more_horiz"
+                      dense
+                      unelevated
+                      class="more-icon"
+                      size="xs"
+                      @click="toggleMenu(prop.node.id)"
+                      @click.stop
+                    >
+                      <q-menu
+                        class="q-px-xs"
+                        anchor="bottom left"
+                        self="top middle"
+                        @hide="toggleMenu(prop.node.id)"
+                      >
+                        <q-list dense>
+                          <q-item v-close-popup clickable class="q-my-xs">
+                            <q-item-section> 添加分支 </q-item-section>
+                          </q-item>
+                          <!-- <q-separator inset /> -->
+                          <q-item v-close-popup clickable class="q-my-xs">
+                            <q-item-section> 编辑组织 </q-item-section>
+                          </q-item>
+                          <q-item v-close-popup clickable class="q-my-xs">
+                            <q-item-section> 删除组织 </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                    </q-btn>
+                  </div>
+                </div>
+              </template>
+            </q-tree>
+          </q-tab-panel>
+        </div>
+      </template>
+      <template #separator>
+        <div class="splitter-drag-icon">
+          <q-icon name="drag_indicator" color="primary" />
+        </div>
+      </template>
+
+      <!--the second splitted screen-->
+      <template #after>
+        <q-tab-panels v-model="tab" animated>
+          <q-tab-panel
+            name="users"
+            class="scroll q-px-md q-py-none frame-table"
+            style="height: calc(100vh - 150px)"
+          >
+            <!-- <q-breadcrumbs class="q-px-md q-py-sm">
+              <q-breadcrumbs-el label="全部用户" />
+              <q-breadcrumbs-el
+                v-for="(label, idx) in path"
+                :key="idx"
+                :label="label"
+              />
+            </q-breadcrumbs> -->
+            <data-table
+              :rows="users"
+              :columns="userColumns"
+              sticky-action-column
+              :hide-filter="true"
+            >
+              <template #table-filter>
+                <q-checkbox
+                  v-model="directDeptCheck"
+                  label="仅展示部门的直属成员"
+                />
+              </template>
+              <template #body-cell-depts="props">
+                <q-td :props="props">
+                  <q-chip
+                    v-for="(dept, idx) in props.row.depts"
+                    :key="idx"
+                    clickable
+                    size="12px"
+                    square
+                    color="secondary"
+                    @click="showRoleCard()"
+                  >
+                    {{ dept }}
+                  </q-chip>
+                </q-td>
+              </template>
+              <template #body-cell-is_deleted="props">
+                <q-td :props="props">
+                  <q-chip
+                    square
+                    size="12px"
+                    :label="!props.row.is_deleted ? '正常' : '禁用'"
+                    class="text-weight-bold q-pa-sm"
+                    :class="
+                      !props.row.is_deleted
+                        ? 'chip-status-on'
+                        : 'chip-status-off'
+                    "
+                  />
+                </q-td>
+              </template>
+              <template #body-cell-actions="props">
+                <q-td :props="props">
+                  <div class="text-grey-8 q-gutter-xs">
+                    <q-btn
+                      size="12px"
+                      flat
+                      dense
+                      icon="more_horiz"
+                      class="flat-btn"
+                    >
+                      <q-menu class="q-px-xs">
+                        <q-list dense>
+                          <q-item
+                            v-if="!props.row.is_deleted"
+                            v-close-popup
+                            clickable
+                            class="q-my-xs"
+                          >
+                            <q-item-section avatar class="q-pr-none">
+                              <q-icon
+                                name="remove_circle_outline"
+                                size="16px"
+                              />
+                            </q-item-section>
+                            <q-item-section> 禁用账号 </q-item-section>
+                          </q-item>
+                          <q-item
+                            v-else
+                            v-close-popup
+                            clickable
+                            class="q-my-xs"
+                          >
+                            <q-item-section avatar class="q-pr-none">
+                              <q-icon name="task_alt" size="16px" />
+                            </q-item-section>
+                            <q-item-section> 启用账号 </q-item-section>
+                          </q-item>
+                          <!-- <q-separator inset /> -->
+                          <q-item v-close-popup clickable class="q-my-xs">
+                            <q-item-section avatar class="q-pr-none">
+                              <q-icon name="delete_outline" size="16px" />
+                            </q-item-section>
+                            <q-item-section> 删除账号 </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                    </q-btn>
+                  </div>
+                </q-td>
+              </template>
+            </data-table>
+          </q-tab-panel>
+          <q-tab-panel
+            name="enterprises"
+            class="scroll q-px-md q-py-none frame-table"
+            style="height: calc(100vh - 150px)"
+          >
+            <data-table
+              :rows="enterprises"
+              :columns="enterpriseColumns"
+              sticky-action-column
+              :hide-filter="true"
+            >
+              <template #body-cell-actions="props">
+                <q-td :props="props">
+                  <div class="text-grey-8 q-gutter-xs">
+                    <q-btn
+                      size="12px"
+                      flat
+                      dense
+                      icon="more_horiz"
+                      class="flat-btn"
+                    />
+                  </div>
+                </q-td>
+              </template>
+            </data-table>
+          </q-tab-panel>
+          <!--q-tab-panel
+            name="new"
+            class="scroll q-pa-xs"
+            style="height: calc(100vh - 150px)"
+          >
+            <q-stepper ref="myStepper" v-model="step" vertical animated flat>
+              <q-step :name="1" prefix="1" title="选择所属组织">
+                <div class="row">
+                  <q-select
+                    v-model="currentOrgType"
+                    :options="orgTypeOptions"
+                    label="请选择组织类型"
+                    class="q-mb-md q-px-sm col-6"
+                  />
+                  <q-select
+                    v-model="currentOrg"
+                    :options="orgOptions"
+                    label="请选择所属组织"
+                    stack-label
+                    class="q-mb-md q-px-sm col-6"
+                  />
+                </div>
+                <q-stepper-navigation>
+                  <q-btn
+                    color="primary"
+                    label="下一步"
+                    unelevated
+                    @click="step = 2"
+                  />
+                </q-stepper-navigation>
+              </q-step>
+
+              <q-step :name="2" prefix="2" title="选择所属部门及角色">
+                <q-item-label caption class="q-mb-md">
+                  可跳过该步骤，稍后进行配置。
+                </q-item-label>
+                <div class="row">
+                  <div class="col-6">
+                    <cascade-select
+                      v-model="selectedDept"
+                      required
+                      label="请选择部门"
+                      :options="deptOptions"
+                      opt-label="name"
+                      opt-value="id"
+                      @input="getRoleOptions"
+                    />
+                  </div>
+                </div>
+                <div class="row q-mt-md">
+                  <div class="col-6">
+                    <q-chip
+                      v-for="item in roleOptions"
+                      :key="item.id"
+                      clickable
+                      color="grey-3"
+                      :label="item.name"
+                      size="14px"
+                      square
+                      icon="add"
+                      @click="addRole(item)"
+                    />
+                  </div>
+                </div>
+                <div class="row q-mt-md">
+                  <div class="text-body2 col-6 q-mx-sm">
+                    用户将直属以下部门并拥有对应所选权限
+                  </div>
+                  <q-item-label
+                    caption
+                    class="text-body2 col-6 q-ma-sm q-mb-md"
+                  >
+                    提示：如果用户并不属于 A 部门但需要拥有 A
+                    部门的某个角色，建议您不要直接关联 A
+                    部门该角色，而是在该用户实际属于的 B
+                    部门内创建对应的角色并赋予该用户。
+                  </q-item-label>
+
+                  <q-card
+                    v-for="(card, idx) in roleCards"
+                    :key="idx"
+                    flat
+                    bordered
+                    class="col-6 q-ma-xs"
+                  >
+                    <q-card-section class="q-py-sm">
+                      <div class="text-subtitle2">{{ card.name }}</div>
+                    </q-card-section>
+                    <q-separator inset />
+                    <q-card-section class="q-py-sm">
+                      <q-chip
+                        v-for="item in card.roles"
+                        :key="item.id"
+                        removable
+                        color="primary"
+                        text-color="white"
+                        :label="item.name"
+                        size="14px"
+                        square
+                        @remove="removeRole(card.deptId, item)"
+                      />
+                    </q-card-section>
+                  </q-card>
+                </div>
+
+                <q-stepper-navigation>
+                  <q-btn
+                    color="primary"
+                    label="下一步"
+                    unelevated
+                    @click="step = 3"
+                  />
+                  <q-btn
+                    flat
+                    color="primary"
+                    label="返回"
+                    class="q-ml-sm"
+                    @click="step = 1"
+                  />
+                </q-stepper-navigation>
+              </q-step>
+
+              <q-step :name="3" prefix="3" title="录入用户信息">
+                <div class="row">
+                  <q-input
+                    label="用户姓名"
+                    stack-label
+                    class="q-mb-md q-px-sm col-6"
+                  />
+                  <q-input
+                    label="手机号"
+                    stack-label
+                    class="q-mb-md q-px-sm col-6"
+                  />
+                </div>
+                <q-stepper-navigation>
+                  <q-btn color="primary" label="完成并提交" unelevated />
+                  <q-btn
+                    flat
+                    color="primary"
+                    label="返回"
+                    class="q-ml-sm"
+                    @click="step = 2"
+                  />
+                </q-stepper-navigation>
+              </q-step>
+            </q-stepper>
+          </q-tab-panel> -->
+        </q-tab-panels>
+      </template>
+    </q-splitter>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { OrgType } from 'pages/type';
+import { QInput, QTableProps } from 'quasar';
 
-import CascadeSelect from 'components/form/CascadeSelect.vue';
-import { CascadeOption } from 'components/form/type';
+import DataTable from 'components/table/DataTable.vue';
 
-const deptOptions: CascadeOption[] = [
+import { Enterprise, OrgTreeStructure, OrgTypeOption, User } from './type';
+
+const structureData: OrgTreeStructure[] = [
   {
-    name: '1. 北京分公司',
+    label: '1. 北京分公司',
     id: 1,
     icon: 'corporate_fare',
     children: [
       {
-        name: '1.1 产品部门',
+        label: '1.1 产品部门',
         id: 2,
         children: [
           {
-            name: '1.1.1 产品设计部门',
+            label: '1.1.1 产品设计部门',
             id: 3,
           },
           {
-            name: '1.1.2 产品研发部门',
+            label: '1.1.2 产品研发部门',
             id: 4,
           },
         ],
       },
       {
-        name: '1.2 成本部门',
+        label: '1.2 成本部门',
         id: 5,
       },
       {
-        name: '1.3 销售部门',
+        label: '1.3 销售部门',
         id: 6,
+      },
+    ],
+  },
+
+  {
+    label: '2. 上海分公司',
+    id: 101,
+    icon: 'corporate_fare',
+    children: [
+      {
+        label: '2.1 产品部门',
+        id: 102,
+        children: [
+          {
+            label: '2.1.1 产品设计部门',
+            id: 103,
+            children: [
+              {
+                label: '2.1.1.1 视觉设计部',
+                id: 104,
+              },
+              {
+                label: '2.1.1.2 交互设计部',
+                id: 107,
+              },
+            ],
+          },
+          {
+            label: '2.1.2 产品研发部门',
+            id: 111,
+          },
+        ],
+      },
+      {
+        label: '2.2 市场部门',
+        id: 112,
+      },
+      {
+        label: '2.3 销售部门',
+        id: 113,
       },
     ],
   },
 ];
 
-const orgTypeOptions: OrgType[] = [
-  { value: 1, id: 1, label: '内部组织' },
-  { value: 2, id: 2, label: '经销商' },
-  { value: 3, id: 3, label: '配件供应商' },
-  { value: 4, id: 4, label: '物流商' },
+const structureData2: OrgTreeStructure[] = [
+  {
+    label: '北京亚奥之星汽车服务有限公司',
+    id: 21,
+    icon: 'corporate_fare',
+    children: [
+      {
+        label: '1.1 售前部门',
+        id: 22,
+      },
+      {
+        label: '1.2 售后部门',
+        id: 25,
+      },
+      {
+        label: '1.3 维修部门',
+        id: 26,
+      },
+    ],
+  },
+
+  {
+    label: '利星行平治（北京）汽车有限公司',
+    id: 201,
+    icon: 'corporate_fare',
+    children: [
+      {
+        label: '2.1 销售部门',
+        id: 202,
+      },
+      {
+        label: '2.2 市场部门',
+        id: 212,
+      },
+      {
+        label: '2.3 机修部门',
+        id: 213,
+      },
+    ],
+  },
+  {
+    label: '盛元书院科技有限公司',
+    id: 202,
+    icon: 'corporate_fare',
+  },
+];
+
+const orgData: OrgTypeOption[] = [
+  { id: 1, value: 1, name: '集团', label: '集团' },
+  { id: 2, value: 2, name: '经销商', label: '经销商' },
+  { id: 3, value: 3, name: '配件供应商', label: '配件供应商' },
+  { id: 4, value: 4, name: '物流商', label: '物流商' },
+  { id: 5, value: 5, name: '入驻企业', label: '入驻企业' },
+  { id: 6, value: 6, name: '合作商家', label: '合作商家' },
+];
+
+const userData: User[] = [
+  {
+    id: '1',
+    name: '王伟力',
+    mobile: '15701259715',
+    username: 'un1',
+    depts: ['北京分公司', '成本部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '2',
+    name: 'Xenia',
+    mobile: '15901259713',
+    email: 'xenia.lyy@gmail.com',
+    username: 'un2',
+    depts: ['北京分公司'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '3',
+    name: 'Daisy',
+    mobile: '15901259715',
+    email: 'daichen.daisy@gmail.com',
+    username: 'un3',
+    depts: ['北京分公司', '产品设计部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: true,
+  },
+  {
+    id: '4',
+    name: '王川',
+    mobile: '13801259713',
+    username: 'un4',
+    depts: ['北京分公司', '产品研发部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: true,
+  },
+  {
+    id: '5',
+    name: 'Mico',
+    email: 'mico@decentfox.com',
+    username: 'un5',
+    depts: ['产品设计部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '6',
+    name: '王昕',
+    mobile: '15901259713',
+    username: 'un6',
+    depts: ['成本部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '7',
+    name: '小明',
+    mobile: '15701259714',
+    username: 'un7',
+    depts: ['销售部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '8',
+    name: '小丽',
+    mobile: '15901259712',
+    email: 'xen@gmail.com',
+    username: 'un8',
+    depts: ['销售部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '9',
+    name: '小红',
+    mobile: '15901259711',
+    email: 'dai@gmail.com',
+    username: 'un9',
+    depts: ['销售部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: true,
+  },
+  {
+    id: '10',
+    name: '小青',
+    mobile: '13801259710',
+    username: 'un10',
+    depts: ['销售部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+  {
+    id: '11',
+    name: '小方',
+    email: 'mico@decent.com',
+    username: 'un11',
+    depts: ['销售部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: true,
+  },
+  {
+    id: '12',
+    name: '阿强',
+    mobile: '15901359713',
+    username: 'un12',
+    depts: ['成本部门'],
+    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
+    created_at: new Date('2023-01-01T00:00:00.000Z'),
+    is_deleted: false,
+  },
+];
+
+const enterpriseData: Enterprise[] = [
+  {
+    id: 1,
+    name: '北京分公司',
+    taxId: '91110106MA00775P0A',
+    bank: '中国工商银行股份有限公司北京天宁寺支行',
+    bankId: '0200024809200034233',
+    address: '北京经济技术开发区荣华中路19号1号楼B座309',
+    tel: '15011592799',
+  },
+  {
+    id: 2,
+    name: '上海分公司',
+    taxId: '91110108780215415F',
+    bank: '中国民生银行股份有限公司上海方庄支行',
+    bankId: '0119014170017913',
+    address: '上海市大柳树路17号富海中心4号楼10层D东',
+    tel: '18518225559',
+  },
+];
+
+const userColumns: QTableProps['columns'] = [
+  {
+    name: 'name',
+    label: '姓名',
+    align: 'left',
+    field: 'name',
+  },
+  {
+    name: 'username',
+    label: '用户名',
+    align: 'left',
+    field: 'username',
+  },
+  {
+    name: 'mobile',
+    label: '手机号',
+    align: 'left',
+    field: 'mobile',
+  },
+  {
+    name: 'email',
+    label: '邮箱',
+    align: 'left',
+    field: 'email',
+  },
+  {
+    name: 'depts',
+    label: '部门',
+    align: 'left',
+    field: 'depts',
+  },
+  {
+    name: 'is_deleted',
+    label: '状态',
+    align: 'center',
+    field: 'is_deleted',
+    sortable: true,
+  },
+  {
+    name: 'actions',
+    label: '操作',
+    align: 'center',
+    field: 'actions',
+  },
+];
+
+const enterpriseColumns: QTableProps['columns'] = [
+  {
+    name: 'name',
+    label: '企业全称',
+    align: 'center',
+    field: 'name',
+  },
+  {
+    name: 'taxId',
+    label: '纳税识别号',
+    align: 'left',
+    field: 'taxId',
+  },
+  {
+    name: 'bank',
+    label: '开户行',
+    align: 'left',
+    field: 'bank',
+  },
+  {
+    name: 'bankId',
+    label: '银行账号',
+    align: 'left',
+    field: 'bankId',
+  },
+  {
+    name: 'address',
+    label: '办公地址',
+    align: 'left',
+    field: 'address',
+  },
+  {
+    name: 'tel',
+    label: '办公电话',
+    align: 'left',
+    field: 'tel',
+  },
+  {
+    name: 'actions',
+    label: '操作',
+    align: 'center',
+    field: 'actions',
+  },
 ];
 
 export default defineComponent({
-  name: 'IndexPage',
+  name: 'OrgAdminPanel',
 
-  components: { CascadeSelect },
+  components: { DataTable },
 
   setup() {
     return {
-      orgTypeOptions: orgTypeOptions,
-      currentOrgType: ref<OrgType | null>(orgTypeOptions[0]),
-      departments: deptOptions,
-      selectedDept: ref<CascadeOption[]>([]),
+      // splitter
+      splitterModel: 350,
+
+      // org selector
+      orgTypeOptions: ref<OrgTypeOption[]>(orgData),
+      currentOrgType: ref(orgData[0]),
+
+      // tree
+      selected: ref(null),
+      filter: ref(''),
+      filterRef: ref(null),
+      simple: ref<OrgTreeStructure[]>(structureData),
+
+      // table
+      tab: ref(''),
+      userColumns: userColumns,
+      enterpriseColumns: enterpriseColumns,
+      users: userData,
+      enterprises: enterpriseData,
+      directDeptCheck: ref(true),
     };
+  },
+
+  mounted() {
+    //this.tab = 'user';
+  },
+
+  methods: {
+    resetOrgFilter() {
+      this.filter = '';
+      (this.$refs.filterRef as QInput).focus();
+    },
+
+    changeOrgType() {
+      if (this.currentOrgType.id === 1) {
+        this.simple = structureData;
+      } else {
+        this.simple = structureData2;
+      }
+      // setTimeout(() => {
+      //   (this.$refs.orgTree as QTree).expandAll();
+      // }, 20);
+    },
+
+    toggleMenu(nodeId: number) {
+      console.error(nodeId);
+      const moreBtn: HTMLElement | null = document.getElementById(
+        'more' + nodeId
+      );
+      if (moreBtn) {
+        moreBtn.style.visibility =
+          moreBtn.style.visibility === 'visible' ? '' : 'visible';
+      }
+    },
+
+    showRoleCard() {
+      console.error('role');
+    },
   },
 });
 </script>
 
 <style lang="scss">
-.dark-select {
-  .q-field__native,
-  .q-field__marginal {
+.splitter-drag-icon {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  background-color: $info;
+  border-radius: 2px;
+}
+
+.tree-item {
+  .more-icon {
+    visibility: hidden;
+    right: 2px;
+    top: 2px;
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  &:hover {
+    .more-icon {
+      visibility: visible;
+    }
+  }
+}
+
+.q-tree__node--selected {
+  background-color: $primary;
+}
+
+.frame-table {
+  .sticky-table {
+    max-height: 100%;
+  }
+}
+
+.q-tab {
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+  margin-left: 1px;
+
+  &.q-tab--active {
+    background-color: $primary;
     color: white !important;
+  }
+
+  &.q-tab--inactive {
+    background-color: $secondary;
   }
 }
 </style>

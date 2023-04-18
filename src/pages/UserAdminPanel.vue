@@ -6,6 +6,7 @@
       api-url="/users/query"
       api-method="POST"
       sticky-action-column
+      :filter-columns="filterColumns"
       :actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="
         (selected) =>
@@ -187,6 +188,7 @@ import { date, QTableProps } from 'quasar';
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DataTable from 'components/table/DataTable.vue';
+import { FilterColumn, FilterOperator } from 'components/table/type';
 
 import { User, UserPostData, UserPostError } from './type';
 
@@ -269,6 +271,90 @@ export default defineComponent({
       passwordChangingRequired: ref(false),
       newUser: ref<UserPostData>({}),
     };
+  },
+
+  computed: {
+    filterColumns() {
+      const columns: FilterColumn[] = [
+        {
+          field: 'name',
+          label: '姓名',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.ct,
+            FilterOperator.nct,
+          ],
+        },
+        {
+          field: 'username',
+          label: '用户名',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.ct,
+            FilterOperator.nct,
+          ],
+        },
+        {
+          field: 'mobile',
+          label: '手机号',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.ct,
+            FilterOperator.nct,
+          ],
+        },
+        {
+          field: 'email',
+          label: '邮箱',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.ct,
+            FilterOperator.nct,
+          ],
+        },
+        {
+          field: 'last_login_at',
+          label: '最后登录时间',
+          type: 'datetime',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.gt,
+            FilterOperator.gte,
+            FilterOperator.lt,
+            FilterOperator.lte,
+          ],
+        },
+        {
+          field: 'created_at',
+          label: '创建时间',
+          type: 'datetime',
+          operatorOptions: [
+            FilterOperator.eq,
+            FilterOperator.neq,
+            FilterOperator.gt,
+            FilterOperator.gte,
+            FilterOperator.lt,
+            FilterOperator.lte,
+          ],
+        },
+        {
+          field: 'is_deleted',
+          label: '状态',
+          type: 'select',
+          operatorOptions: [FilterOperator.eq, FilterOperator.neq],
+          options: [
+            { value: true, label: '正常' },
+            { value: false, label: '禁用' },
+          ],
+        },
+      ];
+      return columns;
+    },
   },
 
   methods: {

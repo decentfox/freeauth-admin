@@ -6,6 +6,7 @@
     class="q-ml-sm"
     :class="hasBeenFiltered ? 'primary-btn' : 'flat-btn'"
   >
+    <q-tooltip>设置过滤条件</q-tooltip>
     <q-menu class="q-pa-sm" anchor="bottom left" self="top middle">
       <div
         v-for="(conditoin, idx) in filters"
@@ -67,12 +68,7 @@
           添加筛选条件
         </q-btn>
         <q-space />
-        <q-btn
-          unelevated
-          class="secondary-btn"
-          color="secondary"
-          @click="resetFilter"
-        >
+        <q-btn unelevated class="secondary-btn" @click="resetFilter">
           <q-icon size="18px" name="restart_alt" />重置
         </q-btn>
         <q-btn unelevated class="q-ml-sm primary-btn" @click="search">

@@ -22,6 +22,7 @@
         debounce="300"
         style="width: 280px"
         :placeholder="searchPlaceholder"
+        class="q-mr-sm"
       >
         <template #prepend>
           <q-icon name="search" />
@@ -36,14 +37,17 @@
           />
         </template>
       </q-input>
-      <filter-panel :columns="filterColumns" />
+      <filter-panel v-if="filterColumns?.length > 0" :columns="filterColumns" />
+      <slot name="table-filter"></slot>
       <q-space />
       <div class="q-gutter-sm">
-        <q-btn unelevated class="secondary-btn" color="secondary">
+        <q-btn unelevated class="secondary-btn">
           <q-icon size="18px" name="upload" />导入
+          <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
-        <q-btn unelevated class="secondary-btn" color="secondary">
+        <q-btn unelevated class="secondary-btn">
           <q-icon size="18px" name="download" />导出
+          <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
       </div>
       <slot name="table-action"></slot>
@@ -54,12 +58,12 @@
         leave-active-class="animated fadeOut"
       >
         <div
-          v-if="actions && selected.length > 0"
+          v-if="batchActions && selected.length > 0"
           class="row col-12 justify-center"
         >
           <q-card class="bg-secondary">
             <q-btn
-              v-for="(action, i) in actions"
+              v-for="(action, i) in batchActions"
               :key="i"
               unelevated
               :label="action"
@@ -166,7 +170,7 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    actions: {
+    batchActions: {
       type: [Array, Object],
       default: null,
     },
@@ -264,7 +268,7 @@ export default defineComponent({
   max-height: calc(100vh - 84px);
 
   .q-table__top {
-    padding: 12px 0 6px 0;
+    padding: 5px;
   }
 
   .q-table__top,

@@ -41,6 +41,7 @@
 }
 
 .secondary-btn {
+  background-color: $secondary;
   .q-btn__content {
     color: $grey-10;
   }
@@ -73,8 +74,10 @@
   --q-primary: #215ae5;
   --q-secondary: rgba(255, 255, 255, 0.07);
   --q-negative: #c95b5b;
+  --q-info: #c95b5b;
 
   .secondary-btn {
+    background-color: rgba(255, 255, 255, 0.07);
     .q-btn__content {
       color: $grey-2;
     }

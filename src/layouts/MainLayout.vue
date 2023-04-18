@@ -36,7 +36,7 @@
             <q-avatar size="26px">
               <q-icon name="admin_panel_settings" />
             </q-avatar>
-            <q-tooltip>Account</q-tooltip>
+            <q-tooltip>账号</q-tooltip>
           </q-btn>
           <q-btn
             round
@@ -47,7 +47,9 @@
             <q-avatar size="26px">
               <q-icon :name="$q.dark.isActive ? 'sunny' : 'dark_mode'" />
             </q-avatar>
-            <q-tooltip>{{ $q.dark.isActive ? 'Light' : 'Dark' }}</q-tooltip>
+            <q-tooltip>
+              {{ $q.dark.isActive ? '浅色模式' : '深色模式' }}
+            </q-tooltip>
           </q-btn>
         </div>
       </q-toolbar>

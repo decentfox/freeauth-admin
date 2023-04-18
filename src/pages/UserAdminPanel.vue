@@ -7,7 +7,7 @@
       api-method="POST"
       sticky-action-column
       :filter-columns="filterColumns"
-      :actions="['批量禁用', '批量启用', '批量删除']"
+      :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="
         (selected) =>
           toggleUsersStatus(
@@ -24,6 +24,14 @@
       "
       @批量删除="(selected) => deleteUsers(selected.map((u: User) => u.id))"
     >
+      <template #table-action>
+        <q-btn
+          unelevated
+          label="创建用户"
+          class="q-ml-md primary-btn"
+          @click="createUserForm = true"
+        />
+      </template>
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
           <q-chip
@@ -36,15 +44,6 @@
             "
           />
         </q-td>
-      </template>
-
-      <template #table-action>
-        <q-btn
-          unelevated
-          label="创建用户"
-          class="q-ml-md primary-btn"
-          @click="createUserForm = true"
-        />
       </template>
       <template #body-cell-actions="props">
         <q-td :props="props">

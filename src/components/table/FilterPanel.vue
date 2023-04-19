@@ -33,6 +33,7 @@
               map-options
               lazy-rules="ondemand"
               :rules="[(val) => !!val || '请选择字段']"
+              @update:model-value="(val) => resetCondition(idx, val)"
             >
             </q-select>
           </div>
@@ -219,6 +220,10 @@ export default defineComponent({
       this.hasBeenFiltered = false;
       (this.$refs.form as QForm).resetValidation();
       this.$emit('filtered', []);
+    },
+
+    resetCondition(idx: number, field: string) {
+      this.filters[idx] = { field: field };
     },
 
     getFilters() {

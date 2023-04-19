@@ -63,7 +63,7 @@ export default defineComponent({
 
   methods: {
     save() {
-      (this.$refs['form'] as QForm).validate().then((success: unknown) => {
+      (this.$refs['form'] as QForm).validate().then((success: boolean) => {
         if (success) {
           this.$emit('confirm');
         }

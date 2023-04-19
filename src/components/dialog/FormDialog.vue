@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { QDialog } from 'quasar';
+import { QDialog, QForm } from 'quasar';
 
 export default defineComponent({
   name: 'FormDialog',
@@ -63,13 +63,11 @@ export default defineComponent({
 
   methods: {
     save() {
-      (this.$refs['form'] as HTMLFormElement)
-        .validate()
-        .then((success: unknown) => {
-          if (success) {
-            this.$emit('confirm');
-          }
-        });
+      (this.$refs['form'] as QForm).validate().then((success: unknown) => {
+        if (success) {
+          this.$emit('confirm');
+        }
+      });
     },
 
     hide() {

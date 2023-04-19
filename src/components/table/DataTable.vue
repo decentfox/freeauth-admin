@@ -154,30 +154,37 @@ export default defineComponent({
   components: { FilterPanel },
 
   props: {
+    /** 获取数据接口 URL */
     apiUrl: {
       type: String,
       default: null,
     },
+    /** 获取数据接口方法，默认为 GET */
     apiMethod: {
       type: String,
       default: 'GET',
     },
+    /** 列表字段定义 */
     columns: {
       type: Array as PropType<QTableColumn[]>,
       default: () => [],
     },
+    /** 搜索输入框提示文字，默认为 "搜索" */
     searchPlaceholder: {
       type: String,
       default: '搜索',
     },
+    /** 是否固定操作列，默认为 false，设置为 true 时，会将列表最后一列固定。  */
     stickyActionColumn: {
       type: Boolean,
       default: false,
     },
+    /** 批量操作定义 */
     batchActions: {
-      type: [Array, Object],
+      type: Array as PropType<string[]>,
       default: null,
     },
+    /** 筛选条件定义 */
     filterColumns: {
       type: Array as PropType<FilterColumn[]>,
       default: () => [],

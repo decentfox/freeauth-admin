@@ -186,8 +186,13 @@ import { date, QTableProps } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
+import { FormDialogComponent } from 'components/dialog/type';
 import DataTable from 'components/table/DataTable.vue';
-import { FilterColumn, FilterOperator } from 'components/table/type';
+import {
+  DateTableComponent,
+  FilterColumn,
+  FilterOperator,
+} from 'components/table/type';
 
 import { User, UserPostData, UserPostError } from './type';
 
@@ -361,7 +366,7 @@ export default defineComponent({
           { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
         );
       } finally {
-        (this.$refs.table as HTMLFormElement).fetchRows();
+        (this.$refs.table as DateTableComponent).fetchRows();
       }
     },
 
@@ -374,7 +379,7 @@ export default defineComponent({
           successMsg: '成员删除成功',
         });
       } finally {
-        (this.$refs.table as HTMLFormElement).fetchRows();
+        (this.$refs.table as DateTableComponent).fetchRows();
       }
     },
 
@@ -384,8 +389,8 @@ export default defineComponent({
         await this.$api.post('/users', this.newUser, {
           successMsg: '成员创建成功',
         });
-        (this.$refs.createUserDialog as HTMLFormElement).hide();
-        (this.$refs.table as HTMLFormElement).fetchRows();
+        (this.$refs.createUserDialog as FormDialogComponent).hide();
+        (this.$refs.table as DateTableComponent).fetchRows();
         this.resetCreateUserForm();
       } catch (e) {
         this.createUserFormError = (e as Error).cause || {};

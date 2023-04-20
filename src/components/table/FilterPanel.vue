@@ -173,6 +173,10 @@ export default defineComponent({
     },
   },
 
+  mounted() {
+    this.addFilter();
+  },
+
   methods: {
     getOperatorOptions(field?: string) {
       let operators: FilterOperator[] = [

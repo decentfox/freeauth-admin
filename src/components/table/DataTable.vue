@@ -65,13 +65,13 @@
           v-if="batchActions && selected.length > 0"
           class="row col-12 justify-center"
         >
-          <q-card class="bg-secondary">
+          <q-card flat>
             <q-btn
               v-for="(action, i) in batchActions"
               :key="i"
               unelevated
               :label="action"
-              class="q-ma-sm"
+              class="primary-btn q-ma-sm"
               @click="$emit(action.replace(' ', '-'), selected)"
             />
           </q-card>

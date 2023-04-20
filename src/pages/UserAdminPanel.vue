@@ -8,21 +8,9 @@
       sticky-action-column
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
-      @批量禁用="
-        (selected) =>
-          toggleUsersStatus(
-            selected.map((u: User) => u.id),
-            true
-          )
-      "
-      @批量启用="
-        (selected) =>
-          toggleUsersStatus(
-            selected.map((u: User) => u.id),
-            false
-          )
-      "
-      @批量删除="(selected) => deleteUsers(selected.map((u: User) => u.id))"
+      @批量禁用="(selected) => disableUsers(selected)"
+      @批量启用="(selected) => enableUsers(selected)"
+      @批量删除="(selected) => deleteUsers(selected)"
     >
       <template #table-action>
         <q-btn
@@ -56,7 +44,7 @@
                     v-close-popup
                     clickable
                     class="q-my-xs"
-                    @click="disableUser(props.row)"
+                    @click="disableUsers([props.row])"
                   >
                     <q-item-section avatar class="q-pr-none">
                       <q-icon name="remove_circle_outline" size="16px" />
@@ -68,7 +56,7 @@
                     v-close-popup
                     clickable
                     class="q-my-xs"
-                    @click="enableUser(props.row)"
+                    @click="enableUsers([props.row])"
                   >
                     <q-item-section avatar class="q-pr-none">
                       <q-icon name="task_alt" size="16px" />
@@ -80,7 +68,7 @@
                     v-close-popup
                     clickable
                     class="q-my-xs"
-                    @click="deleteUser(props.row)"
+                    @click="deleteUsers([props.row])"
                   >
                     <q-item-section avatar class="q-pr-none">
                       <q-icon name="delete_outline" size="16px" />
@@ -189,7 +177,7 @@ import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import DataTable from 'components/table/DataTable.vue';
 import {
-  DateTableComponent,
+  DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
@@ -366,11 +354,11 @@ export default defineComponent({
           { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
         );
       } finally {
-        (this.$refs.table as DateTableComponent).fetchRows();
+        (this.$refs.table as DataTableComponent).fetchRows();
       }
     },
 
-    async deleteUsers(user_ids: string[]) {
+    async executeDeleteUsers(user_ids: string[]) {
       try {
         await this.$api.request({
           method: 'DELETE',
@@ -379,7 +367,7 @@ export default defineComponent({
           successMsg: '成员删除成功',
         });
       } finally {
-        (this.$refs.table as DateTableComponent).fetchRows();
+        (this.$refs.table as DataTableComponent).fetchRows();
       }
     },
 
@@ -390,7 +378,7 @@ export default defineComponent({
           successMsg: '成员创建成功',
         });
         (this.$refs.createUserDialog as FormDialogComponent).hide();
-        (this.$refs.table as DateTableComponent).fetchRows();
+        (this.$refs.table as DataTableComponent).fetchRows();
         this.resetCreateUserForm();
       } catch (e) {
         this.createUserFormError = (e as Error).cause || {};
@@ -402,10 +390,10 @@ export default defineComponent({
       this.newUser = {};
     },
 
-    disableUser(item: User) {
-      const userDesc = `${item.name || item.username}${
-        item.mobile ? `（${item.mobile}）` : ''
-      }`;
+    disableUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
       this.$q
         .dialog({
           component: ConfirmDialog,
@@ -427,15 +415,18 @@ export default defineComponent({
         })
         .onOk(({ type }) => {
           if (type === 'disable') {
-            this.toggleUsersStatus([item.id], true);
+            this.toggleUsersStatus(
+              users.map((u: User) => u.id),
+              true
+            );
           }
         });
     },
 
-    enableUser(item: User) {
-      const userDesc = `${item.name || item.username}${
-        item.mobile ? `（${item.mobile}）` : ''
-      }`;
+    enableUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
       this.$q
         .dialog({
           component: ConfirmDialog,
@@ -457,24 +448,25 @@ export default defineComponent({
         })
         .onOk(({ type }) => {
           if (type === 'enable') {
-            this.toggleUsersStatus([item.id], false);
+            this.toggleUsersStatus(
+              users.map((u: User) => u.id),
+              false
+            );
           }
         });
     },
 
-    deleteUser(item: User) {
-      const userDesc = `${item.name || item.username}${
-        item.mobile ? `（${item.mobile}）` : ''
-      }`;
+    deleteUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
+
       this.$q
         .dialog({
           component: ConfirmDialog,
           componentProps: {
             title: '删除成员',
-            content:
-              '您正在请求删除成员：' +
-              userDesc +
-              '，数据删除后将无法进行恢复，您确认要继续删除吗？',
+            content: `您正在请求删除成员：${userDesc}，数据删除后将无法进行恢复，您确认要继续删除吗？`,
             buttons: [
               { label: '取消' },
               {
@@ -487,7 +479,7 @@ export default defineComponent({
         })
         .onOk(({ type }) => {
           if (type === 'delete') {
-            this.deleteUsers([item.id]);
+            this.executeDeleteUsers(users.map((u: User) => u.id));
           }
         });
     },

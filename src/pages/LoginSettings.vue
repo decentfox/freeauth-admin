@@ -95,7 +95,7 @@
                       协议勾选框文字
                     </q-item-label>
                     <q-input
-                      v-model="policyText"
+                      v-model="policy.text"
                       filled
                       dense
                       placeholder="例如：我已阅读并同意隐私协议与服务条款"
@@ -107,7 +107,7 @@
                       协议跳转链接
                     </q-item-label>
                     <q-input
-                      v-model="policyLink"
+                      v-model="policy.link"
                       filled
                       dense
                       placeholder="https://"
@@ -141,7 +141,7 @@
                     size="32px"
                     label="支持手机号和验证码注册"
                     class="full-width q-mt-sm"
-                    @update:model-value="switchSignupMethod"
+                    @update:model-value="switchSignupMethod('mobile')"
                   />
                   <q-checkbox
                     v-model="signupOptions.email"
@@ -149,7 +149,7 @@
                     size="32px"
                     label="支持邮箱和验证码注册"
                     class="full-width q-mt-sm"
-                    @update:model-value="switchSignupMethod"
+                    @update:model-value="switchSignupMethod('email')"
                   />
                 </q-card-section>
                 <q-card-section>
@@ -194,7 +194,7 @@
                       size="32px"
                       label="支持手机号和验证码登录"
                       class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod"
+                      @update:model-value="switchLoginMethod('code')"
                     />
                     <q-checkbox
                       v-model="codeLoginOptions.email"
@@ -202,7 +202,7 @@
                       size="32px"
                       label="支持邮箱和验证码登录"
                       class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod"
+                      @update:model-value="switchLoginMethod('code')"
                     />
                   </div>
                   <div>
@@ -210,12 +210,12 @@
                       密码登录
                     </q-item-label>
                     <q-checkbox
-                      v-model="pwdLoginOptions.username"
+                      v-model="pwdLoginOptions.mobile"
                       dense
                       size="32px"
                       label="支持手机号和密码登录"
                       class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod"
+                      @update:model-value="switchLoginMethod('password')"
                     />
                     <q-checkbox
                       v-model="pwdLoginOptions.email"
@@ -223,15 +223,15 @@
                       size="32px"
                       label="支持邮箱和密码登录"
                       class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod"
+                      @update:model-value="switchLoginMethod('password')"
                     />
                     <q-checkbox
-                      v-model="pwdLoginOptions.mobile"
+                      v-model="pwdLoginOptions.username"
                       dense
                       size="32px"
                       label="支持用户名和密码登录"
                       class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod"
+                      @update:model-value="switchLoginMethod('password')"
                     />
                   </div>
                 </q-card-section>
@@ -243,246 +243,21 @@
         </div>
       </template>
       <template #after>
-        <q-card bordered class="q-mx-xl q-my-md q-pa-md preview">
-          <q-tab-panels
+        <div class="q-mx-xl q-my-md">
+          <signup-and-login
             ref="preview"
-            v-model="previewPanel"
-            animated
-            class="bg-white preview-panel"
-          >
-            <q-tab-panel name="signup-panel">
-              <div class="row items-center q-pt-sm">
-                <q-img
-                  :src="imageUrl"
-                  spinner-color="white"
-                  class="q-mx-md img-wrapper"
-                  :class="{ 'bg-grey-2': !imageUrl }"
-                />
-                <div class="text-weight-bold text-h6 text-grey-10">
-                  {{ title || `自定义标题` }}
-                </div>
-              </div>
-              <q-tabs
-                v-model="signupTab"
-                dense
-                class="text-grey q-mt-lg"
-                align="left"
-                narrow-indicator
-                style="width: 200px"
-                :style="`color: ${color} !important`"
-              >
-                <q-tab
-                  v-if="signupOptions.mobile"
-                  name="mobile"
-                  label="手机号注册"
-                />
-                <q-tab
-                  v-if="signupOptions.email"
-                  name="email"
-                  label="邮箱注册"
-                />
-              </q-tabs>
-              <q-separator color="grey-4" />
-              <q-tab-panels
-                ref="signup"
-                v-model="signupTab"
-                animated
-                class="bg-white"
-              >
-                <!-- 注册框：手机号注册 -->
-                <q-tab-panel
-                  v-if="signupOptions.mobile"
-                  name="mobile"
-                  class="q-pt-lg bg-white"
-                >
-                  <verification-code-form
-                    is-preview
-                    :color="color"
-                    placeholder="请输入手机号码"
-                    submit-btn="注册"
-                  />
-                  <div class="flex flex-center">
-                    <q-btn
-                      flat
-                      unelevated
-                      color="primary"
-                      label="已有账号，点击前往登录"
-                      :style="`color: ${color} !important`"
-                      @click="loginSettings = true"
-                    />
-                  </div>
-                </q-tab-panel>
-                <!-- 注册框：邮箱注册 -->
-                <q-tab-panel
-                  v-if="signupOptions.email"
-                  name="email"
-                  class="q-pt-lg bg-white"
-                >
-                  <verification-code-form
-                    is-preview
-                    :color="color"
-                    placeholder="请输入邮箱地址"
-                    submit-btn="注册"
-                  />
-                  <div class="flex flex-center">
-                    <q-btn
-                      flat
-                      unelevated
-                      color="primary"
-                      label="已有账号，点击前往登录"
-                      :style="`color: ${color} !important`"
-                      @click="loginSettings = true"
-                    />
-                  </div>
-                </q-tab-panel>
-              </q-tab-panels>
-            </q-tab-panel>
-
-            <q-tab-panel name="login-panel">
-              <div class="row items-center q-pt-sm">
-                <q-img
-                  :src="imageUrl"
-                  spinner-color="white"
-                  class="q-mx-md img-wrapper"
-                  :class="{ 'bg-grey-2': !imageUrl }"
-                />
-                <div class="text-weight-bold text-h6 text-grey-10">
-                  {{ title || `自定义标题` }}
-                </div>
-              </div>
-              <q-tabs
-                v-model="loginTab"
-                dense
-                class="text-grey q-mt-lg"
-                align="left"
-                narrow-indicator
-                style="width: 200px"
-                :style="`color: ${color} !important`"
-              >
-                <q-tab
-                  v-if="codeLoginOptions.email || codeLoginOptions.mobile"
-                  name="code"
-                  label="验证码登录"
-                />
-                <q-tab
-                  v-if="
-                    pwdLoginOptions.email ||
-                    pwdLoginOptions.mobile ||
-                    pwdLoginOptions.username
-                  "
-                  name="password"
-                  label="密码登录"
-                />
-              </q-tabs>
-              <q-separator color="grey-4" />
-              <q-tab-panels
-                ref="login"
-                v-model="loginTab"
-                animated
-                class="bg-white"
-              >
-                <!-- 登录框：验证码登录 -->
-                <q-tab-panel
-                  v-if="codeLoginOptions.email || codeLoginOptions.mobile"
-                  name="code"
-                  class="q-pt-lg bg-white"
-                >
-                  <verification-code-form
-                    is-preview
-                    :color="color"
-                    :placeholder="codeLoginPlaceholder"
-                    submit-btn="登录"
-                  />
-                  <div class="flex flex-center">
-                    <q-btn
-                      flat
-                      unelevated
-                      color="primary"
-                      label="没有账号，点击前往注册"
-                      :style="`color: ${color} !important`"
-                      @click="signupSettings = true"
-                    />
-                  </div>
-                </q-tab-panel>
-                <!-- 登录框：密码登录 -->
-                <q-tab-panel
-                  v-if="
-                    pwdLoginOptions.email ||
-                    pwdLoginOptions.mobile ||
-                    pwdLoginOptions.username
-                  "
-                  name="password"
-                >
-                  <q-form class="q-gutter-md">
-                    <q-input
-                      v-model="passwordForm.identity"
-                      dense
-                      filled
-                      :placeholder="passwordLoginPlaceholder"
-                      hide-bottom-space
-                      bg-color="grey-2"
-                      disable
-                    >
-                      <template #prepend>
-                        <q-icon name="perm_identity" color="grey-7" />
-                      </template>
-                    </q-input>
-                    <q-input
-                      v-model="passwordForm.password"
-                      dense
-                      filled
-                      placeholder="请输入密码"
-                      :type="!showPwd ? 'password' : 'text'"
-                      hide-bottom-space
-                      minlength="6"
-                      bg-color="grey-2"
-                      disable
-                    >
-                      <template #prepend>
-                        <q-icon name="lock_outline" color="grey-7" />
-                      </template>
-                      <template #append>
-                        <q-icon
-                          :name="showPwd ? 'visibility' : 'visibility_off'"
-                          size="20px"
-                          color="grey-7"
-                          class="cursor-pointer"
-                          @click="showPwd = !showPwd"
-                        />
-                      </template>
-                    </q-input>
-                    <div class="error-msg"></div>
-                    <div class="flex flex-center">
-                      <q-btn
-                        unelevated
-                        label="登录"
-                        class="q-my-sm full-width text-body1 primary-btn"
-                        :style="`background-color: ${color} !important`"
-                      />
-                      <q-btn
-                        flat
-                        unelevated
-                        type="button"
-                        color="primary"
-                        label="没有账号，点击前往注册"
-                        :style="`color: ${color} !important`"
-                        @click="signupSettings = true"
-                      />
-                    </div> </q-form
-                ></q-tab-panel>
-              </q-tab-panels>
-            </q-tab-panel>
-          </q-tab-panels>
-          <div
-            v-if="withPolicy"
-            class="row items-center absolute-bottom q-pa-lg q-ml-md"
-          >
-            <q-checkbox v-model="policy" size="32px" />
-            <q-item-label class="text-grey-8">
-              {{ policyText || `我已阅读并同意隐私协议与服务条款` }}
-            </q-item-label>
-          </div>
-        </q-card>
+            is-preview
+            :image-url="imageUrl"
+            :title="title"
+            :color="color"
+            :with-policy="withPolicy"
+            :policy="policy"
+            :signup-options="signupOptions"
+            :initialization="initialization"
+            :code-login-options="codeLoginOptions"
+            :pwd-login-options="pwdLoginOptions"
+          />
+        </div>
       </template>
     </q-splitter>
   </q-page>
@@ -490,15 +265,22 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QFile, QTabPanels } from 'quasar';
+import { QFile } from 'quasar';
 
-import VerificationCodeForm from 'components/form/VerificationCodeForm.vue';
+import SignupAndLogin from 'components/form/SignupAndLogin.vue';
+import {
+  CodeLoginOptions,
+  PwdLoginOptions,
+  SignupAndLoginComponent,
+  SignupAndLoginPolicy,
+  SignupOptions,
+} from 'components/form/type';
 
 export default defineComponent({
   name: 'IndexPage',
 
   components: {
-    VerificationCodeForm,
+    SignupAndLogin,
   },
 
   setup() {
@@ -511,69 +293,31 @@ export default defineComponent({
       title: ref(''),
       color: ref('#215ae5'),
       withPolicy: ref(false),
-      policyText: ref(''),
-      policyLink: ref(''),
+      policy: ref<SignupAndLoginPolicy>({
+        text: '',
+        link: '',
+      }),
 
       // Signup Settings
-      signupOptions: ref({
-        email: false,
+      signupOptions: ref<SignupOptions>({
         mobile: true,
+        email: false,
       }),
       initialization: ref(false),
       signupSettings: ref(false),
 
       // Login Settings
-      codeLoginOptions: ref({
-        email: false,
+      codeLoginOptions: ref<CodeLoginOptions>({
         mobile: true,
+        email: false,
       }),
-      pwdLoginOptions: ref({
+      pwdLoginOptions: ref<PwdLoginOptions>({
         email: false,
         mobile: false,
         username: false,
       }),
       loginSettings: ref(false),
-
-      // Preview
-      previewPanel: ref('signup-panel'),
-      signupTab: ref('mobile'),
-      loginTab: ref('code'),
-      policy: ref(false),
-
-      // Password Login
-      passwordForm: ref({
-        identity: ref(''),
-        password: ref(''),
-      }),
-      showPwd: ref(false),
     };
-  },
-
-  computed: {
-    codeLoginPlaceholder() {
-      let hint = [];
-      if (this.codeLoginOptions.mobile) {
-        hint.push('手机号');
-      }
-      if (this.codeLoginOptions.email) {
-        hint.push('邮箱');
-      }
-      return '请输入' + hint.join('或');
-    },
-
-    passwordLoginPlaceholder() {
-      let hint = [];
-      if (this.pwdLoginOptions.mobile) {
-        hint.push('手机号');
-      }
-      if (this.pwdLoginOptions.email) {
-        hint.push('邮箱');
-      }
-      if (this.pwdLoginOptions.username) {
-        hint.push('用户名');
-      }
-      return '请输入' + hint.join('或');
-    },
   },
 
   methods: {
@@ -584,71 +328,59 @@ export default defineComponent({
     },
 
     uploadImage() {
-      console.error('haha');
       (this.$refs.file as QFile).pickFiles();
     },
 
     switchPreviewPanel() {
-      console.error('haha');
       if (this.loginSettings) {
-        (this.$refs.preview as QTabPanels).goTo('login-panel');
+        (this.$refs.preview as SignupAndLoginComponent).switchTo('login-panel');
       }
       if (this.signupSettings) {
-        (this.$refs.preview as QTabPanels).goTo('signup-panel');
+        (this.$refs.preview as SignupAndLoginComponent).switchTo(
+          'signup-panel'
+        );
       }
     },
 
-    switchSignupMethod() {
-      if (this.signupOptions.email) {
-        (this.$refs.signup as QTabPanels).goTo('email');
-      }
-      if (this.signupOptions.mobile) {
-        (this.$refs.signup as QTabPanels).goTo('mobile');
-      }
+    switchSignupMethod(target: string) {
+      const theOtherOne = target === 'mobile' ? 'email' : 'mobile';
+      setTimeout(() => {
+        if (this.signupOptions[target as keyof SignupOptions]) {
+          (this.$refs.preview as SignupAndLoginComponent).switchSignupMethodTo(
+            target
+          );
+        } else if (this.signupOptions[theOtherOne as keyof SignupOptions]) {
+          (this.$refs.preview as SignupAndLoginComponent).switchSignupMethodTo(
+            theOtherOne
+          );
+        }
+      }, 20);
     },
 
-    switchLoginMethod() {
-      if (this.codeLoginOptions.email || this.codeLoginOptions.mobile) {
-        (this.$refs.login as QTabPanels).goTo('code');
-      }
-      if (
+    switchLoginMethod(target: string) {
+      const codeLogin =
+        this.codeLoginOptions.email || this.codeLoginOptions.mobile;
+      const pwdlogin =
         this.pwdLoginOptions.email ||
         this.pwdLoginOptions.mobile ||
-        this.pwdLoginOptions.username
-      ) {
-        (this.$refs.login as QTabPanels).goTo('password');
-      }
+        this.pwdLoginOptions.username;
+
+      if (!codeLogin && !pwdlogin) return;
+
+      setTimeout(() => {
+        (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
+          target === 'code' && codeLogin ? 'code' : 'password'
+        );
+      }, 20);
     },
   },
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .img-wrapper {
   width: 64px;
   height: 64px;
   border-radius: 3px;
-}
-
-.preview {
-  width: 380px;
-  background-color: white;
-
-  .img-wrapper {
-    width: 48px;
-    height: 48px;
-  }
-
-  .preview-panel {
-    min-height: 500px;
-  }
-
-  .q-tab--inactive {
-    color: $grey-6;
-  }
-
-  .q-field__native {
-    color: $grey-10 !important;
-  }
 }
 </style>

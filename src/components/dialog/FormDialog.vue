@@ -30,7 +30,7 @@
             v-close-popup
             flat
             label="取消"
-            class="flat-btn"
+            class="text-black-white"
           />
           <q-btn unelevated :label="okLabel" type="submit" class="primary-btn">
           </q-btn>

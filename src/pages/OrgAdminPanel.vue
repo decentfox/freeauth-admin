@@ -1,5 +1,5 @@
 <template>
-  <div style="min-width: 1060px">
+  <div class="org-admin" style="min-width: 1060px">
     <q-toolbar class="q-mt-md">
       <q-item-label class="q-ml-xs">组织类型</q-item-label>
       <q-btn
@@ -7,7 +7,7 @@
         dense
         icon="playlist_add"
         text-color="primary"
-        class="q-ml-xs flat-btn"
+        class="q-ml-xs text-black-white"
       >
         <q-tooltip>新增组织类型</q-tooltip>
       </q-btn>
@@ -213,7 +213,7 @@
                       flat
                       dense
                       icon="more_horiz"
-                      class="flat-btn"
+                      class="text-black-white"
                     >
                       <q-menu class="q-px-xs">
                         <q-list dense>
@@ -276,161 +276,13 @@
                       flat
                       dense
                       icon="more_horiz"
-                      class="flat-btn"
+                      class="text-black-white"
                     />
                   </div>
                 </q-td>
               </template>
             </data-table>
           </q-tab-panel>
-          <!--q-tab-panel
-            name="new"
-            class="scroll q-pa-xs"
-            style="height: calc(100vh - 150px)"
-          >
-            <q-stepper ref="myStepper" v-model="step" vertical animated flat>
-              <q-step :name="1" prefix="1" title="选择所属组织">
-                <div class="row">
-                  <q-select
-                    v-model="currentOrgType"
-                    :options="orgTypeOptions"
-                    label="请选择组织类型"
-                    class="q-mb-md q-px-sm col-6"
-                  />
-                  <q-select
-                    v-model="currentOrg"
-                    :options="orgOptions"
-                    label="请选择所属组织"
-                    stack-label
-                    class="q-mb-md q-px-sm col-6"
-                  />
-                </div>
-                <q-stepper-navigation>
-                  <q-btn
-                    color="primary"
-                    label="下一步"
-                    unelevated
-                    @click="step = 2"
-                  />
-                </q-stepper-navigation>
-              </q-step>
-
-              <q-step :name="2" prefix="2" title="选择所属部门及角色">
-                <q-item-label caption class="q-mb-md">
-                  可跳过该步骤，稍后进行配置。
-                </q-item-label>
-                <div class="row">
-                  <div class="col-6">
-                    <cascade-select
-                      v-model="selectedDept"
-                      required
-                      label="请选择部门"
-                      :options="deptOptions"
-                      opt-label="name"
-                      opt-value="id"
-                      @input="getRoleOptions"
-                    />
-                  </div>
-                </div>
-                <div class="row q-mt-md">
-                  <div class="col-6">
-                    <q-chip
-                      v-for="item in roleOptions"
-                      :key="item.id"
-                      clickable
-                      color="grey-3"
-                      :label="item.name"
-                      size="14px"
-                      square
-                      icon="add"
-                      @click="addRole(item)"
-                    />
-                  </div>
-                </div>
-                <div class="row q-mt-md">
-                  <div class="text-body2 col-6 q-mx-sm">
-                    用户将直属以下部门并拥有对应所选权限
-                  </div>
-                  <q-item-label
-                    caption
-                    class="text-body2 col-6 q-ma-sm q-mb-md"
-                  >
-                    提示：如果用户并不属于 A 部门但需要拥有 A
-                    部门的某个角色，建议您不要直接关联 A
-                    部门该角色，而是在该用户实际属于的 B
-                    部门内创建对应的角色并赋予该用户。
-                  </q-item-label>
-
-                  <q-card
-                    v-for="(card, idx) in roleCards"
-                    :key="idx"
-                    flat
-                    bordered
-                    class="col-6 q-ma-xs"
-                  >
-                    <q-card-section class="q-py-sm">
-                      <div class="text-subtitle2">{{ card.name }}</div>
-                    </q-card-section>
-                    <q-separator inset />
-                    <q-card-section class="q-py-sm">
-                      <q-chip
-                        v-for="item in card.roles"
-                        :key="item.id"
-                        removable
-                        color="primary"
-                        text-color="white"
-                        :label="item.name"
-                        size="14px"
-                        square
-                        @remove="removeRole(card.deptId, item)"
-                      />
-                    </q-card-section>
-                  </q-card>
-                </div>
-
-                <q-stepper-navigation>
-                  <q-btn
-                    color="primary"
-                    label="下一步"
-                    unelevated
-                    @click="step = 3"
-                  />
-                  <q-btn
-                    flat
-                    color="primary"
-                    label="返回"
-                    class="q-ml-sm"
-                    @click="step = 1"
-                  />
-                </q-stepper-navigation>
-              </q-step>
-
-              <q-step :name="3" prefix="3" title="录入用户信息">
-                <div class="row">
-                  <q-input
-                    label="用户姓名"
-                    stack-label
-                    class="q-mb-md q-px-sm col-6"
-                  />
-                  <q-input
-                    label="手机号"
-                    stack-label
-                    class="q-mb-md q-px-sm col-6"
-                  />
-                </div>
-                <q-stepper-navigation>
-                  <q-btn color="primary" label="完成并提交" unelevated />
-                  <q-btn
-                    flat
-                    color="primary"
-                    label="返回"
-                    class="q-ml-sm"
-                    @click="step = 2"
-                  />
-                </q-stepper-navigation>
-              </q-step>
-            </q-stepper>
-          </q-tab-panel> -->
         </q-tab-panels>
       </template>
     </q-splitter>
@@ -915,18 +767,20 @@ export default defineComponent({
   }
 }
 
-.q-tab {
-  border-top-right-radius: 6px;
-  border-top-left-radius: 6px;
-  margin-left: 1px;
+.org-admin {
+  .q-tab {
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    margin-left: 1px;
 
-  &.q-tab--active {
-    background-color: $primary;
-    color: white !important;
-  }
+    &.q-tab--active {
+      background-color: $primary;
+      color: white !important;
+    }
 
-  &.q-tab--inactive {
-    background-color: $secondary;
+    &.q-tab--inactive {
+      background-color: $secondary;
+    }
   }
 }
 </style>

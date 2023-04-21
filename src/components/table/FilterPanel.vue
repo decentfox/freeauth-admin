@@ -4,7 +4,7 @@
     dense
     icon="tune"
     class="q-ml-sm"
-    :class="hasBeenFiltered ? 'primary-btn' : 'flat-btn'"
+    :class="hasBeenFiltered ? 'primary-btn' : 'text-black-white'"
   >
     <q-tooltip>设置过滤条件</q-tooltip>
     <q-menu
@@ -104,14 +104,14 @@
                 dense
                 size="10px"
                 icon="remove_circle_outline"
-                class="flat-btn q-ml-xs"
+                class="text-black-white q-ml-xs"
                 @click="removeFilter(idx)"
               />
             </div>
           </div>
         </div>
         <div class="row no-wrap q-px-xs q-my-sm" style="width: 560px">
-          <q-btn flat class="flat-btn" @click="addFilter">
+          <q-btn flat class="text-black-white" @click="addFilter">
             <q-icon size="18px" name="add_circle_outline" class="q-mr-xs" />
             添加筛选条件
           </q-btn>

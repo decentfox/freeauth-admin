@@ -6,7 +6,7 @@
       animated
       class="bg-white preview-panel"
     >
-      <q-tab-panel name="signup-panel">
+      <q-tab-panel name="signup">
         <div class="row items-center q-pt-sm">
           <q-img
             :src="imageUrl"
@@ -53,7 +53,7 @@
                 color="primary"
                 label="已有账号，点击前往登录"
                 :style="`color: ${color} !important`"
-                @click="switchTo('login-panel')"
+                @click="switchTo('login')"
               />
             </div>
           </q-tab-panel>
@@ -72,14 +72,14 @@
                 color="primary"
                 label="已有账号，点击前往登录"
                 :style="`color: ${color} !important`"
-                @click="switchTo('login-panel')"
+                @click="switchTo('login')"
               />
             </div>
           </q-tab-panel>
         </q-tab-panels>
       </q-tab-panel>
 
-      <q-tab-panel name="login-panel">
+      <q-tab-panel name="login">
         <div class="row items-center q-pt-sm">
           <q-img
             :src="imageUrl"
@@ -126,7 +126,7 @@
                 color="primary"
                 label="没有账号，点击前往注册"
                 :style="`color: ${color} !important`"
-                @click="switchTo('signup-panel')"
+                @click="switchTo('signup')"
               />
             </div>
           </q-tab-panel>
@@ -187,7 +187,7 @@
                 color="primary"
                 label="没有账号，点击前往注册"
                 :style="`color: ${color} !important`"
-                @click="switchTo('signup-panel')"
+                @click="switchTo('signup')"
               />
             </div>
           </q-tab-panel>
@@ -288,10 +288,12 @@ export default defineComponent({
     },
   },
 
+  emits: ['panelChanged'],
+
   setup() {
     return {
       // Preview
-      previewPanel: ref('signup-panel'),
+      previewPanel: ref('signup'),
       signupTab: ref('mobile'),
       loginTab: ref('code'),
 
@@ -345,8 +347,11 @@ export default defineComponent({
   },
 
   methods: {
-    switchTo(panelName: string) {
+    switchTo(panelName: string, emit = true) {
       (this.$refs.innerPanel as QTabPanels).goTo(panelName);
+      if (this.isPreview && emit) {
+        this.$emit('panelChanged', panelName);
+      }
     },
 
     switchSignupMethodTo(methodName: string) {

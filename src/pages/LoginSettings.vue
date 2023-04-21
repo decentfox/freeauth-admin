@@ -256,6 +256,7 @@
             :initialization="initialization"
             :code-login-options="codeLoginOptions"
             :pwd-login-options="pwdLoginOptions"
+            @panel-changed="expendSettings"
           />
         </div>
       </template>
@@ -333,13 +334,22 @@ export default defineComponent({
 
     switchPreviewPanel() {
       if (this.loginSettings) {
-        (this.$refs.preview as SignupAndLoginComponent).switchTo('login-panel');
+        (this.$refs.preview as SignupAndLoginComponent).switchTo(
+          'login',
+          false
+        );
       }
       if (this.signupSettings) {
         (this.$refs.preview as SignupAndLoginComponent).switchTo(
-          'signup-panel'
+          'signup',
+          false
         );
       }
+    },
+
+    expendSettings(panelName: string) {
+      this.signupSettings = panelName === 'signup';
+      this.loginSettings = panelName === 'login';
     },
 
     switchSignupMethod(target: string) {
@@ -368,9 +378,15 @@ export default defineComponent({
       if (!codeLogin && !pwdlogin) return;
 
       setTimeout(() => {
-        (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
-          target === 'code' && codeLogin ? 'code' : 'password'
-        );
+        if (target === 'code') {
+          (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
+            codeLogin ? 'code' : 'password'
+          );
+        } else {
+          (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
+            pwdlogin ? 'password' : 'code'
+          );
+        }
       }, 20);
     },
   },

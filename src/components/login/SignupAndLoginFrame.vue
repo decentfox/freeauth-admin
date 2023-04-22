@@ -223,8 +223,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { QTabPanels } from 'quasar';
-
-import VerificationCodeForm from 'components/form/VerificationCodeForm.vue';
+import VerificationCodeForm from 'src/components/login/VerificationCodeForm.vue';
 
 import {
   CodeLoginOptions,
@@ -234,7 +233,7 @@ import {
 } from './type';
 
 export default defineComponent({
-  name: 'SignupAndLogin',
+  name: 'SignupAndLoginFrame',
 
   components: {
     VerificationCodeForm,

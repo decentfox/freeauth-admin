@@ -121,7 +121,7 @@
             <q-separator />
 
             <q-expansion-item
-              v-model="signupSettings"
+              v-model="signupExpanded"
               group="somegroup"
               icon="settings_accessibility"
               label="注册配置"
@@ -152,16 +152,25 @@
                     @update:model-value="switchSignupMethod('email')"
                   />
                 </q-card-section>
-                <q-card-section>
-                  <q-toggle
-                    v-model="initialization"
-                    left-label
-                    label="注册后设置用户名密码"
-                    class="text-weight-bold"
+                <q-card-section
+                  v-if="signupOptions.mobile || signupOptions.email"
+                >
+                  <security-config-item
+                    :value="signupCodeLimit"
+                    toggle-label="注册验证码发送限制"
+                    description="同一个手机或邮箱，在限定周期内可获取的注册验证码次数"
+                    action-hint="可获取验证码次数"
                   />
-                  <q-item-label class="text-caption hint-label">
-                    开启后，用户注册后会被要求修改默认分配的用户名及密码
-                  </q-item-label>
+                </q-card-section>
+
+                <q-separator inset spaced="md" />
+
+                <q-card-section>
+                  <security-config-item
+                    :value="signupResetPassword"
+                    toggle-label="注册后设置用户名密码"
+                    description="开启后，用户注册后会被要求修改默认分配的用户名及密码"
+                  />
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -169,7 +178,7 @@
             <q-separator />
 
             <q-expansion-item
-              v-model="loginSettings"
+              v-model="loginExpanded"
               group="somegroup"
               icon="password"
               label="登录配置"
@@ -179,61 +188,93 @@
             >
               <q-separator />
               <q-card class="q-pa-md">
-                <q-card-section class="q-gutter-sm">
+                <q-card-section>
                   <q-item-label class="q-pb-sm text-weight-bold">
-                    选择登录方式
+                    选择验证码登录方式
                   </q-item-label>
+                  <q-checkbox
+                    v-model="codeLoginOptions.mobile"
+                    dense
+                    size="32px"
+                    label="支持手机号和验证码登录"
+                    class="full-width q-mt-sm"
+                    @update:model-value="switchLoginMethod('code')"
+                  />
+                  <q-checkbox
+                    v-model="codeLoginOptions.email"
+                    dense
+                    size="32px"
+                    label="支持邮箱和验证码登录"
+                    class="full-width q-mt-sm"
+                    @update:model-value="switchLoginMethod('code')"
+                  />
+                </q-card-section>
+                <q-card-section v-if="codeLogin">
+                  <security-config-item
+                    :value="codeLoginFailureLimit"
+                    toggle-label="登录验证码尝试次数"
+                    description="验证码有效限定周期内，允许用户尝试次数，超出则需重新获取"
+                    action-hint="允许尝试次数"
+                  />
+                </q-card-section>
+                <q-card-section v-if="codeLogin">
+                  <security-config-item
+                    :value="loginCodeLimit"
+                    toggle-label="登录验证码发送限制"
+                    description="同一个手机或邮箱，在限定周期内可获取的登录验证码次数"
+                    action-hint="可获取验证码次数"
+                  />
+                </q-card-section>
 
-                  <div>
-                    <q-item-label class="text-caption hint-label">
-                      验证码登录
-                    </q-item-label>
-                    <q-checkbox
-                      v-model="codeLoginOptions.mobile"
-                      dense
-                      size="32px"
-                      label="支持手机号和验证码登录"
-                      class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod('code')"
-                    />
-                    <q-checkbox
-                      v-model="codeLoginOptions.email"
-                      dense
-                      size="32px"
-                      label="支持邮箱和验证码登录"
-                      class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod('code')"
-                    />
-                  </div>
-                  <div>
-                    <q-item-label class="text-caption hint-label q-pt-sm">
-                      密码登录
-                    </q-item-label>
-                    <q-checkbox
-                      v-model="pwdLoginOptions.mobile"
-                      dense
-                      size="32px"
-                      label="支持手机号和密码登录"
-                      class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod('password')"
-                    />
-                    <q-checkbox
-                      v-model="pwdLoginOptions.email"
-                      dense
-                      size="32px"
-                      label="支持邮箱和密码登录"
-                      class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod('password')"
-                    />
-                    <q-checkbox
-                      v-model="pwdLoginOptions.username"
-                      dense
-                      size="32px"
-                      label="支持用户名和密码登录"
-                      class="full-width q-mt-sm"
-                      @update:model-value="switchLoginMethod('password')"
-                    />
-                  </div>
+                <q-separator inset spaced="md" />
+
+                <q-card-section>
+                  <q-item-label class="q-pb-sm text-weight-bold">
+                    选择密码登录方式
+                  </q-item-label>
+                  <q-checkbox
+                    v-model="pwdLoginOptions.mobile"
+                    dense
+                    size="32px"
+                    label="支持手机号和密码登录"
+                    class="full-width q-mt-sm"
+                    @update:model-value="switchLoginMethod('password')"
+                  />
+                  <q-checkbox
+                    v-model="pwdLoginOptions.email"
+                    dense
+                    size="32px"
+                    label="支持邮箱和密码登录"
+                    class="full-width q-mt-sm"
+                    @update:model-value="switchLoginMethod('password')"
+                  />
+                  <q-checkbox
+                    v-model="pwdLoginOptions.username"
+                    dense
+                    size="32px"
+                    label="支持用户名和密码登录"
+                    class="full-width q-mt-sm"
+                    @update:model-value="switchLoginMethod('password')"
+                  />
+                </q-card-section>
+                <q-card-section v-if="pwdLogin">
+                  <security-config-item
+                    :value="pwdLoginFailureLimit"
+                    toggle-label="登录密码尝试次数"
+                    description="限定周期内允许用户尝试次数，超出后当日不再允许登录"
+                    action-hint="允许尝试次数"
+                  />
+                </q-card-section>
+
+                <q-separator inset spaced="md" />
+
+                <q-card-section>
+                  <security-config-item
+                    :value="autoLogout"
+                    toggle-label="cookie 过期时间"
+                    description="用户登录状态的有效时间，过期后用户需要重新登录"
+                    action-hint="允许尝试次数"
+                  />
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -244,7 +285,7 @@
       </template>
       <template #after>
         <div class="q-mx-xl q-my-md">
-          <signup-and-login
+          <signup-and-login-frame
             ref="preview"
             is-preview
             :image-url="imageUrl"
@@ -253,10 +294,9 @@
             :with-policy="withPolicy"
             :policy="policy"
             :signup-options="signupOptions"
-            :initialization="initialization"
             :code-login-options="codeLoginOptions"
             :pwd-login-options="pwdLoginOptions"
-            @panel-changed="expendSettings"
+            @panel-changed="expandSettings"
           />
         </div>
       </template>
@@ -267,21 +307,24 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QFile } from 'quasar';
+import SecurityConfigItem from 'src/components/login/SecurityConfigItem.vue';
+import SignupAndLoginFrame from 'src/components/login/SignupAndLoginFrame.vue';
 
-import SignupAndLogin from 'components/form/SignupAndLogin.vue';
 import {
   CodeLoginOptions,
   PwdLoginOptions,
+  SecurityConfig,
   SignupAndLoginComponent,
   SignupAndLoginPolicy,
   SignupOptions,
-} from 'components/form/type';
+} from 'components/login/type';
 
 export default defineComponent({
   name: 'IndexPage',
 
   components: {
-    SignupAndLogin,
+    SecurityConfigItem,
+    SignupAndLoginFrame,
   },
 
   setup() {
@@ -304,8 +347,7 @@ export default defineComponent({
         mobile: true,
         email: false,
       }),
-      initialization: ref(false),
-      signupSettings: ref(false),
+      signupExpanded: ref(false),
 
       // Login Settings
       codeLoginOptions: ref<CodeLoginOptions>({
@@ -317,8 +359,51 @@ export default defineComponent({
         mobile: false,
         username: false,
       }),
-      loginSettings: ref(false),
+      loginExpanded: ref(false),
+
+      // Security Settings
+      signupCodeLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 60,
+        times: 5,
+      }),
+      signupResetPassword: ref(<SecurityConfig>{
+        status: false,
+      }),
+      loginCodeLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 60,
+        times: 5,
+      }),
+      codeLoginFailureLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 15,
+        times: 3,
+      }),
+      pwdLoginFailureLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 1440,
+        times: 5,
+      }),
+      autoLogout: ref(<SecurityConfig>{
+        status: false,
+        duration: 1440,
+      }),
     };
+  },
+
+  computed: {
+    codeLogin() {
+      return this.codeLoginOptions.email || this.codeLoginOptions.mobile;
+    },
+
+    pwdLogin() {
+      return (
+        this.pwdLoginOptions.email ||
+        this.pwdLoginOptions.mobile ||
+        this.pwdLoginOptions.username
+      );
+    },
   },
 
   methods: {
@@ -333,13 +418,13 @@ export default defineComponent({
     },
 
     switchPreviewPanel() {
-      if (this.loginSettings) {
+      if (this.loginExpanded) {
         (this.$refs.preview as SignupAndLoginComponent).switchTo(
           'login',
           false
         );
       }
-      if (this.signupSettings) {
+      if (this.signupExpanded) {
         (this.$refs.preview as SignupAndLoginComponent).switchTo(
           'signup',
           false
@@ -347,9 +432,9 @@ export default defineComponent({
       }
     },
 
-    expendSettings(panelName: string) {
-      this.signupSettings = panelName === 'signup';
-      this.loginSettings = panelName === 'login';
+    expandSettings(panelName: string) {
+      this.signupExpanded = panelName === 'signup';
+      this.loginExpanded = panelName === 'login';
     },
 
     switchSignupMethod(target: string) {
@@ -368,23 +453,15 @@ export default defineComponent({
     },
 
     switchLoginMethod(target: string) {
-      const codeLogin =
-        this.codeLoginOptions.email || this.codeLoginOptions.mobile;
-      const pwdlogin =
-        this.pwdLoginOptions.email ||
-        this.pwdLoginOptions.mobile ||
-        this.pwdLoginOptions.username;
-
-      if (!codeLogin && !pwdlogin) return;
-
+      if (!this.codeLogin && !this.pwdLogin) return;
       setTimeout(() => {
         if (target === 'code') {
           (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
-            codeLogin ? 'code' : 'password'
+            this.codeLogin ? 'code' : 'password'
           );
         } else {
           (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
-            pwdlogin ? 'password' : 'code'
+            this.pwdLogin ? 'password' : 'code'
           );
         }
       }, 20);

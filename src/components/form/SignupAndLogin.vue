@@ -194,14 +194,28 @@
         </q-tab-panels>
       </q-tab-panel>
     </q-tab-panels>
-    <div
-      v-if="withPolicy"
-      class="row items-center absolute-bottom q-pa-lg q-ml-md"
-    >
-      <q-checkbox v-model="policyChecked" size="32px" />
-      <q-item-label class="text-grey-8">
-        {{ policy.text || `我已阅读并同意隐私协议与服务条款` }}
-      </q-item-label>
+    <div v-if="withPolicy" class="absolute-bottom q-pa-lg q-mx-md">
+      <div v-if="policy.link" class="row items-center">
+        <q-checkbox v-model="policyChecked" size="32px" />
+        <q-item-label class="ellipsis">
+          <a
+            :href="policy.link"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-grey-10"
+          >
+            {{ policy.text || `我已阅读并同意隐私协议与服务条款` }}
+          </a>
+        </q-item-label>
+      </div>
+      <div v-else class="ellipsis">
+        <q-checkbox
+          v-model="policyChecked"
+          size="32px"
+          class="text-grey-10"
+          :label="policy.text || `我已阅读并同意隐私协议与服务条款`"
+        />
+      </div>
     </div>
   </q-card>
 </template>

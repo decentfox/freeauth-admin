@@ -156,11 +156,11 @@
                   <q-toggle
                     v-model="initialization"
                     left-label
-                    label="修改默认用户名密码"
+                    label="注册后设置用户名密码"
                     class="text-weight-bold"
                   />
                   <q-item-label class="text-caption hint-label">
-                    开启后，用户注册后会被要求修改用户名及密码
+                    开启后，用户注册后会被要求修改默认分配的用户名及密码
                   </q-item-label>
                 </q-card-section>
               </q-card>

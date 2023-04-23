@@ -156,6 +156,16 @@
                   v-if="signupOptions.mobile || signupOptions.email"
                 >
                   <security-config-item
+                    :value="codeSignupFailureLimit"
+                    toggle-label="注册验证码尝试次数"
+                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                    action-hint="允许试错次数"
+                  />
+                </q-card-section>
+                <q-card-section
+                  v-if="signupOptions.mobile || signupOptions.email"
+                >
+                  <security-config-item
                     :value="signupCodeLimit"
                     toggle-label="注册验证码发送限制"
                     description="同一个手机或邮箱，在限定周期内可获取的注册验证码次数"
@@ -213,8 +223,8 @@
                   <security-config-item
                     :value="codeLoginFailureLimit"
                     toggle-label="登录验证码尝试次数"
-                    description="验证码有效限定周期内，允许用户尝试次数，超出则需重新获取"
-                    action-hint="允许尝试次数"
+                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                    action-hint="允许试错次数"
                   />
                 </q-card-section>
                 <q-card-section v-if="codeLogin">
@@ -261,8 +271,8 @@
                   <security-config-item
                     :value="pwdLoginFailureLimit"
                     toggle-label="登录密码尝试次数"
-                    description="限定周期内允许用户尝试次数，超出后当日不再允许登录"
-                    action-hint="允许尝试次数"
+                    description="限定周期内允许用户试错次数，超出后当日不再允许登录"
+                    action-hint="允许试错次数"
                   />
                 </q-card-section>
 
@@ -273,7 +283,6 @@
                     :value="autoLogout"
                     toggle-label="cookie 过期时间"
                     description="用户登录状态的有效时间，过期后用户需要重新登录"
-                    action-hint="允许尝试次数"
                   />
                 </q-card-section>
               </q-card>
@@ -367,6 +376,11 @@ export default defineComponent({
         duration: 60,
         times: 5,
       }),
+      codeSignupFailureLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 10,
+        times: 3,
+      }),
       signupResetPassword: ref(<SecurityConfig>{
         status: false,
       }),
@@ -377,7 +391,7 @@ export default defineComponent({
       }),
       codeLoginFailureLimit: ref(<SecurityConfig>{
         status: false,
-        duration: 15,
+        duration: 10,
         times: 3,
       }),
       pwdLoginFailureLimit: ref(<SecurityConfig>{

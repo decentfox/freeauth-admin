@@ -21,6 +21,10 @@ const routes: RouteRecordRaw[] = [
         path: '/login_settings',
         component: () => import('pages/LoginSettings.vue'),
       },
+      {
+        path: '/audit_logs',
+        component: () => import('pages/AuditLogs.vue'),
+      },
     ],
   },
 

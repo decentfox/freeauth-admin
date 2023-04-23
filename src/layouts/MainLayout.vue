@@ -141,6 +141,7 @@ const menuLinkList: MainMenuSection[] = [
       {
         title: '审计日志',
         icon: 'mark_chat_read',
+        link: '/audit_logs',
       },
     ],
   },

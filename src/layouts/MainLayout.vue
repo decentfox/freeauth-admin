@@ -8,7 +8,7 @@
           round
           icon="menu"
           aria-label="Menu"
-          class="flat-btn"
+          class="text-black-white"
           @click="toggleLeftDrawer"
         />
         <q-toolbar-title>
@@ -31,8 +31,8 @@
         </q-toolbar-title>
 
         <div class="q-pl-md q-gutter-xs row no-wrap items-center">
-          <q-btn flat label="帮助文档" class="flat-btn" />
-          <q-btn round flat class="flat-btn">
+          <q-btn flat label="帮助文档" class="text-black-white" />
+          <q-btn round flat class="text-black-white">
             <q-avatar size="26px">
               <q-icon name="admin_panel_settings" />
             </q-avatar>
@@ -41,7 +41,7 @@
           <q-btn
             round
             flat
-            class="flat-btn"
+            class="text-black-white"
             @click="$q.dark.isActive ? $q.dark.set(false) : $q.dark.set(true)"
           >
             <q-avatar size="26px">
@@ -132,6 +132,7 @@ const menuLinkList: MainMenuSection[] = [
       {
         title: '登录配置',
         icon: 'password',
+        link: '/login_settings',
       },
       {
         title: '安全设置',

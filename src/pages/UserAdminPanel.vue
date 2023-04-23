@@ -36,7 +36,13 @@
       <template #body-cell-actions="props">
         <q-td :props="props">
           <div class="text-grey-8 q-gutter-xs">
-            <q-btn size="12px" flat dense icon="more_horiz" class="flat-btn">
+            <q-btn
+              size="12px"
+              flat
+              dense
+              icon="more_horiz"
+              class="text-black-white"
+            >
               <q-menu class="q-px-xs">
                 <q-list dense>
                   <q-item
@@ -95,7 +101,7 @@
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
           <div>
-            <q-item-label class="text-caption input-label">
+            <q-item-label class="text-caption hint-label">
               登录信息（至少填写1项）
             </q-item-label>
             <div class="q-gutter-sm">
@@ -139,7 +145,7 @@
           </div>
           <q-separator />
           <div>
-            <q-item-label class="text-caption input-label">
+            <q-item-label class="text-caption hint-label">
               用户姓名（选填）
             </q-item-label>
             <q-input
@@ -399,10 +405,7 @@ export default defineComponent({
           component: ConfirmDialog,
           componentProps: {
             title: '禁用成员',
-            content:
-              '您正在请求禁用成员：' +
-              userDesc +
-              '，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。',
+            content: `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
             buttons: [
               { label: '取消' },
               {
@@ -432,10 +435,7 @@ export default defineComponent({
           component: ConfirmDialog,
           componentProps: {
             title: '恢复成员',
-            content:
-              '您正在请求启用成员：' +
-              userDesc +
-              '，操作后，账号状态将恢复正常，用户可以重新登录系统。',
+            content: `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
             buttons: [
               { label: '取消' },
               {

@@ -17,6 +17,10 @@ const routes: RouteRecordRaw[] = [
         path: '/org_admin_panel',
         component: () => import('pages/OrgAdminPanel.vue'),
       },
+      {
+        path: '/login_settings',
+        component: () => import('pages/LoginSettings.vue'),
+      },
     ],
   },
 

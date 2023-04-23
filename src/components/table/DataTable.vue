@@ -174,7 +174,7 @@ export default defineComponent({
       type: String,
       default: '搜索',
     },
-    /** 是否固定操作列，默认为 false，设置为 true 时，会将列表最后一列固定。  */
+    /** 是否固定操作列，默认为 false，设置为 true 时，会将列表最后一列固定 */
     stickyActionColumn: {
       type: Boolean,
       default: false,

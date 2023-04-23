@@ -371,34 +371,41 @@ export default defineComponent({
       loginExpanded: ref(false),
 
       // Security Settings
+      /** 注册：同一个手机号或邮箱在 60 分钟内只能获取 5 次验证码，防止频发获取验证码 */
       signupCodeLimit: ref(<SecurityConfig>{
         status: false,
         duration: 60,
         times: 5,
       }),
+      /** 注册：验证码有效期 10 分钟，有效期内只能试错 3 次，超出则验证码自动过期 */
       codeSignupFailureLimit: ref(<SecurityConfig>{
         status: false,
         duration: 10,
         times: 3,
       }),
+      /** 注册：注册后是否要求用户修改默认分配的用户名和密码 */
       signupResetPassword: ref(<SecurityConfig>{
         status: false,
       }),
+      /** 登录：同一个手机号或邮箱在 60 分钟内只能获取 5 次验证码，防止频发获取验证码 */
       loginCodeLimit: ref(<SecurityConfig>{
         status: false,
         duration: 60,
         times: 5,
       }),
+      /** 登录：验证码有效期 10 分钟，有效期内只能试错 3 次，超出则验证码自动过期 */
       codeLoginFailureLimit: ref(<SecurityConfig>{
         status: false,
         duration: 10,
         times: 3,
       }),
+      /** 登录：1440 分钟（1天）内只能试错 5 次密码，超出则只能于第二日再次使用密码，但当日仍然可以用其他方式登录 */
       pwdLoginFailureLimit: ref(<SecurityConfig>{
         status: false,
         duration: 1440,
         times: 5,
       }),
+      /** 自动登出： 1440 分钟（1天） */
       autoLogout: ref(<SecurityConfig>{
         status: false,
         duration: 1440,

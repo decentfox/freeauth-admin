@@ -178,8 +178,8 @@
                 <q-card-section>
                   <security-config-item
                     :value="signupResetPassword"
-                    toggle-label="注册后设置用户名密码"
-                    description="开启后，用户注册后会被要求修改默认分配的用户名及密码"
+                    toggle-label="注册后修改初始密码"
+                    description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
                   />
                 </q-card-section>
               </q-card>

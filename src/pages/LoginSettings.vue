@@ -156,6 +156,16 @@
                   v-if="signupOptions.mobile || signupOptions.email"
                 >
                   <security-config-item
+                    :value="codeSignupFailureLimit"
+                    toggle-label="注册验证码尝试次数"
+                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                    action-hint="允许试错次数"
+                  />
+                </q-card-section>
+                <q-card-section
+                  v-if="signupOptions.mobile || signupOptions.email"
+                >
+                  <security-config-item
                     :value="signupCodeLimit"
                     toggle-label="注册验证码发送限制"
                     description="同一个手机或邮箱，在限定周期内可获取的注册验证码次数"
@@ -168,8 +178,8 @@
                 <q-card-section>
                   <security-config-item
                     :value="signupResetPassword"
-                    toggle-label="注册后设置用户名密码"
-                    description="开启后，用户注册后会被要求修改默认分配的用户名及密码"
+                    toggle-label="注册后修改初始密码"
+                    description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
                   />
                 </q-card-section>
               </q-card>
@@ -213,8 +223,8 @@
                   <security-config-item
                     :value="codeLoginFailureLimit"
                     toggle-label="登录验证码尝试次数"
-                    description="验证码有效限定周期内，允许用户尝试次数，超出则需重新获取"
-                    action-hint="允许尝试次数"
+                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                    action-hint="允许试错次数"
                   />
                 </q-card-section>
                 <q-card-section v-if="codeLogin">
@@ -261,8 +271,8 @@
                   <security-config-item
                     :value="pwdLoginFailureLimit"
                     toggle-label="登录密码尝试次数"
-                    description="限定周期内允许用户尝试次数，超出后当日不再允许登录"
-                    action-hint="允许尝试次数"
+                    description="限定周期内允许用户试错次数，超出后当日不再允许登录"
+                    action-hint="允许试错次数"
                   />
                 </q-card-section>
 
@@ -273,7 +283,6 @@
                     :value="autoLogout"
                     toggle-label="cookie 过期时间"
                     description="用户登录状态的有效时间，过期后用户需要重新登录"
-                    action-hint="允许尝试次数"
                   />
                 </q-card-section>
               </q-card>
@@ -362,29 +371,41 @@ export default defineComponent({
       loginExpanded: ref(false),
 
       // Security Settings
+      /** 注册：同一个手机号或邮箱在 60 分钟内只能获取 5 次验证码，防止频发获取验证码 */
       signupCodeLimit: ref(<SecurityConfig>{
         status: false,
         duration: 60,
         times: 5,
       }),
+      /** 注册：验证码有效期 10 分钟，有效期内只能试错 3 次，超出则验证码自动过期 */
+      codeSignupFailureLimit: ref(<SecurityConfig>{
+        status: false,
+        duration: 10,
+        times: 3,
+      }),
+      /** 注册：注册后是否要求用户修改默认分配的用户名和密码 */
       signupResetPassword: ref(<SecurityConfig>{
         status: false,
       }),
+      /** 登录：同一个手机号或邮箱在 60 分钟内只能获取 5 次验证码，防止频发获取验证码 */
       loginCodeLimit: ref(<SecurityConfig>{
         status: false,
         duration: 60,
         times: 5,
       }),
+      /** 登录：验证码有效期 10 分钟，有效期内只能试错 3 次，超出则验证码自动过期 */
       codeLoginFailureLimit: ref(<SecurityConfig>{
         status: false,
-        duration: 15,
+        duration: 10,
         times: 3,
       }),
+      /** 登录：1440 分钟（1天）内只能试错 5 次密码，超出则只能于第二日再次使用密码，但当日仍然可以用其他方式登录 */
       pwdLoginFailureLimit: ref(<SecurityConfig>{
         status: false,
         duration: 1440,
         times: 5,
       }),
+      /** 自动登出： 1440 分钟（1天） */
       autoLogout: ref(<SecurityConfig>{
         status: false,
         duration: 1440,

@@ -45,11 +45,11 @@
       <slot name="table-filter"></slot>
       <q-space />
       <div class="q-gutter-sm">
-        <q-btn unelevated class="secondary-btn">
+        <q-btn v-if="!hideImport" unelevated class="secondary-btn">
           <q-icon size="18px" name="upload" />导入
           <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
-        <q-btn unelevated class="secondary-btn">
+        <q-btn v-if="!hideExport" unelevated class="secondary-btn">
           <q-icon size="18px" name="download" />导出
           <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
@@ -188,6 +188,16 @@ export default defineComponent({
     filterColumns: {
       type: Array as PropType<FilterColumn[]>,
       default: () => [],
+    },
+    /** 是否隐藏导出按钮 */
+    hideExport: {
+      type: Boolean,
+      default: false,
+    },
+    /** 是否隐藏导入按钮 */
+    hideImport: {
+      type: Boolean,
+      default: false,
     },
   },
 

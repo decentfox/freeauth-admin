@@ -63,14 +63,23 @@
       :breakpoint="400"
     >
       <q-scroll-area class="fit">
-        <q-list class="q-py-lg q-pr-sm main-menu">
+        <q-list class="q-pr-sm main-menu">
           <div v-for="(group, idx) in mainMenu" :key="idx">
+            <q-item-label
+              class="q-pl-lg q-pt-lg q-pb-sm text-overline"
+              style="font-size: 11px"
+            >
+              {{ group.header }}
+            </q-item-label>
+            <q-separator inset />
             <q-item
               v-for="(item, itemIdx) in group.links"
               :key="itemIdx"
               v-ripple
+              dense
               :to="item.link"
               clickable
+              class="q-my-md"
               :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-9'"
               active-class="active-link"
             >
@@ -81,7 +90,6 @@
                 <q-item-label>{{ item.title }}</q-item-label>
               </q-item-section>
             </q-item>
-            <q-separator v-if="idx !== mainMenu.length - 1" class="q-my-sm" />
           </div>
         </q-list>
       </q-scroll-area>
@@ -100,7 +108,31 @@ import { MainMenuSection } from 'components/type';
 
 const menuLinkList: MainMenuSection[] = [
   {
-    header: '业务范围',
+    header: 'F2P · 基础功能',
+    links: [
+      {
+        title: '定制登录',
+        icon: 'password',
+        link: '/login_settings',
+      },
+      {
+        title: '用户管理',
+        icon: 'contacts',
+        link: '/user_admin_panel',
+      },
+      {
+        title: '审计日志',
+        icon: 'mark_chat_read',
+        link: '/audit_logs',
+      },
+      {
+        title: '参数设置',
+        icon: 'settings_suggest',
+      },
+    ],
+  },
+  {
+    header: 'PRO · 高级功能',
     links: [
       {
         title: '组织管理',
@@ -110,38 +142,25 @@ const menuLinkList: MainMenuSection[] = [
       {
         title: '角色管理',
         icon: 'people_alt',
+        link: '/role_admin_panel',
       },
       {
-        title: '用户管理',
-        icon: 'contacts',
-        link: '/user_admin_panel',
+        title: '权限设置',
+        icon: 'room_preferences',
+        link: '/perm_admin_panel',
       },
+    ],
+  },
+  {
+    header: 'ECO · 生态功能',
+    links: [
       {
         title: '应用管理',
         icon: 'apps',
       },
       {
-        title: '权限设置',
-        icon: 'room_preferences',
-      },
-    ],
-  },
-  {
-    header: '技术范围',
-    links: [
-      {
-        title: '登录配置',
-        icon: 'password',
-        link: '/login_settings',
-      },
-      {
-        title: '安全设置',
-        icon: 'add_moderator',
-      },
-      {
-        title: '审计日志',
-        icon: 'mark_chat_read',
-        link: '/audit_logs',
+        title: '单点登录',
+        icon: 'pin_end',
       },
     ],
   },
@@ -169,8 +188,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .main-menu {
   .q-item {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
   }
 
   .active-link {

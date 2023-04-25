@@ -10,20 +10,28 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/IndexPage.vue'),
       },
       {
-        path: '/user_admin_panel',
-        component: () => import('pages/UserAdminPanel.vue'),
-      },
-      {
-        path: '/org_admin_panel',
-        component: () => import('pages/OrgAdminPanel.vue'),
-      },
-      {
         path: '/login_settings',
         component: () => import('pages/LoginSettings.vue'),
       },
       {
+        path: '/user_admin_panel',
+        component: () => import('pages/UserAdminPanel.vue'),
+      },
+      {
         path: '/audit_logs',
         component: () => import('pages/AuditLogs.vue'),
+      },
+      {
+        path: '/role_admin_panel',
+        component: () => import('pages/RoleAdminPanel.vue'),
+      },
+      {
+        path: '/perm_admin_panel',
+        component: () => import('pages/PermAdminPanel.vue'),
+      },
+      {
+        path: '/org_admin_panel',
+        component: () => import('pages/OrgAdminPanel.vue'),
       },
     ],
   },

@@ -1,8 +1,7 @@
 export interface OrgTypeOption {
-  id: number;
   value: number;
   label: string;
-  name: string;
+  desc?: string;
 }
 
 export interface User {

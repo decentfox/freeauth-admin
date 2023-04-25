@@ -46,7 +46,7 @@
               placeholder="请输入手机号码"
               submit-btn="注册"
             />
-            <div class="flex flex-center">
+            <div v-if="codeLogin || pwdLogin" class="flex flex-center">
               <q-btn
                 flat
                 unelevated
@@ -65,7 +65,7 @@
               placeholder="请输入邮箱地址"
               submit-btn="注册"
             />
-            <div class="flex flex-center">
+            <div v-if="codeLogin || pwdLogin" class="flex flex-center">
               <q-btn
                 flat
                 unelevated
@@ -119,7 +119,10 @@
               :placeholder="codeLoginPlaceholder"
               submit-btn="登录"
             />
-            <div class="flex flex-center">
+            <div
+              v-if="signupOptions.email || signupOptions.mobile"
+              class="flex flex-center"
+            >
               <q-btn
                 flat
                 unelevated
@@ -180,7 +183,10 @@
                 />
               </div>
             </q-form>
-            <div class="flex flex-center">
+            <div
+              v-if="signupOptions.email || signupOptions.mobile"
+              class="flex flex-center"
+            >
               <q-btn
                 flat
                 unelevated

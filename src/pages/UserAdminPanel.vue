@@ -69,7 +69,6 @@
                     </q-item-section>
                     <q-item-section> 启用账号 </q-item-section>
                   </q-item>
-                  <!-- <q-separator inset /> -->
                   <q-item
                     v-close-popup
                     clickable

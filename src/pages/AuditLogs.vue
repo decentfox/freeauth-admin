@@ -196,7 +196,7 @@ const logs = [
     ip: '127.0.0.1',
     device: 'PC',
     os: 'Windows',
-    created_time: '',
+    created_at: Date.now(),
     result: 1,
   },
   {
@@ -207,7 +207,7 @@ const logs = [
     ip: '127.0.0.1',
     device: 'PC',
     os: 'MacOS',
-    created_time: '',
+    created_at: Date.now(),
     result: 1,
   },
   {
@@ -218,7 +218,7 @@ const logs = [
     ip: '127.0.0.1',
     device: 'Mobile',
     os: 'Android',
-    created_time: '',
+    created_at: Date.now(),
     result: 0,
   },
 ];

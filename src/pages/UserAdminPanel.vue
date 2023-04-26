@@ -36,53 +36,23 @@
       <template #body-cell-actions="props">
         <q-td :props="props">
           <div class="text-grey-8 q-gutter-xs">
-            <q-btn
-              size="12px"
-              flat
-              dense
-              icon="more_horiz"
-              class="text-black-white"
-            >
-              <q-menu class="q-px-xs">
-                <q-list dense>
-                  <q-item
-                    v-if="!props.row.is_deleted"
-                    v-close-popup
-                    clickable
-                    class="q-my-xs"
-                    @click="disableUsers([props.row])"
-                  >
-                    <q-item-section avatar class="q-pr-none">
-                      <q-icon name="remove_circle_outline" size="16px" />
-                    </q-item-section>
-                    <q-item-section> 禁用账号 </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-else
-                    v-close-popup
-                    clickable
-                    class="q-my-xs"
-                    @click="enableUsers([props.row])"
-                  >
-                    <q-item-section avatar class="q-pr-none">
-                      <q-icon name="task_alt" size="16px" />
-                    </q-item-section>
-                    <q-item-section> 启用账号 </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    class="q-my-xs"
-                    @click="deleteUsers([props.row])"
-                  >
-                    <q-item-section avatar class="q-pr-none">
-                      <q-icon name="delete_outline" size="16px" />
-                    </q-item-section>
-                    <q-item-section> 删除账号 </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+            <dropdown-button
+              :buttons="[
+                {
+                  label: !props.row.is_deleted ? '禁用账号' : '启用账号',
+                  icon: !props.row.is_deleted
+                    ? 'remove_circle_outline'
+                    : 'task_alt',
+                  actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                },
+                {
+                  label: '删除账号',
+                  icon: 'delete_outline',
+                  actionType: 'delete',
+                },
+              ]"
+              @menu-click="operateOneUser($event, [props.row])"
+            />
           </div>
         </q-td>
       </template>
@@ -180,6 +150,7 @@ import { date, QTableProps } from 'quasar';
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
+import DropdownButton from 'components/DropdownButton.vue';
 import DataTable from 'components/table/DataTable.vue';
 import {
   DataTableComponent,
@@ -336,7 +307,7 @@ const filterColumns: FilterColumn[] = [
 export default defineComponent({
   name: 'UserAdminPanel',
 
-  components: { DataTable, FormDialog },
+  components: { DataTable, DropdownButton, FormDialog },
 
   setup() {
     return {
@@ -481,6 +452,16 @@ export default defineComponent({
             this.executeDeleteUsers(users.map((u: User) => u.id));
           }
         });
+    },
+
+    operateOneUser(event: Event, users: User[]) {
+      if (event.type === 'disable') {
+        this.disableUsers(users);
+      } else if (event.type === 'enable') {
+        this.enableUsers(users);
+      } else if (event.type === 'delete') {
+        this.deleteUsers(users);
+      }
     },
   },
 });

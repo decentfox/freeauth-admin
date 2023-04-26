@@ -1,62 +1,110 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <data-table
-      ref="table"
-      :columns="columns"
-      :rows="rows"
-      sticky-action-column
-      :filter-columns="filterColumns"
-      hide-import
-      hide-export
-    >
-      <template #table-action>
-        <q-btn unelevated label="创建角色" class="q-ml-md primary-btn" />
-      </template>
-      <template #body-cell-is_deleted="props">
-        <q-td :props="props">
-          <q-chip
-            square
-            size="12px"
-            :label="!props.row.is_deleted ? '正常' : '禁用'"
-            class="text-weight-bold q-pa-sm"
-            :class="
-              !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-            "
-          />
-        </q-td>
-      </template>
-      <template #body-cell-actions="props">
-        <q-td :props="props">
-          <div class="text-grey-8 q-gutter-xs">
+  <q-page class="full-width">
+    <q-tab-panels v-model="panel" animated>
+      <q-tab-panel name="table" class="q-pa-md">
+        <data-table
+          ref="table"
+          :columns="columns"
+          :rows="rows"
+          sticky-action-column
+          :filter-columns="filterColumns"
+          hide-import
+          hide-export
+        >
+          <template #table-action>
+            <q-btn unelevated label="创建角色" class="q-ml-md primary-btn" />
             <q-btn
-              size="12px"
-              flat
+              unelevated
               dense
-              icon="more_horiz"
-              class="text-black-white"
+              icon="account_tree"
+              class="q-ml-md"
+              @click="panel = 'structure'"
             >
-              <q-menu class="q-px-xs">
-                <q-list dense>
-                  <q-item v-close-popup clickable class="q-my-xs">
-                    <q-item-section avatar class="q-pr-none">
-                      <q-icon name="delete_outline" size="16px" />
-                    </q-item-section>
-                    <q-item-section> 删除账号 </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+              <q-tooltip>切换视图</q-tooltip>
             </q-btn>
-          </div>
-        </q-td>
-      </template>
-    </data-table>
+          </template>
+          <template #body-cell-is_deleted="props">
+            <q-td :props="props">
+              <q-chip
+                square
+                size="12px"
+                :label="!props.row.is_deleted ? '正常' : '禁用'"
+                class="text-weight-bold q-pa-sm"
+                :class="
+                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
+                "
+              />
+            </q-td>
+          </template>
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <div class="text-grey-8 q-gutter-xs">
+                <dropdown-button
+                  :buttons="[
+                    {
+                      label: '删除角色',
+                      icon: 'delete_outline',
+                      actionType: 'delete',
+                    },
+                  ]"
+                  @menu-click="operateOneRole"
+                />
+              </div>
+            </q-td>
+          </template>
+        </data-table>
+      </q-tab-panel>
+      <q-tab-panel name="structure" class="q-pa-none">
+        <q-splitter
+          v-model="splitterModel"
+          class="q-py-sm"
+          unit="px"
+          :limits="[250, 500]"
+        >
+          <!--the first splitted screen-->
+          <template #before>
+            <structure-tree />
+          </template>
+          <template #after>
+            <div class="q-px-md q-py-sm">
+              <q-toolbar class="q-pa-none">
+                <q-tabs
+                  v-model="tab"
+                  dense
+                  class="text-grey-7"
+                  active-color="primary"
+                  indicator-color="primary"
+                  align="left"
+                  narrow-indicator
+                >
+                  <q-tab name="roles" label="角色列表" />
+                  <q-tab name="new" label="创建角色" />
+                </q-tabs>
+                <q-space />
+                <q-btn
+                  unelevated
+                  dense
+                  icon="list_alt"
+                  class="q-mr-xs"
+                  @click="panel = 'table'"
+                >
+                  <q-tooltip>切换视图</q-tooltip>
+                </q-btn>
+              </q-toolbar>
+            </div>
+          </template>
+        </q-splitter>
+      </q-tab-panel>
+    </q-tab-panels>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
+import DropdownButton from 'components/DropdownButton.vue';
+import StructureTree from 'components/StructureTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 import { FilterColumn, FilterOperator } from 'components/table/type';
 
@@ -153,17 +201,27 @@ const roles = [
 export default defineComponent({
   name: 'IndexPage',
 
-  components: { DataTable },
+  components: { DataTable, DropdownButton, StructureTree },
 
   setup() {
     return {
+      // table mode
       columns: columns,
       filterColumns: filterColumns,
       rows: roles,
+      panel: ref('table'),
+
+      // structure mode
+      splitterModel: 350,
+      tab: ref('roles'),
     };
   },
 
-  methods: {},
+  methods: {
+    operateOneRole() {
+      console.error('start');
+    },
+  },
 });
 </script>
 

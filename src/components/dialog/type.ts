@@ -4,8 +4,10 @@ export interface FormDialogComponent {
 }
 
 export type DialogButton = {
-  /** 选项的显示文本 */
+  /** 对话框中按钮的文本 */
   label: string;
+  /** 对话框中按钮触发的事件类型名 */
   actionType?: string;
+  /** 对话框中按钮样式类型 */
   class?: string;
 };

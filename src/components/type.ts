@@ -13,3 +13,12 @@ export interface MainMenuLink {
   /** 菜单链接，可空 */
   link?: string;
 }
+
+export interface MenuButton {
+  /** 菜单按钮文案 */
+  label?: string;
+  /** 菜单按钮图标 */
+  icon?: string;
+  /** 菜单按钮触发事件类型 */
+  actionType: string;
+}

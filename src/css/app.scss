@@ -7,7 +7,7 @@
   min-width: 28px;
 }
 
-/* the style for ticked checkbox */
+/** the style for ticked checkbox */
 .q-checkbox__bg {
   border-width: 1px !important;
   border-color: $grey-7;
@@ -16,6 +16,50 @@
 .q-checkbox__inner--truthy .q-checkbox__bg {
   color: $primary;
   border-color: $primary !important;
+}
+
+.q-checkbox__inner {
+  font-size: 32px;
+}
+
+/** the style for tree structure */
+.tree-item {
+  .more-icon {
+    visibility: hidden;
+    right: 2px;
+    top: 2px;
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  &:hover {
+    .more-icon {
+      visibility: visible;
+    }
+  }
+}
+
+.q-tree__node--selected {
+  background-color: $primary;
+
+  .q-checkbox__inner--falsy .q-checkbox__bg {
+    background-color: white;
+    border-color: $primary !important;
+  }
+}
+
+/** the style for splitter */
+.splitter-drag-icon {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  background-color: $info;
+  border-radius: 2px;
+}
+
+.frame-table {
+  .sticky-table {
+    max-height: 100%;
+  }
 }
 
 .hint-label {
@@ -34,14 +78,14 @@
 .primary-btn {
   background-color: $primary;
   .q-btn__content {
-    color: $grey-2;
+    color: $grey-1;
   }
 }
 
 .accent-btn {
   background-color: $accent;
   .q-btn__content {
-    color: $grey-2;
+    color: $grey-1;
   }
 }
 
@@ -84,7 +128,7 @@
   .secondary-btn {
     background-color: rgba(255, 255, 255, 0.07);
     .q-btn__content {
-      color: $grey-2;
+      color: $grey-1;
     }
   }
 
@@ -96,7 +140,7 @@
   }
 
   .text-black-white {
-    color: $grey-2;
+    color: $grey-1;
   }
 
   .main-header {

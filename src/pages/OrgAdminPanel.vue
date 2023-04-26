@@ -10,6 +10,7 @@
       <template #before>
         <structure-tree editable />
       </template>
+
       <template #separator>
         <div class="splitter-drag-icon">
           <q-icon name="drag_indicator" color="primary" />
@@ -31,7 +32,6 @@
             >
               <q-tab name="enterprises" label="企业信息" />
               <q-tab name="users" label="成员列表" />
-              <q-tab name="new" label="新用户入职" />
             </q-tabs>
           </q-toolbar>
           <q-tab-panels v-model="tab" animated>
@@ -46,6 +46,14 @@
                 sticky-action-column
                 :hide-filter="true"
               >
+                <template #table-action>
+                  <q-btn
+                    unelevated
+                    dense
+                    label="添加企业"
+                    class="q-ml-sm q-px-md primary-btn"
+                  />
+                </template>
                 <template #body-cell-actions="props">
                   <q-td :props="props">
                     <div class="text-grey-8 q-gutter-xs">
@@ -81,8 +89,9 @@
                 <template #table-action>
                   <q-btn
                     unelevated
+                    dense
                     label="添加成员"
-                    class="q-ml-md primary-btn"
+                    class="q-ml-sm q-px-md primary-btn"
                   />
                 </template>
                 <template #body-cell-depts="props">

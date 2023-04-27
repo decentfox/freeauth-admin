@@ -8,5 +8,5 @@ export type CascadeOption = {
   /** 当前是否被选中 */
   selected?: boolean;
   /** 选项自定义显示文本及选项值 */
-  [key: string]: string | number | Array;
+  [key: string]: string | number | CascadeOption[] | boolean | undefined;
 };

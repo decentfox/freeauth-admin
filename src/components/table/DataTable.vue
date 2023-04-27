@@ -8,7 +8,7 @@
     :rows="rows"
     :columns="columns"
     row-key="id"
-    selection="multiple"
+    :selection="selection"
     binary-state-sort
     :filter="keyword"
     :loading="loading"
@@ -45,11 +45,21 @@
       <slot name="table-filter"></slot>
       <q-space />
       <div class="q-gutter-sm">
-        <q-btn v-if="!hideImport" unelevated class="secondary-btn">
+        <q-btn
+          v-if="!hideImport"
+          unelevated
+          dense
+          class="secondary-btn q-px-md"
+        >
           <q-icon size="18px" name="upload" />导入
           <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
-        <q-btn v-if="!hideExport" unelevated class="secondary-btn">
+        <q-btn
+          v-if="!hideExport"
+          unelevated
+          dense
+          class="secondary-btn q-px-md"
+        >
           <q-icon size="18px" name="download" />导出
           <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
@@ -101,7 +111,7 @@
           v-model="pagination.page"
           active-design="unelevated"
           active-color="primary"
-          :color="$q.dark.isActive ? 'grey-2' : 'grey-10'"
+          :color="$q.dark.isActive ? 'grey-1' : 'grey-10'"
           active-text-color="white"
           :max="pagination.last"
           :max-pages="6"
@@ -143,7 +153,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { QTableColumn, QTableProps } from 'quasar';
+import { QTable, QTableColumn, QTableProps } from 'quasar';
 
 import FilterPanel from './FilterPanel.vue';
 import { FilterColumn, FilterCondition, Pagination, QueryData } from './type';
@@ -198,6 +208,11 @@ export default defineComponent({
     hideImport: {
       type: Boolean,
       default: false,
+    },
+    /** 是否可以勾选表格行 */
+    selection: {
+      type: QTable['selection'],
+      default: 'multiple',
     },
   },
 
@@ -321,10 +336,6 @@ export default defineComponent({
 .selectable {
   .q-checkbox__inner {
     font-size: 28px;
-
-    .q-checkbox__bg {
-      border: 1px solid $grey-6;
-    }
   }
 }
 

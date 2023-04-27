@@ -145,7 +145,7 @@ const menuLinkList: MainMenuSection[] = [
         link: '/role_admin_panel',
       },
       {
-        title: '权限设置',
+        title: '权限管理',
         icon: 'room_preferences',
         link: '/perm_admin_panel',
       },

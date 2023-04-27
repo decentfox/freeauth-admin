@@ -15,8 +15,9 @@
       <template #table-action>
         <q-btn
           unelevated
+          dense
           label="创建用户"
-          class="q-ml-md primary-btn"
+          class="q-ml-sm q-px-md primary-btn"
           @click="createUserForm = true"
         />
       </template>

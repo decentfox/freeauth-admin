@@ -41,9 +41,17 @@ export interface Enterprise {
   tel: string;
 }
 
-export interface OrgTreeStructure {
+export interface TreeStructureNode {
   label: string;
+  disable?: boolean;
   id: number;
   icon?: string;
-  children?: OrgTreeStructure[];
+  children?: TreeStructureNode[];
+}
+
+export interface Permission {
+  name: string;
+  desc?: string;
+  code: string;
+  path?: string;
 }

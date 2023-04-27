@@ -17,8 +17,8 @@
           <q-item v-if="editable" clickable>
             <q-item-section>
               <q-item-label caption lines="1">
-                <q-icon name="add" />
-                添加组织类型
+                <q-icon size="16px" name="edit_note" />
+                管理组织类型
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -35,6 +35,28 @@
           </q-item>
         </template>
       </q-select>
+      <q-space />
+      <dropdown-button
+        v-if="editable"
+        btn-label="创建"
+        btn-icon="add"
+        btn-class="q-ml-sm secondary-btn"
+        btn-style="width: 75px; height: 40px"
+        :buttons="[
+          {
+            label: '组织类型',
+            actionType: 'org_type',
+          },
+          {
+            label: '组织机构',
+            actionType: 'org',
+          },
+          {
+            label: '分支部门',
+            actionType: 'dept',
+          },
+        ]"
+      />
     </q-toolbar>
     <q-separator spaced="sm" />
 
@@ -45,7 +67,7 @@
         dense
         filled
         debounce="300"
-        placeholder="搜索组织"
+        placeholder="搜索组织名称"
         class="full-width"
       >
         <template #prepend>
@@ -61,16 +83,6 @@
           />
         </template>
       </q-input>
-      <q-space />
-      <q-btn
-        v-if="editable"
-        unelevated
-        class="q-ml-sm secondary-btn"
-        label="创建"
-        style="width: 75px; height: 40px"
-      >
-        <q-tooltip>新增组织</q-tooltip>
-      </q-btn>
     </q-toolbar>
     <q-tab-panel
       name="structure"
@@ -110,20 +122,19 @@
               >
                 <q-menu
                   class="q-px-xs"
-                  anchor="bottom left"
-                  self="top middle"
+                  anchor="bottom right"
+                  self="top right"
                   @hide="toggleMenu(prop.node.id)"
                 >
                   <q-list dense>
                     <q-item v-close-popup clickable class="q-my-xs">
                       <q-item-section> 添加分支 </q-item-section>
                     </q-item>
-                    <!-- <q-separator inset /> -->
                     <q-item v-close-popup clickable class="q-my-xs">
-                      <q-item-section> 编辑组织 </q-item-section>
+                      <q-item-section> 修改名称 </q-item-section>
                     </q-item>
                     <q-item v-close-popup clickable class="q-my-xs">
-                      <q-item-section> 删除组织 </q-item-section>
+                      <q-item-section> 删除该项 </q-item-section>
                     </q-item>
                   </q-list>
                 </q-menu>
@@ -140,9 +151,11 @@
 import { defineComponent, ref } from 'vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QInput, QSelect, QTree } from 'quasar';
-import { OrgTreeStructure, OrgTypeOption } from 'src/pages/type';
+import { OrgTypeOption, TreeStructureNode } from 'src/pages/type';
 
-const structureData: OrgTreeStructure[] = [
+import DropdownButton from 'components/DropdownButton.vue';
+
+const structureData: TreeStructureNode[] = [
   {
     label: '1. 北京分公司',
     id: 1,
@@ -172,7 +185,6 @@ const structureData: OrgTreeStructure[] = [
       },
     ],
   },
-
   {
     label: '2. 上海分公司',
     id: 101,
@@ -214,7 +226,12 @@ const structureData: OrgTreeStructure[] = [
   },
 ];
 
-const structureData2: OrgTreeStructure[] = [
+const structureData2: TreeStructureNode[] = [
+  {
+    label: '智能院科技有限公司',
+    id: 502,
+    icon: 'account_balance',
+  },
   {
     label: '北京亚奥之星汽车服务有限公司',
     id: 21,
@@ -281,6 +298,8 @@ const orgData: OrgTypeOption[] = [
 export default defineComponent({
   name: 'StructureTree',
 
+  components: { DropdownButton },
+
   props: {
     editable: {
       type: Boolean,
@@ -299,7 +318,7 @@ export default defineComponent({
       selected: ref(null),
       filter: ref(''),
       filterRef: ref(null),
-      simple: ref<OrgTreeStructure[]>(structureData),
+      simple: ref<TreeStructureNode[]>(structureData),
     };
   },
 
@@ -333,37 +352,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.splitter-drag-icon {
-  height: 30px;
-  display: flex;
-  align-items: center;
-  background-color: $info;
-  border-radius: 2px;
-}
-
-.tree-item {
-  .more-icon {
-    visibility: hidden;
-    right: 2px;
-    top: 2px;
-    background-color: rgba(255, 255, 255, 0.07);
-  }
-
-  &:hover {
-    .more-icon {
-      visibility: visible;
-    }
-  }
-}
-
-.q-tree__node--selected {
-  background-color: $primary;
-}
-
-.frame-table {
-  .sticky-table {
-    max-height: 100%;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

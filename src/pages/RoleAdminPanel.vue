@@ -3,16 +3,20 @@
     <q-tab-panels v-model="panel" animated>
       <q-tab-panel name="table" class="q-pa-md">
         <data-table
-          ref="table"
-          :columns="columns"
           :rows="rows"
+          :columns="columns"
           sticky-action-column
           :filter-columns="filterColumns"
           hide-import
           hide-export
         >
           <template #table-action>
-            <q-btn unelevated label="创建角色" class="q-ml-md primary-btn" />
+            <q-btn
+              unelevated
+              dense
+              label="添加角色"
+              class="q-ml-sm q-px-md primary-btn"
+            />
             <q-btn
               unelevated
               dense
@@ -65,6 +69,11 @@
           <template #before>
             <structure-tree />
           </template>
+          <template #separator>
+            <div class="splitter-drag-icon">
+              <q-icon name="drag_indicator" color="primary" />
+            </div>
+          </template>
           <template #after>
             <div class="q-px-md q-py-sm">
               <q-toolbar class="q-pa-none">
@@ -78,7 +87,7 @@
                   narrow-indicator
                 >
                   <q-tab name="roles" label="角色列表" />
-                  <q-tab name="new" label="创建角色" />
+                  <q-tab name="users" label="用户列表" />
                 </q-tabs>
                 <q-space />
                 <q-btn
@@ -175,6 +184,7 @@ const filterColumns: FilterColumn[] = [
 
 const roles = [
   {
+    id: 1,
     name: '管理员',
     code: 'admin',
     belongs_to: ['所有经销商'],
@@ -183,6 +193,7 @@ const roles = [
     is_deleted: 0,
   },
   {
+    id: 2,
     name: '分管领导',
     code: 'leader',
     belongs_to: ['北京公司', '上海公司'],
@@ -190,6 +201,7 @@ const roles = [
     is_deleted: 0,
   },
   {
+    id: 3,
     name: '项目经理',
     code: 'manager',
     belongs_to: ['北京公司'],

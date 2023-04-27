@@ -11,6 +11,7 @@
       @批量禁用="(selected) => disableUsers(selected)"
       @批量启用="(selected) => enableUsers(selected)"
       @批量删除="(selected) => deleteUsers(selected)"
+      @row-click="goToUserProfile"
     >
       <template #table-action>
         <q-btn
@@ -475,6 +476,11 @@ export default defineComponent({
       } else if (event.type === 'delete') {
         this.deleteUsers(users);
       }
+    },
+
+    goToUserProfile(evt: Event, row: User) {
+      console.error(row.id);
+      this.$router.push(`/user_profile/${row.id}`);
     },
   },
 });

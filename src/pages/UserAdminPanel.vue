@@ -70,7 +70,7 @@
     >
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
-          <div>
+          <q-item-section>
             <q-item-label class="text-caption hint-label">
               登录信息（至少填写1项）
             </q-item-label>
@@ -104,6 +104,9 @@
                 class="col"
                 :error="!!createUserFormError.email"
                 :error-message="createUserFormError.email"
+                @update:model-value="
+                  if (!newUser.email) firstLoginNotification = false;
+                "
               />
             </div>
             <div
@@ -112,9 +115,9 @@
             >
               {{ createUserFormError.__root__ }}
             </div>
-          </div>
+          </q-item-section>
           <q-separator />
-          <div>
+          <q-item-section>
             <q-item-label class="text-caption hint-label">
               用户姓名（选填）
             </q-item-label>
@@ -127,17 +130,26 @@
               :error="!!createUserFormError.name"
               :error-message="createUserFormError.name"
             />
-          </div>
-          <div>
-            <q-toggle
-              v-model="firstLoginNotification"
-              label="发送首次登录信息（系统自动生成初始密码）"
-            />
+          </q-item-section>
+          <q-item-section>
             <q-toggle
               v-model="passwordChangingRequired"
               label="强制用户在首次登录时修改密码"
             />
-          </div>
+            <q-toggle
+              v-model="firstLoginNotification"
+              label="通过邮件发送初始默认登录信息"
+              :disable="!newUser.email"
+            >
+              <q-tooltip
+                v-if="!newUser.email"
+                anchor="bottom middle"
+                self="center end"
+              >
+                填写有效邮箱后才可启用
+              </q-tooltip>
+            </q-toggle>
+          </q-item-section>
         </div>
       </template>
     </form-dialog>
@@ -316,7 +328,7 @@ export default defineComponent({
       filterColumns: filterColumns,
       createUserForm: ref(false),
       createUserFormError: ref<UserPostError>({}),
-      firstLoginNotification: ref(true),
+      firstLoginNotification: ref(false),
       passwordChangingRequired: ref(false),
       newUser: ref<UserPostData>({}),
     };

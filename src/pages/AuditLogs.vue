@@ -3,18 +3,23 @@
     <data-table
       ref="table"
       :columns="columns"
-      :rows="rows"
+      api-url="/audit_logs/query"
+      api-method="POST"
       :filter-columns="filterColumns"
       hide-import
     >
-      <template #body-cell-result="props">
+      <template #body-cell-status_code="props">
         <q-td :props="props">
           <q-chip
             square
             size="12px"
-            :label="props.row.result ? '成功' : '失败'"
+            :label="props.row.status_code === 200 ? '成功' : '失败'"
             class="text-weight-bold q-pa-sm"
-            :class="props.row.result ? 'chip-status-on' : 'chip-status-off'"
+            :class="
+              props.row.status_code === 200
+                ? 'chip-status-on'
+                : 'chip-status-off'
+            "
           />
         </q-td>
       </template>
@@ -34,43 +39,45 @@ const columns: QTableProps['columns'] = [
     name: 'event_type',
     label: '事件类型',
     align: 'left',
-    field: 'event_type',
+    field: (row) =>
+      row.event_type.toLowerCase() === 'signup'
+        ? '注册'
+        : row.event_type.toLowerCase() === 'signout'
+        ? '登出'
+        : row.event_type.toLowerCase() === 'signin'
+        ? '登录'
+        : '',
     sortable: true,
   },
   {
     name: 'username',
     label: '用户名',
     align: 'left',
-    field: 'username',
-    sortable: true,
+    field: (row) => row.user.username,
   },
   {
     name: 'mobile',
     label: '手机号',
     align: 'left',
-    field: 'mobile',
-    sortable: true,
+    field: (row) => row.user.mobile,
   },
   {
     name: 'email',
     label: '邮箱',
     align: 'left',
-    field: 'email',
-    sortable: true,
+    field: (row) => row.user.email,
   },
   {
-    name: 'ip',
+    name: 'client_ip',
     label: 'IP',
     align: 'left',
-    field: 'ip',
-    sortable: true,
+    field: 'client_ip',
   },
   {
     name: 'device_info',
-    label: '设备类型 / 系统',
+    label: '设备信息',
     align: 'left',
-    field: (row) => [row.device, row.os].join(' / '),
-    sortable: true,
+    field: (row) => [row.device, row.os, row.browser].join(' / '),
   },
   {
     name: 'created_at',
@@ -81,10 +88,10 @@ const columns: QTableProps['columns'] = [
     sortable: true,
   },
   {
-    name: 'result',
+    name: 'status_code',
     label: '结果',
     align: 'center',
-    field: 'result',
+    field: 'status_code',
     sortable: true,
   },
 ];
@@ -95,11 +102,9 @@ const filterColumns: FilterColumn[] = [
     label: '事件类型',
     operatorOptions: [FilterOperator.eq, FilterOperator.neq],
     options: [
-      { value: 1, label: '注册' },
-      { value: 2, label: '登录' },
-      { value: 3, label: '登出' },
-      { value: 4, label: '修改密码' },
-      { value: 5, label: '修改用户名' },
+      { value: 'signup', label: '注册' },
+      { value: 'signin', label: '登录' },
+      { value: 'signout', label: '登出' },
     ],
   },
   {
@@ -133,28 +138,8 @@ const filterColumns: FilterColumn[] = [
     ],
   },
   {
-    field: 'ip',
-    label: 'IP',
-    operatorOptions: [
-      FilterOperator.eq,
-      FilterOperator.neq,
-      FilterOperator.ct,
-      FilterOperator.nct,
-    ],
-  },
-  {
-    field: 'device',
-    label: '设备类型',
-    operatorOptions: [FilterOperator.eq, FilterOperator.neq],
-    options: [
-      { value: 1, label: 'PC' },
-      { value: 2, label: 'Mobile' },
-      { value: 3, label: 'Unknown' },
-    ],
-  },
-  {
-    field: 'os',
-    label: '设备系统',
+    field: 'client_ip',
+    label: 'IP 地址',
     operatorOptions: [
       FilterOperator.eq,
       FilterOperator.neq,
@@ -176,7 +161,7 @@ const filterColumns: FilterColumn[] = [
     ],
   },
   {
-    field: 'result',
+    field: 'is_succeed',
     label: '结果',
     type: 'select',
     operatorOptions: [FilterOperator.eq, FilterOperator.neq],
@@ -184,42 +169,6 @@ const filterColumns: FilterColumn[] = [
       { value: false, label: '成功' },
       { value: true, label: '失败' },
     ],
-  },
-];
-
-const logs = [
-  {
-    event_type: '登录',
-    username: 'daisy',
-    mobile: '15901259726',
-    email: 'daisy@decentfox.com',
-    ip: '127.0.0.1',
-    device: 'PC',
-    os: 'Windows',
-    created_at: Date.now(),
-    result: 1,
-  },
-  {
-    event_type: '登出',
-    username: 'daisy',
-    mobile: '15901259726',
-    email: 'daisy@decentfox.com',
-    ip: '127.0.0.1',
-    device: 'PC',
-    os: 'MacOS',
-    created_at: Date.now(),
-    result: 1,
-  },
-  {
-    event_type: '注册',
-    username: 'mico',
-    mobile: '15901259723',
-    email: 'mico@decentfox.com',
-    ip: '127.0.0.1',
-    device: 'Mobile',
-    os: 'Android',
-    created_at: Date.now(),
-    result: 0,
   },
 ];
 
@@ -232,7 +181,6 @@ export default defineComponent({
     return {
       columns: columns,
       filterColumns: filterColumns,
-      rows: logs,
     };
   },
 

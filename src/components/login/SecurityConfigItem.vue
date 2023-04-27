@@ -45,6 +45,7 @@ export default defineComponent({
   name: 'SecurityConfigItem',
 
   props: {
+    /** 安全设置项的数值 */
     value: {
       type: Object as PropType<SecurityConfig>,
       default: () => {
@@ -61,7 +62,7 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    /** 次数操作说明 */
+    /** 可操作次数的说明 */
     actionHint: {
       type: String,
       default: '',
@@ -88,3 +89,5 @@ export default defineComponent({
   methods: {},
 });
 </script>
+
+<style lang="scss" scoped></style>

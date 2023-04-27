@@ -200,6 +200,7 @@
         </q-tab-panels>
       </q-tab-panel>
     </q-tab-panels>
+
     <div v-if="withPolicy" class="absolute-bottom q-pa-lg q-mx-md">
       <div v-if="policy.link" class="row items-center">
         <q-checkbox v-model="policyChecked" size="32px" />
@@ -284,12 +285,6 @@ export default defineComponent({
       default: () => {
         return {};
       },
-    },
-    /** 注册后是否强制修改用户名及密码 */
-    /** TODO */
-    initialization: {
-      type: Boolean,
-      default: false,
     },
     /** 支持验证码登录的方式 */
     codeLoginOptions: {

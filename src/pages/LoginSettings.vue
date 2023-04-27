@@ -19,102 +19,114 @@
             >
               <q-separator />
               <q-card class="q-pa-md">
-                <q-card-section class="q-gutter-sm">
-                  <q-item-label class="q-pb-sm text-weight-bold">
-                    登录注册框样式
-                  </q-item-label>
-                  <div>
-                    <q-item-label class="text-caption hint-label">
-                      自定义图标（logo）
+                <q-form>
+                  <q-card-section class="q-gutter-sm">
+                    <q-item-label class="q-pb-sm text-weight-bold">
+                      登录注册框样式
                     </q-item-label>
-                    <div class="row items-center">
-                      <q-img
-                        :src="imageUrl"
-                        spinner-color="white"
-                        class="img-wrapper bg-secondary"
-                      />
-                      <q-btn
-                        unelevated
-                        class="secondary-btn q-ml-md"
-                        @click="uploadImage"
-                      >
-                        <q-icon size="18px" name="upload_file" />上传图标
-                      </q-btn>
-                      <q-file
-                        ref="file"
-                        v-model="logo"
-                        style="display: none"
-                        @update:model-value="handleUpload"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <q-item-label class="text-caption hint-label">
-                      自定义标题
-                    </q-item-label>
-                    <q-input
-                      v-model="title"
-                      filled
-                      dense
-                      placeholder="请填写登录注册框标题"
-                      hide-bottom-space
-                    />
-                  </div>
-                  <div>
-                    <q-item-label class="text-caption hint-label">
-                      自定义界面主色
-                    </q-item-label>
-                    <q-input v-model="color" filled dense>
-                      <template #append>
-                        <q-icon
-                          name="colorize"
-                          size="20px"
-                          class="cursor-pointer"
+                    <q-item-section>
+                      <q-item-label class="text-caption hint-label">
+                        自定义图标（logo）
+                      </q-item-label>
+                      <div class="row items-center">
+                        <q-img
+                          :src="imageUrl"
+                          spinner-color="white"
+                          class="img-wrapper bg-secondary"
+                        />
+                        <q-btn
+                          unelevated
+                          class="secondary-btn q-ml-md"
+                          @click="uploadImage"
                         >
-                          <q-popup-proxy
-                            cover
-                            transition-show="scale"
-                            transition-hide="scale"
+                          <q-icon size="18px" name="upload_file" />上传图标
+                        </q-btn>
+                        <q-file
+                          ref="file"
+                          v-model="logo"
+                          style="display: none"
+                          @update:model-value="handleUpload"
+                        />
+                      </div>
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label class="text-caption hint-label">
+                        自定义标题
+                      </q-item-label>
+                      <q-input
+                        v-model="title"
+                        filled
+                        dense
+                        placeholder="请填写登录注册框标题"
+                        hide-bottom-space
+                      />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label class="text-caption hint-label">
+                        自定义界面主色
+                      </q-item-label>
+                      <q-input v-model="color" filled dense>
+                        <template #append>
+                          <q-icon
+                            name="colorize"
+                            size="20px"
+                            class="cursor-pointer"
                           >
-                            <q-color v-model="color" default-value="#215ae5" />
-                          </q-popup-proxy>
-                        </q-icon>
-                      </template>
-                    </q-input>
-                  </div>
-                </q-card-section>
-                <q-card-section class="q-gutter-sm">
-                  <q-toggle
-                    v-model="withPolicy"
-                    left-label
-                    label="开启登录注册协议"
-                    class="text-weight-bold"
-                  />
-                  <div v-if="withPolicy">
-                    <q-item-label class="text-caption hint-label">
-                      协议勾选框文字
-                    </q-item-label>
-                    <q-input
-                      v-model="policy.text"
-                      filled
-                      dense
-                      placeholder="例如：我已阅读并同意隐私协议与服务条款"
-                      hide-bottom-space
+                            <q-popup-proxy
+                              cover
+                              transition-show="scale"
+                              transition-hide="scale"
+                            >
+                              <q-color
+                                v-model="color"
+                                default-value="#215ae5"
+                              />
+                            </q-popup-proxy>
+                          </q-icon>
+                        </template>
+                      </q-input>
+                    </q-item-section>
+                  </q-card-section>
+                  <q-card-section class="q-gutter-sm">
+                    <q-toggle
+                      v-model="withPolicy"
+                      left-label
+                      label="开启登录注册协议"
+                      class="text-weight-bold"
                     />
-                  </div>
-                  <div v-if="withPolicy">
-                    <q-item-label class="text-caption hint-label">
-                      协议跳转链接
-                    </q-item-label>
-                    <q-input
-                      v-model="policy.link"
-                      filled
-                      dense
-                      placeholder="https://"
-                      hide-bottom-space
+                    <q-item-section v-if="withPolicy">
+                      <q-item-label class="text-caption hint-label">
+                        协议勾选框文字
+                      </q-item-label>
+                      <q-input
+                        v-model="policy.text"
+                        filled
+                        dense
+                        placeholder="例如：我已阅读并同意隐私协议与服务条款"
+                        hide-bottom-space
+                      />
+                    </q-item-section>
+                    <q-item-section v-if="withPolicy">
+                      <q-item-label class="text-caption hint-label">
+                        协议跳转链接
+                      </q-item-label>
+                      <q-input
+                        v-model="policy.link"
+                        filled
+                        dense
+                        placeholder="https://"
+                        hide-bottom-space
+                      />
+                    </q-item-section>
+                  </q-card-section>
+                  <q-card-actions>
+                    <q-btn
+                      unelevated
+                      class="primary-btn q-mx-sm"
+                      label="保存"
                     />
-                  </div>
-                </q-card-section>
+                  </q-card-actions>
+                </q-form>
               </q-card>
             </q-expansion-item>
 
@@ -131,57 +143,66 @@
             >
               <q-separator />
               <q-card class="q-pa-md">
-                <q-card-section>
-                  <q-item-label class="q-pb-sm text-weight-bold">
-                    选择注册方式
-                  </q-item-label>
-                  <q-checkbox
-                    v-model="signupOptions.mobile"
-                    dense
-                    size="32px"
-                    label="支持手机号和验证码注册"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchSignupMethod('mobile')"
-                  />
-                  <q-checkbox
-                    v-model="signupOptions.email"
-                    dense
-                    size="32px"
-                    label="支持邮箱和验证码注册"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchSignupMethod('email')"
-                  />
-                </q-card-section>
-                <q-card-section
-                  v-if="signupOptions.mobile || signupOptions.email"
-                >
-                  <security-config-item
-                    :value="codeSignupFailureLimit"
-                    toggle-label="注册验证码尝试次数"
-                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
-                    action-hint="允许试错次数"
-                  />
-                </q-card-section>
-                <q-card-section
-                  v-if="signupOptions.mobile || signupOptions.email"
-                >
-                  <security-config-item
-                    :value="signupCodeLimit"
-                    toggle-label="注册验证码发送限制"
-                    description="同一个手机或邮箱，在限定周期内可获取的注册验证码次数"
-                    action-hint="可获取验证码次数"
-                  />
-                </q-card-section>
+                <q-form>
+                  <q-card-section>
+                    <q-item-label class="q-pb-sm text-weight-bold">
+                      选择注册方式
+                    </q-item-label>
+                    <q-checkbox
+                      v-model="signupOptions.mobile"
+                      dense
+                      size="32px"
+                      label="支持手机号和验证码注册"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchSignupMethod('mobile')"
+                    />
+                    <q-checkbox
+                      v-model="signupOptions.email"
+                      dense
+                      size="32px"
+                      label="支持邮箱和验证码注册"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchSignupMethod('email')"
+                    />
+                  </q-card-section>
+                  <q-card-section
+                    v-if="signupOptions.mobile || signupOptions.email"
+                  >
+                    <security-config-item
+                      :value="codeSignupFailureLimit"
+                      toggle-label="注册验证码尝试次数"
+                      description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                      action-hint="允许试错次数"
+                    />
+                  </q-card-section>
+                  <q-card-section
+                    v-if="signupOptions.mobile || signupOptions.email"
+                  >
+                    <security-config-item
+                      :value="signupCodeLimit"
+                      toggle-label="注册验证码发送限制"
+                      description="同一个手机或邮箱，在限定周期内可获取的注册验证码次数"
+                      action-hint="可获取验证码次数"
+                    />
+                  </q-card-section>
 
-                <q-separator inset spaced="md" />
+                  <q-separator inset spaced="md" />
 
-                <q-card-section>
-                  <security-config-item
-                    :value="signupResetPassword"
-                    toggle-label="注册后修改初始密码"
-                    description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
-                  />
-                </q-card-section>
+                  <q-card-section>
+                    <security-config-item
+                      :value="signupResetPassword"
+                      toggle-label="注册后修改初始密码"
+                      description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
+                    />
+                  </q-card-section>
+                  <q-card-actions>
+                    <q-btn
+                      unelevated
+                      class="primary-btn q-mx-sm"
+                      label="保存"
+                    />
+                  </q-card-actions>
+                </q-form>
               </q-card>
             </q-expansion-item>
 
@@ -198,96 +219,104 @@
             >
               <q-separator />
               <q-card class="q-pa-md">
-                <q-card-section>
-                  <q-item-label class="q-pb-sm text-weight-bold">
-                    选择验证码登录方式
-                  </q-item-label>
-                  <q-checkbox
-                    v-model="codeLoginOptions.mobile"
-                    dense
-                    size="32px"
-                    label="支持手机号和验证码登录"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchLoginMethod('code')"
-                  />
-                  <q-checkbox
-                    v-model="codeLoginOptions.email"
-                    dense
-                    size="32px"
-                    label="支持邮箱和验证码登录"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchLoginMethod('code')"
-                  />
-                </q-card-section>
-                <q-card-section v-if="codeLogin">
-                  <security-config-item
-                    :value="codeLoginFailureLimit"
-                    toggle-label="登录验证码尝试次数"
-                    description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
-                    action-hint="允许试错次数"
-                  />
-                </q-card-section>
-                <q-card-section v-if="codeLogin">
-                  <security-config-item
-                    :value="loginCodeLimit"
-                    toggle-label="登录验证码发送限制"
-                    description="同一个手机或邮箱，在限定周期内可获取的登录验证码次数"
-                    action-hint="可获取验证码次数"
-                  />
-                </q-card-section>
+                <q-form>
+                  <q-card-section>
+                    <q-item-label class="q-pb-sm text-weight-bold">
+                      选择验证码登录方式
+                    </q-item-label>
+                    <q-checkbox
+                      v-model="codeLoginOptions.mobile"
+                      dense
+                      size="32px"
+                      label="支持手机号和验证码登录"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchLoginMethod('code')"
+                    />
+                    <q-checkbox
+                      v-model="codeLoginOptions.email"
+                      dense
+                      size="32px"
+                      label="支持邮箱和验证码登录"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchLoginMethod('code')"
+                    />
+                  </q-card-section>
+                  <q-card-section v-if="codeLogin">
+                    <security-config-item
+                      :value="codeLoginFailureLimit"
+                      toggle-label="登录验证码尝试次数"
+                      description="验证码有效限定周期内，允许用户试错次数，超出则需重新获取"
+                      action-hint="允许试错次数"
+                    />
+                  </q-card-section>
+                  <q-card-section v-if="codeLogin">
+                    <security-config-item
+                      :value="loginCodeLimit"
+                      toggle-label="登录验证码发送限制"
+                      description="同一个手机或邮箱，在限定周期内可获取的登录验证码次数"
+                      action-hint="可获取验证码次数"
+                    />
+                  </q-card-section>
 
-                <q-separator inset spaced="md" />
+                  <q-separator inset spaced="md" />
 
-                <q-card-section>
-                  <q-item-label class="q-pb-sm text-weight-bold">
-                    选择密码登录方式
-                  </q-item-label>
-                  <q-checkbox
-                    v-model="pwdLoginOptions.mobile"
-                    dense
-                    size="32px"
-                    label="支持手机号和密码登录"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchLoginMethod('password')"
-                  />
-                  <q-checkbox
-                    v-model="pwdLoginOptions.email"
-                    dense
-                    size="32px"
-                    label="支持邮箱和密码登录"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchLoginMethod('password')"
-                  />
-                  <q-checkbox
-                    v-model="pwdLoginOptions.username"
-                    dense
-                    size="32px"
-                    label="支持用户名和密码登录"
-                    class="full-width q-mt-sm"
-                    @update:model-value="switchLoginMethod('password')"
-                  />
-                </q-card-section>
-                <q-card-section v-if="pwdLogin">
-                  <security-config-item
-                    :value="pwdLoginFailureLimit"
-                    toggle-label="登录密码尝试次数"
-                    description="限定周期内允许用户试错次数，超出后当日不再允许登录"
-                    action-hint="允许试错次数"
-                  />
-                </q-card-section>
+                  <q-card-section>
+                    <q-item-label class="q-pb-sm text-weight-bold">
+                      选择密码登录方式
+                    </q-item-label>
+                    <q-checkbox
+                      v-model="pwdLoginOptions.mobile"
+                      dense
+                      size="32px"
+                      label="支持手机号和密码登录"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchLoginMethod('password')"
+                    />
+                    <q-checkbox
+                      v-model="pwdLoginOptions.email"
+                      dense
+                      size="32px"
+                      label="支持邮箱和密码登录"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchLoginMethod('password')"
+                    />
+                    <q-checkbox
+                      v-model="pwdLoginOptions.username"
+                      dense
+                      size="32px"
+                      label="支持用户名和密码登录"
+                      class="full-width q-mt-sm"
+                      @update:model-value="switchLoginMethod('password')"
+                    />
+                  </q-card-section>
+                  <q-card-section v-if="pwdLogin">
+                    <security-config-item
+                      :value="pwdLoginFailureLimit"
+                      toggle-label="登录密码尝试次数"
+                      description="限定周期内允许用户试错次数，超出后当日不再允许登录"
+                      action-hint="允许试错次数"
+                    />
+                  </q-card-section>
 
-                <q-separator inset spaced="md" />
+                  <q-separator inset spaced="md" />
 
-                <q-card-section>
-                  <security-config-item
-                    :value="autoLogout"
-                    toggle-label="cookie 过期时间"
-                    description="用户登录状态的有效时间，过期后用户需要重新登录"
-                  />
-                </q-card-section>
+                  <q-card-section>
+                    <security-config-item
+                      :value="autoLogout"
+                      toggle-label="cookie 过期时间"
+                      description="用户登录状态的有效时间，过期后用户需要重新登录"
+                    />
+                  </q-card-section>
+                  <q-card-actions>
+                    <q-btn
+                      unelevated
+                      class="primary-btn q-mx-sm"
+                      label="保存"
+                    />
+                  </q-card-actions>
+                </q-form>
               </q-card>
             </q-expansion-item>
-
             <q-separator />
           </q-list>
         </div>

@@ -18,6 +18,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/UserAdminPanel.vue'),
       },
       {
+        path: '/user_profile/:userId',
+        component: () => import('pages/UserProfile.vue'),
+        props: true,
+      },
+      {
         path: '/audit_logs',
         component: () => import('pages/AuditLogs.vue'),
       },

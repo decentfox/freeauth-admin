@@ -209,10 +209,7 @@ const columns: QTableProps['columns'] = [
     align: 'left',
     field: (row) =>
       row.last_login_at
-        ? date.formatDate(
-            new Date(row.last_login_at).toLocaleString(),
-            'YYYY-MM-DD HH:mm:ss'
-          )
+        ? date.formatDate(new Date(row.last_login_at), 'YYYY-MM-DD HH:mm:ss')
         : null,
     sortable: true,
   },

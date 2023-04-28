@@ -8,18 +8,14 @@
       :filter-columns="filterColumns"
       hide-import
     >
-      <template #body-cell-status_code="props">
+      <template #body-cell-is_succeed="props">
         <q-td :props="props">
           <q-chip
             square
             size="12px"
-            :label="props.row.status_code === 200 ? '成功' : '失败'"
+            :label="props.row.is_succeed ? '成功' : '失败'"
             class="text-weight-bold q-pa-sm"
-            :class="
-              props.row.status_code === 200
-                ? 'chip-status-on'
-                : 'chip-status-off'
-            "
+            :class="props.row.is_succeed ? 'chip-status-on' : 'chip-status-off'"
           />
         </q-td>
       </template>
@@ -34,19 +30,24 @@ import { date, QTableProps } from 'quasar';
 import DataTable from 'components/table/DataTable.vue';
 import { FilterColumn, FilterOperator } from 'components/table/type';
 
+enum EventType {
+  SignIn = 'SignIn',
+  SignOut = 'SignOut',
+  SignUp = 'SignUp',
+}
+
+const EventTypeMap = {
+  [EventType.SignIn]: '登录',
+  [EventType.SignOut]: '登出',
+  [EventType.SignUp]: '注册',
+};
+
 const columns: QTableProps['columns'] = [
   {
     name: 'event_type',
     label: '事件类型',
     align: 'left',
-    field: (row) =>
-      row.event_type.toLowerCase() === 'signup'
-        ? '注册'
-        : row.event_type.toLowerCase() === 'signout'
-        ? '登出'
-        : row.event_type.toLowerCase() === 'signin'
-        ? '登录'
-        : '',
+    field: (row) => EventTypeMap[row.event_type as EventType],
     sortable: true,
   },
   {
@@ -88,10 +89,10 @@ const columns: QTableProps['columns'] = [
     sortable: true,
   },
   {
-    name: 'status_code',
+    name: 'is_succeed',
     label: '结果',
     align: 'center',
-    field: 'status_code',
+    field: 'is_succeed',
     sortable: true,
   },
 ];
@@ -100,15 +101,15 @@ const filterColumns: FilterColumn[] = [
   {
     field: 'event_type',
     label: '事件类型',
+    type: 'select',
     operatorOptions: [FilterOperator.eq, FilterOperator.neq],
-    options: [
-      { value: 'signup', label: '注册' },
-      { value: 'signin', label: '登录' },
-      { value: 'signout', label: '登出' },
-    ],
+    options: Object.entries(EventTypeMap).map(([value, label]) => ({
+      value,
+      label,
+    })),
   },
   {
-    field: 'username',
+    field: 'user.username',
     label: '用户名',
     operatorOptions: [
       FilterOperator.eq,
@@ -118,7 +119,7 @@ const filterColumns: FilterColumn[] = [
     ],
   },
   {
-    field: 'mobile',
+    field: 'user.mobile',
     label: '手机号',
     operatorOptions: [
       FilterOperator.eq,
@@ -128,7 +129,7 @@ const filterColumns: FilterColumn[] = [
     ],
   },
   {
-    field: 'email',
+    field: 'user.email',
     label: '邮箱',
     operatorOptions: [
       FilterOperator.eq,
@@ -166,8 +167,8 @@ const filterColumns: FilterColumn[] = [
     type: 'select',
     operatorOptions: [FilterOperator.eq, FilterOperator.neq],
     options: [
-      { value: false, label: '成功' },
-      { value: true, label: '失败' },
+      { value: true, label: '成功' },
+      { value: false, label: '失败' },
     ],
   },
 ];

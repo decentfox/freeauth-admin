@@ -8,7 +8,7 @@
     >
       <!--the first splitted screen-->
       <template #before>
-        <structure-tree editable />
+        <org-structure-tree ref="orgStructure" editable />
       </template>
 
       <template #separator>
@@ -52,19 +52,30 @@
                     dense
                     label="添加企业"
                     class="q-ml-sm q-px-md primary-btn"
+                    @click="
+                      (
+                        $refs.orgStructure as OrgTree
+                      ).createEnterpriseForm = true
+                    "
                   />
                 </template>
                 <template #body-cell-actions="props">
                   <q-td :props="props">
-                    <div class="text-grey-8 q-gutter-xs">
-                      <q-btn
-                        size="12px"
-                        flat
-                        dense
-                        icon="more_horiz"
-                        class="text-black-white"
-                      />
-                    </div>
+                    <dropdown-button
+                      :buttons="[
+                        {
+                          label: '编辑信息',
+                          icon: 'edit_note',
+                          actionType: 'edit',
+                        },
+                        {
+                          label: '删除企业',
+                          icon: 'delete_outline',
+                          actionType: 'delete',
+                        },
+                      ]"
+                      @menu-click="operateOneEnterprise($event, props.row)"
+                    />
                   </q-td>
                 </template>
               </data-table>
@@ -75,12 +86,13 @@
               style="height: calc(100vh - 150px)"
             >
               <data-table
-                :rows="users"
+                api-url="/users/query"
+                api-method="POST"
                 :columns="userColumns"
                 sticky-action-column
                 :hide-filter="true"
               >
-                <template #table-filter>
+                <template #extra-filters>
                   <q-checkbox
                     v-model="directDeptCheck"
                     label="仅展示部门的直属成员"
@@ -126,28 +138,26 @@
                 </template>
                 <template #body-cell-actions="props">
                   <q-td :props="props">
-                    <div class="text-grey-8 q-gutter-xs">
-                      <dropdown-button
-                        :buttons="[
-                          {
-                            label: !props.row.is_deleted
-                              ? '禁用账号'
-                              : '启用账号',
-                            icon: !props.row.is_deleted
-                              ? 'remove_circle_outline'
-                              : 'task_alt',
-                            actionType: !props.row.is_deleted
-                              ? 'disable'
-                              : 'enable',
-                          },
-                          {
-                            label: '删除账号',
-                            icon: 'delete_outline',
-                            actionType: 'delete',
-                          },
-                        ]"
-                      />
-                    </div>
+                    <dropdown-button
+                      :buttons="[
+                        {
+                          label: !props.row.is_deleted
+                            ? '禁用账号'
+                            : '启用账号',
+                          icon: !props.row.is_deleted
+                            ? 'remove_circle_outline'
+                            : 'task_alt',
+                          actionType: !props.row.is_deleted
+                            ? 'disable'
+                            : 'enable',
+                        },
+                        {
+                          label: '删除账号',
+                          icon: 'delete_outline',
+                          actionType: 'delete',
+                        },
+                      ]"
+                    />
                   </q-td>
                 </template>
               </data-table>
@@ -164,156 +174,29 @@ import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
 import DropdownButton from 'components/DropdownButton.vue';
-import StructureTree from 'components/StructureTree.vue';
+import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 
-import { Enterprise, User } from './type';
+import { Enterprise, OrgTree } from './type';
 
-const userData: User[] = [
-  {
-    id: '1',
-    name: '王伟力',
-    mobile: '15701259715',
-    username: 'un1',
-    depts: ['北京分公司', '成本部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '2',
-    name: 'Xenia',
-    mobile: '15901259713',
-    email: 'xenia.lyy@gmail.com',
-    username: 'un2',
-    depts: ['北京分公司'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '3',
-    name: 'Daisy',
-    mobile: '15901259715',
-    email: 'daichen.daisy@gmail.com',
-    username: 'un3',
-    depts: ['北京分公司', '产品设计部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: true,
-  },
-  {
-    id: '4',
-    name: '王川',
-    mobile: '13801259713',
-    username: 'un4',
-    depts: ['北京分公司', '产品研发部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: true,
-  },
-  {
-    id: '5',
-    name: 'Mico',
-    email: 'mico@decentfox.com',
-    username: 'un5',
-    depts: ['产品设计部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '6',
-    name: '王昕',
-    mobile: '15901259713',
-    username: 'un6',
-    depts: ['成本部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '7',
-    name: '小明',
-    mobile: '15701259714',
-    username: 'un7',
-    depts: ['销售部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '8',
-    name: '小丽',
-    mobile: '15901259712',
-    email: 'xen@gmail.com',
-    username: 'un8',
-    depts: ['销售部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '9',
-    name: '小红',
-    mobile: '15901259711',
-    email: 'dai@gmail.com',
-    username: 'un9',
-    depts: ['销售部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: true,
-  },
-  {
-    id: '10',
-    name: '小青',
-    mobile: '13801259710',
-    username: 'un10',
-    depts: ['销售部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-  {
-    id: '11',
-    name: '小方',
-    email: 'mico@decent.com',
-    username: 'un11',
-    depts: ['销售部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: true,
-  },
-  {
-    id: '12',
-    name: '阿强',
-    mobile: '15901359713',
-    username: 'un12',
-    depts: ['成本部门'],
-    last_login_at: new Date('2023-01-02T00:00:00.000Z'),
-    created_at: new Date('2023-01-01T00:00:00.000Z'),
-    is_deleted: false,
-  },
-];
-
-const enterpriseData: Enterprise[] = [
+const enterpriseData = [
   {
     id: 1,
     name: '北京分公司',
-    taxId: '91110106MA00775P0A',
-    bank: '中国工商银行股份有限公司北京天宁寺支行',
-    bankId: '0200024809200034233',
-    address: '北京经济技术开发区荣华中路19号1号楼B座309',
-    tel: '15011592799',
+    tax_id: '91110106MA00775P0A',
+    issuing_bank: '中国工商银行股份有限公司北京天宁寺支行',
+    bank_account_num: '0200024809200034233',
+    contact_address: '北京经济技术开发区荣华中路19号1号楼B座309',
+    contact_phone_num: '15011592799',
   },
   {
     id: 2,
     name: '上海分公司',
-    taxId: '91110108780215415F',
-    bank: '中国民生银行股份有限公司上海方庄支行',
-    bankId: '0119014170017913',
-    address: '上海市大柳树路17号富海中心4号楼10层D东',
-    tel: '18518225559',
+    tax_id: '91110108780215415F',
+    issuing_bank: '中国民生银行股份有限公司上海方庄支行',
+    bank_account_num: '0119014170017913',
+    contact_address: '上海市大柳树路17号富海中心4号楼10层D东',
+    contact_phone_num: '18518225559',
   },
 ];
 
@@ -367,38 +250,38 @@ const enterpriseColumns: QTableProps['columns'] = [
   {
     name: 'name',
     label: '企业全称',
-    align: 'center',
     field: 'name',
+    align: 'left',
   },
   {
-    name: 'taxId',
+    name: 'tax_id',
     label: '纳税识别号',
+    field: 'tax_id',
     align: 'left',
-    field: 'taxId',
   },
   {
-    name: 'bank',
+    name: 'issuing_bank',
     label: '开户行',
+    field: 'issuing_bank',
     align: 'left',
-    field: 'bank',
   },
   {
-    name: 'bankId',
+    name: 'bank_account_num',
     label: '银行账号',
+    field: 'bank_account_num',
     align: 'left',
-    field: 'bankId',
   },
   {
-    name: 'address',
+    name: 'contact_address',
     label: '办公地址',
+    field: 'contact_address',
     align: 'left',
-    field: 'address',
   },
   {
-    name: 'tel',
+    name: 'contact_phone_num',
     label: '办公电话',
+    field: 'contact_phone_num',
     align: 'left',
-    field: 'tel',
   },
   {
     name: 'actions',
@@ -411,7 +294,7 @@ const enterpriseColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'OrgAdminPanel',
 
-  components: { DataTable, DropdownButton, StructureTree },
+  components: { DataTable, DropdownButton, OrgStructureTree },
 
   setup() {
     return {
@@ -422,15 +305,25 @@ export default defineComponent({
       tab: ref('enterprises'),
       userColumns: userColumns,
       enterpriseColumns: enterpriseColumns,
-      users: userData,
       enterprises: enterpriseData,
-      directDeptCheck: ref(true),
+      directDeptCheck: ref(false),
     };
   },
 
   methods: {
     showRoleCard() {
       console.error('role');
+    },
+
+    operateOneEnterprise(evt: Event, enterprise: Enterprise) {
+      if (evt.type === 'edit') {
+        (this.$refs.orgStructure as OrgTree).createEnterpriseForm = true;
+      } else if (evt.type === 'delete') {
+        (this.$refs.orgStructure as OrgTree).deleteBranch({
+          enterpriseId: enterprise.id,
+          label: enterprise.name,
+        });
+      }
     },
   },
 });

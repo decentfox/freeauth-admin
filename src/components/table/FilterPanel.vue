@@ -3,7 +3,7 @@
     unelevated
     dense
     icon="tune"
-    class="q-ml-sm"
+    class="q-ml-xs"
     :class="hasBeenFiltered ? 'primary-btn' : 'text-black-white'"
   >
     <q-tooltip>设置过滤条件</q-tooltip>

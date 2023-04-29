@@ -97,6 +97,7 @@
         selected-color="white"
         :filter="filter"
         default-expand-all
+        @update:selected="onNodeUpdated"
       >
         <template #default-header="prop">
           <div class="row items-center tree-item" style="width: 100%">
@@ -131,7 +132,7 @@
                       v-close-popup
                       clickable
                       class="q-my-xs"
-                      @click="createBranch(prop.node)"
+                      @click="createBranch(prop.node.id)"
                     >
                       <q-item-section> 添加分支 </q-item-section>
                     </q-item>
@@ -139,7 +140,11 @@
                       v-close-popup
                       clickable
                       class="q-my-xs"
-                      @click="editBranch(prop.node)"
+                      @click="
+                        prop.node.enterpriseId
+                          ? editEnterprise(prop.node.enterpriseId)
+                          : editBranch(prop.node.id)
+                      "
                     >
                       <q-item-section> 编辑该项 </q-item-section>
                     </q-item>
@@ -147,7 +152,7 @@
                       v-close-popup
                       clickable
                       class="q-my-xs"
-                      @click="deleteBranch(prop.node)"
+                      @click="deleteBranch(prop.node.id)"
                     >
                       <q-item-section> 删除该项 </q-item-section>
                     </q-item>
@@ -326,7 +331,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QInput, QSelect, QTree, QTreeNode } from 'quasar';
 import {
@@ -340,153 +345,6 @@ import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
 import TreeSelect from 'components/form/TreeSelect.vue';
-
-const structureData: QTreeNode[] = [
-  {
-    label: '1. 北京分公司',
-    id: 1,
-    enterpriseId: 1,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '1.1 产品部门',
-        id: 2,
-        parentId: 1,
-        children: [
-          {
-            label: '1.1.1 产品设计部门',
-            id: 3,
-            parentId: 2,
-          },
-          {
-            label: '1.1.2 产品研发部门',
-            id: 4,
-            parentId: 2,
-          },
-        ],
-      },
-      {
-        label: '1.2 成本部门',
-        id: 5,
-        parentId: 1,
-      },
-      {
-        label: '1.3 销售部门',
-        id: 6,
-        parentId: 1,
-      },
-    ],
-  },
-  {
-    label: '2. 上海分公司',
-    id: 101,
-    enterpriseId: 2,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '2.1 产品部门',
-        id: 102,
-        parentId: 101,
-        children: [
-          {
-            label: '2.1.1 产品设计部门',
-            id: 103,
-            parentId: 102,
-            children: [
-              {
-                label: '2.1.1.1 视觉设计部',
-                id: 104,
-                parentId: 103,
-              },
-              {
-                label: '2.1.1.2 交互设计部',
-                id: 107,
-                parentId: 103,
-              },
-            ],
-          },
-          {
-            label: '2.1.2 产品研发部门',
-            id: 111,
-            parentId: 102,
-          },
-        ],
-      },
-      {
-        label: '2.2 市场部门',
-        id: 112,
-        parentId: 101,
-      },
-      {
-        label: '2.3 销售部门',
-        id: 113,
-        parentId: 101,
-      },
-    ],
-  },
-];
-
-const structureData2: QTreeNode[] = [
-  {
-    label: '智能院科技有限公司',
-    id: 502,
-    enterpriseId: 3,
-    icon: 'account_balance',
-  },
-  {
-    label: '北京亚奥之星汽车服务有限公司',
-    id: 21,
-    enterpriseId: 4,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '1.1 售前部门',
-        id: 24,
-        parentId: 21,
-      },
-      {
-        label: '1.2 售后部门',
-        id: 25,
-        parentId: 21,
-      },
-      {
-        label: '1.3 维修部门',
-        id: 26,
-        parentId: 21,
-      },
-    ],
-  },
-
-  {
-    label: '利星行平治（北京）汽车有限公司',
-    id: 201,
-    enterpriseId: 5,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '2.1 销售部门',
-        id: 211,
-        parentId: 201,
-      },
-      {
-        label: '2.2 市场部门',
-        id: 212,
-        parentId: 201,
-      },
-      {
-        label: '2.3 机修部门',
-        id: 213,
-        parentId: 201,
-      },
-    ],
-  },
-  {
-    label: '盛元书院科技有限公司',
-    id: 202,
-    enterpriseId: 6,
-    icon: 'account_balance',
-  },
-];
 
 const orgData: OrgTypeOption[] = [
   {
@@ -511,11 +369,20 @@ export default defineComponent({
   components: { DropdownButton, FormDialog, TreeSelect },
 
   props: {
+    simple: {
+      type: Array as PropType<QTreeNode[]>,
+      default: () => {
+        return [];
+      },
+    },
+
     editable: {
       type: Boolean,
       default: false,
     },
   },
+
+  emits: ['update:selectNode', 'update:changeOrgType'],
 
   setup() {
     return {
@@ -528,7 +395,6 @@ export default defineComponent({
       selected: ref(null),
       filter: ref(''),
       filterRef: ref(null),
-      simple: ref<QTreeNode[]>(structureData),
 
       // form dialog
       createOrgTypeForm: ref(false),
@@ -549,17 +415,6 @@ export default defineComponent({
       (this.$refs.filterRef as QInput).focus();
     },
 
-    changeOrgType() {
-      if (this.selectedOrgType.value === 1) {
-        this.simple = structureData;
-      } else {
-        this.simple = structureData2;
-      }
-      setTimeout(() => {
-        (this.$refs.orgTree as QTree).expandAll();
-      }, 20);
-    },
-
     toggleMenu(nodeId: number) {
       const moreBtn: HTMLElement | null = document.getElementById(
         'more' + nodeId
@@ -572,31 +427,78 @@ export default defineComponent({
 
     createObject(evt: Event) {
       if (evt.type === 'org_type') {
-        this.createOrgTypeForm = true;
+        this.createOrgType();
       } else if (evt.type === 'enterprise') {
-        this.createEnterpriseForm = true;
+        this.createEnterprise();
       } else if (evt.type === 'branch') {
-        this.createBranchForm = true;
+        this.createBranch();
       }
     },
 
-    createBranch(node?: QTreeNode) {
-      this.editedBranch = node ? [node] : [];
+    createOrgType() {
+      this.createOrgTypeForm = true;
+    },
+
+    editOrgType() {
+      // TODO
+    },
+
+    deleteOrgType() {
+      // TODO
+    },
+
+    createEnterprise() {
+      this.createEnterpriseForm = true;
+    },
+
+    editEnterprise(enterpriseId: string) {
+      this.createEnterpriseForm = true;
+      console.error(`start to edit enterprise ${enterpriseId}!`);
+    },
+
+    deleteEnterprise(enterpriseId: string) {
+      this.$q
+        .dialog({
+          component: ConfirmDialog,
+          componentProps: {
+            title: '删除企业',
+            content:
+              '操作后，该企业下的所有部门将一并执行删除；与其关联的用户将自动与企业解绑，但仍可继续正常使用。请问您确认要执行删除吗？',
+            buttons: [
+              { label: '取消' },
+              {
+                label: '删除',
+                actionType: 'delete',
+                class: 'accent-btn',
+              },
+            ],
+          },
+        })
+        .onOk(({ type }) => {
+          if (type === 'delete') {
+            console.error(`enterprise ${enterpriseId} delete done!`);
+          }
+        });
+    },
+
+    createBranch(nodeId?: number) {
+      if (nodeId) {
+        const node = (this.$refs.orgTree as QTree).getNodeByKey(nodeId);
+        this.editedBranch = node ? [node] : [];
+      }
       this.createBranchForm = true;
     },
 
-    editBranch(node: QTreeNode) {
-      if (node.enterpriseId) {
-        this.createEnterpriseForm = true;
-      } else {
-        this.editedBranch = [
-          (this.$refs.orgTree as QTree).getNodeByKey(node.parentId),
-        ];
-        this.createBranchForm = true;
-      }
+    editBranch(nodeId: number) {
+      const node = (this.$refs.orgTree as QTree).getNodeByKey(nodeId);
+      this.editedBranch = [
+        (this.$refs.orgTree as QTree).getNodeByKey(node.parentId),
+      ];
+      this.createBranchForm = true;
     },
 
-    deleteBranch(node: QTreeNode) {
+    deleteBranch(nodeId: number) {
+      const node = (this.$refs.orgTree as QTree).getNodeByKey(nodeId);
       const deptName = node.label;
       this.$q
         .dialog({
@@ -619,6 +521,19 @@ export default defineComponent({
             console.error('delete done!');
           }
         });
+    },
+
+    onNodeUpdated(selected: number) {
+      const node = (this.$refs.orgTree as QTree).getNodeByKey(selected);
+      this.$emit('update:selectNode', node);
+    },
+
+    changeOrgType(selected: OrgTypeOption) {
+      this.$emit('update:changeOrgType', selected.value);
+    },
+
+    expandTree() {
+      (this.$refs.orgTree as QTree).expandAll();
     },
   },
 });

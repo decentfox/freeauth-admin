@@ -82,7 +82,7 @@ export default defineComponent({
   setup() {
     return {
       selected: ref(null),
-      ticked: ref([]),
+      ticked: ref<number[]>([]),
       selectedNode: ref<QTreeNode>(),
       tickedNodes: ref<QTreeNode>([]),
     };
@@ -92,6 +92,10 @@ export default defineComponent({
     if (!this.multiSelect && this.initialSelectedItems.length) {
       this.selectedNode = this.initialSelectedItems[0];
       this.selected = this.selectedNode ? this.selectedNode.id : null;
+    }
+    if (this.multiSelect && this.initialSelectedItems.length) {
+      this.tickedNodes = this.initialSelectedItems;
+      this.ticked = this.initialSelectedItems.map((item: QTreeNode) => item.id);
     }
   },
 

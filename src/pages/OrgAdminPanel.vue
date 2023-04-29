@@ -8,7 +8,13 @@
     >
       <!--the first splitted screen-->
       <template #before>
-        <org-structure-tree ref="orgStructure" editable />
+        <org-structure-tree
+          ref="orgStructure"
+          editable
+          :simple="simple"
+          @update:select-node="onNodeUpdated"
+          @update:change-org-type="onOrgTypeChanged"
+        />
       </template>
 
       <template #separator>
@@ -52,11 +58,7 @@
                     dense
                     label="添加企业"
                     class="q-ml-sm q-px-md primary-btn"
-                    @click="
-                      (
-                        $refs.orgStructure as OrgTree
-                      ).createEnterpriseForm = true
-                    "
+                    @click="($refs.orgStructure as OrgTree).createEnterprise()"
                   />
                 </template>
                 <template #body-cell-actions="props">
@@ -104,6 +106,7 @@
                     dense
                     label="添加成员"
                     class="q-ml-sm q-px-md primary-btn"
+                    @click="newMemberForm = true"
                   />
                 </template>
                 <template #body-cell-depts="props">
@@ -115,7 +118,6 @@
                       size="12px"
                       square
                       color="secondary"
-                      @click="showRoleCard()"
                     >
                       {{ dept }}
                     </q-chip>
@@ -166,18 +168,343 @@
         </div>
       </template>
     </q-splitter>
+    <form-dialog
+      ref="newMemberDialog"
+      v-model="newMemberForm"
+      title="添加成员"
+      width="450px"
+    >
+      <template #form-content>
+        <div class="q-col-gutter-sm q-pa-md">
+          <div>
+            <q-item-label class="text-caption hint-label">
+              直属部门
+            </q-item-label>
+            <tree-select
+              :simple="simple"
+              multi-select
+              :initial-selected-items="editedBranch"
+            />
+          </div>
+        </div>
+
+        <q-option-group
+          v-model="newMemberTab"
+          inline
+          class="q-px-md"
+          :options="[
+            { label: '添加已有用户', value: 'member' },
+            { label: '创建全新用户', value: 'account' },
+          ]"
+        />
+        <q-separator inset />
+        <q-tab-panels v-model="newMemberTab" animated>
+          <q-tab-panel name="member">
+            <q-select
+              ref="select"
+              v-model="selectedUsers"
+              :options="userOptions"
+              placeholder="输入用户姓名进行搜索"
+              filled
+              dense
+              use-input
+              hide-dropdown-icon
+              multiple
+              map-options
+              virtual-scroll-slice-size="5"
+              :rules="[(val) => (val && val.length > 0) || '至少选择一名成员']"
+              @filter="searchUser"
+              @update:model-value="clearFilter"
+            >
+              <template #no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    找不到任何匹配项
+                  </q-item-section>
+                </q-item>
+              </template>
+              <template #selected-item="scope">
+                <q-chip
+                  removable
+                  dense
+                  :tabindex="scope.tabindex"
+                  color="blue-1"
+                  text-color="primary"
+                  class="q-ma-none q-mt-xs q-mr-xs"
+                  @remove="scope.removeAtIndex(scope.index)"
+                >
+                  <q-avatar color="primary" text-color="white">
+                    {{ scope.opt.name[0] }}
+                  </q-avatar>
+                  {{ scope.opt.name }}
+                </q-chip>
+              </template>
+              <template #option="scope">
+                <q-item
+                  v-bind="scope.itemProps"
+                  :disable="!scope.opt.is_active"
+                >
+                  <q-item-section avatar>
+                    <q-avatar color="primary" text-color="white">
+                      {{ scope.opt.name[0] }}
+                    </q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ scope.opt.name }}</q-item-label>
+                    <q-item-label caption>{{ scope.opt.role }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </q-tab-panel>
+          <q-tab-panel name="account">
+            <div class="q-gutter-md">
+              <q-item-section>
+                <q-item-label class="text-caption hint-label">
+                  登录信息（至少填写1项）
+                </q-item-label>
+                <div class="q-gutter-sm">
+                  <q-input
+                    v-model="newUser.username"
+                    filled
+                    dense
+                    placeholder="请填写用户名"
+                    hide-bottom-space
+                    class="col"
+                    :error="!!createUserFormError.username"
+                    :error-message="createUserFormError.username"
+                  />
+                  <q-input
+                    v-model="newUser.mobile"
+                    filled
+                    dense
+                    placeholder="请填写手机号"
+                    hide-bottom-space
+                    class="col"
+                    :error="!!createUserFormError.mobile"
+                    :error-message="createUserFormError.mobile"
+                  />
+                  <q-input
+                    v-model="newUser.email"
+                    filled
+                    dense
+                    placeholder="请填写邮箱"
+                    hide-bottom-space
+                    class="col"
+                    :error="!!createUserFormError.email"
+                    :error-message="createUserFormError.email"
+                    @update:model-value="
+                      if (!newUser.email) firstLoginNotification = false;
+                    "
+                  />
+                </div>
+                <div
+                  v-if="!!createUserFormError.__root__"
+                  class="error-hint text-negative"
+                >
+                  {{ createUserFormError.__root__ }}
+                </div>
+              </q-item-section>
+              <q-separator />
+              <q-item-section>
+                <q-item-label class="text-caption hint-label">
+                  用户姓名（选填）
+                </q-item-label>
+                <q-input
+                  v-model="newUser.name"
+                  filled
+                  dense
+                  placeholder="请填写用户姓名"
+                  hide-bottom-space
+                  :error="!!createUserFormError.name"
+                  :error-message="createUserFormError.name"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-toggle
+                  v-model="passwordChangingRequired"
+                  label="强制用户在首次登录时修改密码"
+                />
+                <q-toggle
+                  v-model="firstLoginNotification"
+                  label="通过邮件发送初始默认登录信息"
+                  :disable="!newUser.email"
+                >
+                  <q-tooltip
+                    v-if="!newUser.email"
+                    anchor="bottom middle"
+                    self="center end"
+                  >
+                    填写有效邮箱后才可启用
+                  </q-tooltip>
+                </q-toggle>
+              </q-item-section>
+            </div>
+          </q-tab-panel>
+        </q-tab-panels>
+      </template>
+    </form-dialog>
   </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QTableProps } from 'quasar';
+import { QSelect, QTableProps, QTreeNode } from 'quasar';
 
+import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
+import TreeSelect from 'components/form/TreeSelect.vue';
 import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 
-import { Enterprise, OrgTree } from './type';
+import { Enterprise, OrgTree, UserPostData, UserPostError } from './type';
+
+const structureData: QTreeNode[] = [
+  {
+    label: '1. 北京分公司',
+    id: 1,
+    enterpriseId: 1,
+    icon: 'account_balance',
+    children: [
+      {
+        label: '1.1 产品部门',
+        id: 2,
+        parentId: 1,
+        children: [
+          {
+            label: '1.1.1 产品设计部门',
+            id: 3,
+            parentId: 2,
+          },
+          {
+            label: '1.1.2 产品研发部门',
+            id: 4,
+            parentId: 2,
+          },
+        ],
+      },
+      {
+        label: '1.2 成本部门',
+        id: 5,
+        parentId: 1,
+      },
+      {
+        label: '1.3 销售部门',
+        id: 6,
+        parentId: 1,
+      },
+    ],
+  },
+  {
+    label: '2. 上海分公司',
+    id: 101,
+    enterpriseId: 2,
+    icon: 'account_balance',
+    children: [
+      {
+        label: '2.1 产品部门',
+        id: 102,
+        parentId: 101,
+        children: [
+          {
+            label: '2.1.1 产品设计部门',
+            id: 103,
+            parentId: 102,
+            children: [
+              {
+                label: '2.1.1.1 视觉设计部',
+                id: 104,
+                parentId: 103,
+              },
+              {
+                label: '2.1.1.2 交互设计部',
+                id: 107,
+                parentId: 103,
+              },
+            ],
+          },
+          {
+            label: '2.1.2 产品研发部门',
+            id: 111,
+            parentId: 102,
+          },
+        ],
+      },
+      {
+        label: '2.2 市场部门',
+        id: 112,
+        parentId: 101,
+      },
+      {
+        label: '2.3 销售部门',
+        id: 113,
+        parentId: 101,
+      },
+    ],
+  },
+];
+
+const structureData2: QTreeNode[] = [
+  {
+    label: '智能院科技有限公司',
+    id: 502,
+    enterpriseId: 3,
+    icon: 'account_balance',
+  },
+  {
+    label: '北京亚奥之星汽车服务有限公司',
+    id: 21,
+    enterpriseId: 4,
+    icon: 'account_balance',
+    children: [
+      {
+        label: '1.1 售前部门',
+        id: 24,
+        parentId: 21,
+      },
+      {
+        label: '1.2 售后部门',
+        id: 25,
+        parentId: 21,
+      },
+      {
+        label: '1.3 维修部门',
+        id: 26,
+        parentId: 21,
+      },
+    ],
+  },
+
+  {
+    label: '利星行平治（北京）汽车有限公司',
+    id: 201,
+    enterpriseId: 5,
+    icon: 'account_balance',
+    children: [
+      {
+        label: '2.1 销售部门',
+        id: 211,
+        parentId: 201,
+      },
+      {
+        label: '2.2 市场部门',
+        id: 212,
+        parentId: 201,
+      },
+      {
+        label: '2.3 机修部门',
+        id: 213,
+        parentId: 201,
+      },
+    ],
+  },
+  {
+    label: '盛元书院科技有限公司',
+    id: 202,
+    enterpriseId: 6,
+    icon: 'account_balance',
+  },
+];
 
 const enterpriseData = [
   {
@@ -294,36 +621,97 @@ const enterpriseColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'OrgAdminPanel',
 
-  components: { DataTable, DropdownButton, OrgStructureTree },
+  components: {
+    DataTable,
+    DropdownButton,
+    FormDialog,
+    OrgStructureTree,
+    TreeSelect,
+  },
 
   setup() {
     return {
       // splitter
       splitterModel: 350,
 
+      // tree
+      simple: ref<QTreeNode[]>(structureData),
+
       // table
       tab: ref('enterprises'),
-      userColumns: userColumns,
+      // enterprise
       enterpriseColumns: enterpriseColumns,
       enterprises: enterpriseData,
+      // users
+      userColumns: userColumns,
       directDeptCheck: ref(false),
+
+      // form dialog
+      newMemberForm: ref(false),
+      newMemberTab: ref('member'),
+      editedBranch: ref<QTreeNode[]>(),
+      // add new member
+      newUser: ref<UserPostData>({}),
+      userKeyword: ref(''),
+      selectedUsers: ref([]),
+      userOptions: ref([]),
+      // add new account
+      createUserForm: ref(false),
+      createUserFormError: ref<UserPostError>({}),
+      firstLoginNotification: ref(false),
+      passwordChangingRequired: ref(false),
     };
   },
 
   methods: {
-    showRoleCard() {
-      console.error('role');
-    },
-
     operateOneEnterprise(evt: Event, enterprise: Enterprise) {
       if (evt.type === 'edit') {
-        (this.$refs.orgStructure as OrgTree).createEnterpriseForm = true;
+        (this.$refs.orgStructure as OrgTree).editEnterprise(enterprise.id);
       } else if (evt.type === 'delete') {
-        (this.$refs.orgStructure as OrgTree).deleteBranch({
-          enterpriseId: enterprise.id,
-          label: enterprise.name,
-        });
+        (this.$refs.orgStructure as OrgTree).deleteEnterprise(enterprise.id);
       }
+    },
+
+    onNodeUpdated(node: QTreeNode) {
+      this.editedBranch = node ? [node] : [];
+    },
+
+    onOrgTypeChanged(selected: number) {
+      // TODO
+      if (selected === 1) {
+        this.simple = structureData;
+      } else {
+        this.simple = structureData2;
+      }
+      setTimeout(() => {
+        (this.$refs.orgStructure as OrgTree).expandTree();
+      }, 20);
+    },
+
+    searchUser(
+      val: string,
+      update: (fn: () => void) => void,
+      abort: () => void
+    ) {
+      const kw = val.trim();
+      if (kw === '') {
+        abort();
+        return;
+      }
+      update(async () => {
+        // TODO
+        let resp = await this.$api.get('/users/options', {
+          params: {
+            keyword: kw,
+            is_active: true,
+          },
+        });
+        this.userOptions = resp.data.rows;
+      });
+    },
+
+    clearFilter() {
+      (this.$refs.select as QSelect).updateInputValue('');
     },
   },
 });

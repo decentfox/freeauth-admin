@@ -20,10 +20,10 @@
             <q-btn
               unelevated
               dense
-              icon="account_tree"
-              class="q-ml-md"
+              class="q-ml-md secondary-btn"
               @click="panel = 'structure'"
             >
+              <q-icon class="material-icons-outlined">account_tree</q-icon>
               <q-tooltip>切换视图</q-tooltip>
             </q-btn>
           </template>
@@ -67,7 +67,7 @@
         >
           <!--the first splitted screen-->
           <template #before>
-            <structure-tree />
+            <org-structure-tree />
           </template>
           <template #separator>
             <div class="splitter-drag-icon">
@@ -94,7 +94,7 @@
                   unelevated
                   dense
                   icon="list_alt"
-                  class="q-mr-xs"
+                  class="q-mr-xs secondary-btn"
                   @click="panel = 'table'"
                 >
                   <q-tooltip>切换视图</q-tooltip>
@@ -113,7 +113,7 @@ import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
 import DropdownButton from 'components/DropdownButton.vue';
-import StructureTree from 'components/StructureTree.vue';
+import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 import { FilterColumn, FilterOperator } from 'components/table/type';
 
@@ -213,7 +213,7 @@ const roles = [
 export default defineComponent({
   name: 'IndexPage',
 
-  components: { DataTable, DropdownButton, StructureTree },
+  components: { DataTable, DropdownButton, OrgStructureTree },
 
   setup() {
     return {

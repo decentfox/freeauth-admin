@@ -173,12 +173,12 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QInput, QTableProps } from 'quasar';
-import { Permission, TreeStructureNode } from 'src/pages/type';
+import { QInput, QTableProps, QTreeNode } from 'quasar';
+import { Permission } from 'src/pages/type';
 
 import DataTable from 'components/table/DataTable.vue';
 
-const pageStructure: TreeStructureNode[] = [
+const pageStructure: QTreeNode[] = [
   {
     label: '页面层级定义', // 操作权限：编辑保存
     id: 0,

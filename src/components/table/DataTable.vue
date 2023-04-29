@@ -42,7 +42,7 @@
         :columns="filterColumns"
         @filtered="onFiltered"
       />
-      <slot name="table-filter"></slot>
+      <slot name="extra-filters"></slot>
       <q-space />
       <div class="q-gutter-sm">
         <q-btn

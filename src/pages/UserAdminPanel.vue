@@ -6,6 +6,7 @@
       api-url="/users/query"
       api-method="POST"
       sticky-action-column
+      search-placeholder="搜索用户信息"
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="(selected) => disableUsers(selected)"
@@ -36,26 +37,24 @@
         </q-td>
       </template>
       <template #body-cell-actions="props">
-        <q-td :props="props">
-          <div class="text-grey-8 q-gutter-xs">
-            <dropdown-button
-              :buttons="[
-                {
-                  label: !props.row.is_deleted ? '禁用账号' : '启用账号',
-                  icon: !props.row.is_deleted
-                    ? 'remove_circle_outline'
-                    : 'task_alt',
-                  actionType: !props.row.is_deleted ? 'disable' : 'enable',
-                },
-                {
-                  label: '删除账号',
-                  icon: 'delete_outline',
-                  actionType: 'delete',
-                },
-              ]"
-              @menu-click="operateOneUser($event, [props.row])"
-            />
-          </div>
+        <q-td :props="props" @click.stop>
+          <dropdown-button
+            :buttons="[
+              {
+                label: !props.row.is_deleted ? '禁用账号' : '启用账号',
+                icon: !props.row.is_deleted
+                  ? 'remove_circle_outline'
+                  : 'task_alt',
+                actionType: !props.row.is_deleted ? 'disable' : 'enable',
+              },
+              {
+                label: '删除账号',
+                icon: 'delete_outline',
+                actionType: 'delete',
+              },
+            ]"
+            @menu-click="operateOneUser($event, [props.row])"
+          />
         </q-td>
       </template>
     </data-table>
@@ -465,18 +464,17 @@ export default defineComponent({
         });
     },
 
-    operateOneUser(event: Event, users: User[]) {
-      if (event.type === 'disable') {
+    operateOneUser(evt: Event, users: User[]) {
+      if (evt.type === 'disable') {
         this.disableUsers(users);
-      } else if (event.type === 'enable') {
+      } else if (evt.type === 'enable') {
         this.enableUsers(users);
-      } else if (event.type === 'delete') {
+      } else if (evt.type === 'delete') {
         this.deleteUsers(users);
       }
     },
 
     goToUserProfile(evt: Event, row: User) {
-      console.error(row.id);
       this.$router.push(`/user_profile/${row.id}`);
     },
   },

@@ -6,6 +6,7 @@
       api-url="/audit_logs/query"
       api-method="POST"
       :filter-columns="filterColumns"
+      search-placeholder="搜索用户信息、IP地址"
       hide-import
     >
       <template #body-cell-is_succeed="props">
@@ -147,6 +148,21 @@ const filterColumns: FilterColumn[] = [
       FilterOperator.ct,
       FilterOperator.nct,
     ],
+  },
+  {
+    field: 'device',
+    label: '设备',
+    operatorOptions: [FilterOperator.ct, FilterOperator.nct],
+  },
+  {
+    field: 'os',
+    label: '操作系统',
+    operatorOptions: [FilterOperator.ct, FilterOperator.nct],
+  },
+  {
+    field: 'browser',
+    label: '浏览器',
+    operatorOptions: [FilterOperator.ct, FilterOperator.nct],
   },
   {
     field: 'created_at',

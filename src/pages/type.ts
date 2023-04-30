@@ -1,10 +1,12 @@
-import { QTreeNode } from 'quasar';
-
 export interface OrgTree {
-  /** 创建企业组织的表单对话框 */
-  createEnterpriseForm: boolean;
-  /** 创建企业组织的表单对话框 */
-  deleteBranch: (node: QTreeNode) => void;
+  /** 展开组织树结构 */
+  expandTree: () => void;
+  /** 创建企业机构的表单对话框 */
+  createEnterprise: () => void;
+  /** 编辑企业机构的表单对话框 */
+  editEnterprise: (enterpriseId: string) => void;
+  /** 删除企业机构的表单对话框 */
+  deleteEnterprise: (enterpriseId: string) => void;
 }
 
 export interface OrgTypeOption {
@@ -68,7 +70,7 @@ export interface EnterprisePostData {
 
 export interface Enterprise {
   /** 企业 ID */
-  id: number;
+  id: string;
   /** 企业名称 */
   name: string;
   /** 企业纳税识别号 */

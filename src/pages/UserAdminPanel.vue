@@ -69,8 +69,8 @@
       @close="resetCreateUserForm"
     >
       <template #form-content>
-        <div class="q-gutter-md q-pa-md">
-          <q-item-section>
+        <div class="q-gutter-lg q-pa-md">
+          <div>
             <q-item-label class="text-caption hint-label">
               登录信息（至少填写1项）
             </q-item-label>
@@ -115,9 +115,8 @@
             >
               {{ createUserFormError.__root__ }}
             </div>
-          </q-item-section>
-          <q-separator />
-          <q-item-section>
+          </div>
+          <div>
             <q-item-label class="text-caption hint-label">
               用户姓名（选填）
             </q-item-label>
@@ -130,8 +129,8 @@
               :error="!!createUserFormError.name"
               :error-message="createUserFormError.name"
             />
-          </q-item-section>
-          <q-item-section>
+          </div>
+          <div>
             <q-toggle
               v-model="passwordChangingRequired"
               label="强制用户在首次登录时修改密码"
@@ -143,13 +142,13 @@
             >
               <q-tooltip
                 v-if="!newUser.email"
-                anchor="bottom middle"
-                self="center end"
+                anchor="bottom left"
+                self="center start"
               >
                 填写有效邮箱后才可启用
               </q-tooltip>
             </q-toggle>
-          </q-item-section>
+          </div>
         </div>
       </template>
     </form-dialog>
@@ -344,19 +343,6 @@ export default defineComponent({
       }
     },
 
-    async executeDeleteUsers(user_ids: string[]) {
-      try {
-        await this.$api.request({
-          method: 'DELETE',
-          url: '/users',
-          data: { user_ids },
-          successMsg: '成员删除成功',
-        });
-      } finally {
-        (this.$refs.table as DataTableComponent).fetchRows();
-      }
-    },
-
     async createUser() {
       try {
         this.createUserFormError = {};
@@ -457,9 +443,19 @@ export default defineComponent({
             ],
           },
         })
-        .onOk(({ type }) => {
+        .onOk(async ({ type }) => {
           if (type === 'delete') {
-            this.executeDeleteUsers(users.map((u: User) => u.id));
+            const userIds: string[] = users.map((u: User) => u.id);
+            try {
+              await this.$api.request({
+                method: 'DELETE',
+                url: '/users',
+                data: { user_ids: userIds },
+                successMsg: '成员删除成功',
+              });
+            } finally {
+              (this.$refs.table as DataTableComponent).fetchRows();
+            }
           }
         });
     },

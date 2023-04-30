@@ -10,12 +10,20 @@
           v-bind="button"
           clickable
           class="q-my-xs"
+          :disable="button.disable"
           @click="onClick(button)"
         >
           <q-item-section v-if="button.icon" avatar class="q-pr-none">
             <q-icon :name="button.icon" size="16px" />
           </q-item-section>
           <q-item-section> {{ button.label }} </q-item-section>
+          <q-tooltip
+            v-if="button.disable"
+            anchor="bottom left"
+            self="center start"
+          >
+            {{ button.disableHint }}
+          </q-tooltip>
         </q-item>
       </q-list>
     </q-menu>

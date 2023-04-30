@@ -21,4 +21,8 @@ export interface MenuButton {
   icon?: string;
   /** 菜单按钮触发事件类型 */
   actionType: string;
+  /** 菜单按钮是否禁用 */
+  disable?: boolean;
+  /** 禁用按钮提示信息 */
+  disableHint?: string;
 }

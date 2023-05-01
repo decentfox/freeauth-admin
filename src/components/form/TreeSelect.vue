@@ -22,7 +22,7 @@
         </q-chip>
       </template>
       <template v-if="tickedNodes.length === 0 && !selectedNode">
-        <span class="text-grey-8">请选择所属上级部门</span>
+        <span class="field-placeholder">请选择所属上级部门</span>
       </template>
     </div>
     <q-popup-proxy ref="popup" :breakpoint="600" fit class="q-pa-sm">

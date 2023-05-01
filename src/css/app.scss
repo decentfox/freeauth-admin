@@ -100,6 +100,10 @@
   color: $grey-10;
 }
 
+.field-placeholder {
+  color: $grey-8;
+}
+
 .main-header {
   background: white;
 }
@@ -141,6 +145,10 @@
 
   .text-black-white {
     color: $grey-1;
+  }
+
+  .field-placeholder {
+    color: $grey-5;
   }
 
   .main-header {

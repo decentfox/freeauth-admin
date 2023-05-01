@@ -10,16 +10,34 @@ export interface OrgTree {
 }
 
 export interface OrgTypeOption {
-  value: number;
-  label: string;
-  desc?: string;
+  /** 组织类型 ID */
+  id: string;
+  /** 组织类型名称 */
+  name: string;
+  /** 组织类型描述 */
+  description?: string;
+  /** 组织类型是否停用 */
+  is_deleted: boolean;
+  /** 是否为默认组织类型 */
+  is_protected: boolean;
 }
 
 export interface OrgTypePostData {
+  /** 组织类型 ID */
+  id?: string;
   /** 组织类型名称 */
   name?: string;
   /** 组织类型描述 */
-  desc?: string;
+  description?: string;
+  /** 组织类型是否停用 */
+  is_deleted?: boolean;
+  /** 是否为默认组织类型 */
+  is_protected?: boolean;
+}
+
+export interface OrgTypePostError {
+  name?: string;
+  __root__?: string;
 }
 
 export interface User {

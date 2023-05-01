@@ -676,9 +676,9 @@ export default defineComponent({
       this.editedBranch = node ? [node] : [];
     },
 
-    onOrgTypeChanged(selected: number) {
+    onOrgTypeChanged(selected: string) {
       // TODO
-      if (selected === 1) {
+      if (selected === '内部组织') {
         this.simple = structureData;
       } else {
         this.simple = structureData2;

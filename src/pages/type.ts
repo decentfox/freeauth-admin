@@ -14,6 +14,8 @@ export interface OrgTypeOption {
   id: string;
   /** 组织类型名称 */
   name: string;
+  /** 组织类型 Code */
+  code: string;
   /** 组织类型描述 */
   description?: string;
   /** 组织类型是否停用 */
@@ -27,6 +29,8 @@ export interface OrgTypePostData {
   id?: string;
   /** 组织类型名称 */
   name?: string;
+  /** 组织类型 Code */
+  code?: string;
   /** 组织类型描述 */
   description?: string;
   /** 组织类型是否停用 */
@@ -37,6 +41,7 @@ export interface OrgTypePostData {
 
 export interface OrgTypePostError {
   name?: string;
+  code?: string;
   __root__?: string;
 }
 
@@ -72,23 +77,29 @@ export interface UserPostError {
 }
 
 export interface EnterprisePostData {
-  /** 企业名称 */
+  /** 企业机构 ID */
+  id?: string;
+  /** 企业机构 Code */
+  code?: string;
+  /** 企业机构名称 */
   name?: string;
-  /** 企业纳税识别号 */
+  /** 企业机构纳税识别号 */
   taxId?: string;
-  /** 企业开户行 */
+  /** 企业机构开户行 */
   issuingBank?: string;
-  /** 企业银行账号 */
+  /** 企业机构银行账号 */
   bankAccountNumber?: string;
-  /** 企业办公地址 */
+  /** 企业机构办公地址 */
   contactAddress?: string;
-  /** 企业办公电话 */
+  /** 企业机构办公电话 */
   contactPhoneNum?: string;
 }
 
 export interface Enterprise {
   /** 企业 ID */
   id: string;
+  /** 企业 Code */
+  code: string;
   /** 企业名称 */
   name: string;
   /** 企业纳税识别号 */
@@ -104,9 +115,11 @@ export interface Enterprise {
 }
 
 export interface BranchPostData {
-  /** 组织分支名称 */
+  /** 部门分支名称 */
   name?: string;
-  /** 组织分支描述 */
+  /** 部门分支 Code */
+  code?: string;
+  /** 部门分支描述 */
   desc?: string;
   /** 所属上级部门 ID */
   parentId?: number;

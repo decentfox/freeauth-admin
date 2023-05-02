@@ -177,9 +177,7 @@
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
-            <q-item-label class="text-caption hint-label">
-              直属部门
-            </q-item-label>
+            <field-label name="直属部门" required />
             <tree-select
               :simple="simple"
               multi-select
@@ -259,10 +257,8 @@
           </q-tab-panel>
           <q-tab-panel name="account">
             <div class="q-gutter-md">
-              <q-item-section>
-                <q-item-label class="text-caption hint-label">
-                  登录信息（至少填写1项）
-                </q-item-label>
+              <div>
+                <field-label name="登录信息" required hint="至少填写一项" />
                 <div class="q-gutter-sm">
                   <q-input
                     v-model="newUser.username"
@@ -304,12 +300,9 @@
                 >
                   {{ createUserFormError.__root__ }}
                 </div>
-              </q-item-section>
-              <q-separator />
-              <q-item-section>
-                <q-item-label class="text-caption hint-label">
-                  用户姓名（选填）
-                </q-item-label>
+              </div>
+              <div>
+                <field-label name="用户姓名" />
                 <q-input
                   v-model="newUser.name"
                   filled
@@ -319,8 +312,8 @@
                   :error="!!createUserFormError.name"
                   :error-message="createUserFormError.name"
                 />
-              </q-item-section>
-              <q-item-section>
+              </div>
+              <div>
                 <q-toggle
                   v-model="passwordChangingRequired"
                   label="强制用户在首次登录时修改密码"
@@ -338,7 +331,7 @@
                     填写有效邮箱后才可启用
                   </q-tooltip>
                 </q-toggle>
-              </q-item-section>
+              </div>
             </div>
           </q-tab-panel>
         </q-tab-panels>
@@ -353,6 +346,7 @@ import { QSelect, QTableProps, QTreeNode } from 'quasar';
 
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
 import TreeSelect from 'components/form/TreeSelect.vue';
 import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
@@ -509,6 +503,7 @@ const structureData2: QTreeNode[] = [
 const enterpriseData = [
   {
     id: 1,
+    code: 'BEIJNG',
     name: '北京分公司',
     tax_id: '91110106MA00775P0A',
     issuing_bank: '中国工商银行股份有限公司北京天宁寺支行',
@@ -518,6 +513,7 @@ const enterpriseData = [
   },
   {
     id: 2,
+    code: 'SHANGHAI',
     name: '上海分公司',
     tax_id: '91110108780215415F',
     issuing_bank: '中国民生银行股份有限公司上海方庄支行',
@@ -581,6 +577,12 @@ const enterpriseColumns: QTableProps['columns'] = [
     align: 'left',
   },
   {
+    name: 'code',
+    label: '企业 Code',
+    field: 'code',
+    align: 'left',
+  },
+  {
     name: 'tax_id',
     label: '纳税识别号',
     field: 'tax_id',
@@ -624,6 +626,7 @@ export default defineComponent({
   components: {
     DataTable,
     DropdownButton,
+    FieldLabel,
     FormDialog,
     OrgStructureTree,
     TreeSelect,

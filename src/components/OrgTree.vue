@@ -19,7 +19,14 @@
           <q-item v-bind="scope.itemProps">
             <q-item-section>
               <div class="row no-wrap" :style="`width: ${width * 0.8}px;`">
-                <q-item-label lines="1">
+                <q-item-label
+                  :class="
+                    selectedOrgType.id === scope.opt.id
+                      ? `text-weight-bold`
+                      : ``
+                  "
+                  lines="1"
+                >
                   {{ scope.opt.name }}
                 </q-item-label>
                 <q-badge
@@ -88,6 +95,25 @@
         @menu-click="startToCreateObject"
       />
     </q-toolbar>
+    <div class="q-pa-xs row">
+      <q-badge
+        align="middle"
+        :label="!selectedOrgType.is_deleted ? '正常' : '停用'"
+        :class="
+          !selectedOrgType.is_deleted ? 'chip-status-on' : 'chip-status-off'
+        "
+        class="q-pa-sm"
+      />
+      <q-badge
+        label="代码：INNER"
+        class="q-pa-sm q-ml-xs bg-secondary text-black-white cursor-pointer"
+        @click="$utils.copyToClipboard(selectedOrgType.name)"
+      >
+        <q-tooltip anchor="bottom left" self="top start">
+          组织类型的唯一标识符，可用于获取组织类型信息。
+        </q-tooltip>
+      </q-badge>
+    </div>
     <q-separator spaced="sm" />
     <q-toolbar class="q-pa-none">
       <q-input
@@ -205,9 +231,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div>
-          <q-item-label class="text-caption hint-label">
-            组织类型名称
-          </q-item-label>
+          <field-label name="组织类型名称" required />
           <q-input
             v-model="orgTypeData.name"
             filled
@@ -219,9 +243,23 @@
           />
         </div>
         <div>
-          <q-item-label class="text-caption hint-label">
-            组织类型描述
-          </q-item-label>
+          <field-label
+            name="组织类型 Code"
+            required
+            hint="组织类型的唯一标识符，可用于获取组织类型信息"
+          />
+          <q-input
+            v-model="orgTypeData.code"
+            filled
+            dense
+            placeholder="请填写组织类型代码"
+            hide-bottom-space
+            :error="!!orgTypeFormError.code"
+            :error-message="orgTypeFormError.code"
+          />
+        </div>
+        <div>
+          <field-label name="组织类型描述" />
           <q-input
             v-model="orgTypeData.description"
             filled
@@ -257,10 +295,22 @@
   >
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
-        <q-item-section>
-          <q-item-label class="text-caption hint-label">
-            企业税务信息
-          </q-item-label>
+        <div>
+          <field-label
+            name="企业机构 Code"
+            required
+            hint="企业机构的唯一标识符，同一组织类型下唯一，可用于获取企业信息"
+          />
+          <q-input
+            v-model="newEnterprise.code"
+            filled
+            dense
+            placeholder="请填写企业机构代码"
+            hide-bottom-space
+          />
+        </div>
+        <div>
+          <field-label name="企业税务信息" required />
           <div class="q-gutter-sm">
             <q-input
               v-model="newEnterprise.name"
@@ -274,17 +324,15 @@
               v-model="newEnterprise.taxId"
               filled
               dense
-              placeholder="请填写15、18或20位纳税识别号"
+              placeholder="请填写 15、18 或 20 位纳税识别号"
               hide-bottom-space
               class="col"
             />
           </div>
-        </q-item-section>
-        <q-separator />
-        <q-item-section>
-          <q-item-label class="text-caption hint-label">
-            企业银行信息
-          </q-item-label>
+        </div>
+
+        <div>
+          <field-label name="企业银行信息" />
           <div class="q-gutter-sm">
             <q-input
               v-model="newEnterprise.issuingBank"
@@ -303,12 +351,10 @@
               class="col"
             />
           </div>
-        </q-item-section>
-        <q-separator />
-        <q-item-section>
-          <q-item-label class="text-caption hint-label">
-            企业办公信息
-          </q-item-label>
+        </div>
+
+        <div>
+          <field-label name="企业办公信息" />
           <div class="q-gutter-sm">
             <q-input
               v-model="newEnterprise.contactAddress"
@@ -327,7 +373,7 @@
               class="col"
             />
           </div>
-        </q-item-section>
+        </div>
       </div>
     </template>
   </form-dialog>
@@ -338,20 +384,16 @@
     width="450px"
   >
     <template #form-content>
-      <div class="q-col-gutter-sm q-pa-md">
+      <div class="q-col-gutter-md q-pa-md">
         <div>
-          <q-item-label class="text-caption hint-label">
-            上级部门
-          </q-item-label>
+          <field-label name="所属上级部门" required />
           <tree-select
             :simple="simple"
             :initial-selected-items="editedBranch"
           />
         </div>
         <div>
-          <q-item-label class="text-caption hint-label">
-            部门名称
-          </q-item-label>
+          <field-label name="部门名称" required />
           <q-input
             v-model="newBranch.name"
             filled
@@ -361,9 +403,21 @@
           />
         </div>
         <div>
-          <q-item-label class="text-caption hint-label">
-            部门描述
-          </q-item-label>
+          <field-label
+            name="部门 Code"
+            required
+            hint="部门分支的唯一标识符，同一企业机构下唯一，可用户获取部门信息"
+          />
+          <q-input
+            v-model="newBranch.code"
+            filled
+            dense
+            placeholder="请填写部门代码"
+            hide-bottom-space
+          />
+        </div>
+        <div>
+          <field-label name="部门描述" />
           <q-input
             v-model="newBranch.desc"
             filled
@@ -393,6 +447,7 @@ import {
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
 import TreeSelect from 'components/form/TreeSelect.vue';
 
 import { FormDialogComponent } from './dialog/type';
@@ -400,7 +455,7 @@ import { FormDialogComponent } from './dialog/type';
 export default defineComponent({
   name: 'OrgTree',
 
-  components: { DropdownButton, FormDialog, TreeSelect },
+  components: { DropdownButton, FieldLabel, FormDialog, TreeSelect },
 
   props: {
     simple: {
@@ -425,6 +480,7 @@ export default defineComponent({
       selectedOrgType: ref<OrgTypeOption>({
         id: '',
         name: '',
+        code: '',
         is_deleted: false,
         is_protected: false,
       }),

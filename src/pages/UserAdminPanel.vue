@@ -63,17 +63,15 @@
     <form-dialog
       ref="createUserDialog"
       v-model="createUserForm"
-      title="创建新用户"
+      title="创建用户"
       width="450px"
       @confirm="createUser"
       @close="resetCreateUserForm"
     >
       <template #form-content>
-        <div class="q-gutter-lg q-pa-md">
+        <div class="q-gutter-md q-pa-md">
           <div>
-            <q-item-label class="text-caption hint-label">
-              登录信息（至少填写1项）
-            </q-item-label>
+            <field-label name="登录信息" required hint="至少填写一项" />
             <div class="q-gutter-sm">
               <q-input
                 v-model="newUser.username"
@@ -117,9 +115,7 @@
             </div>
           </div>
           <div>
-            <q-item-label class="text-caption hint-label">
-              用户姓名（选填）
-            </q-item-label>
+            <field-label name="用户姓名" />
             <q-input
               v-model="newUser.name"
               filled
@@ -163,6 +159,7 @@ import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
 import DataTable from 'components/table/DataTable.vue';
 import {
   DataTableComponent,
@@ -316,7 +313,7 @@ const filterColumns: FilterColumn[] = [
 export default defineComponent({
   name: 'UserAdminPanel',
 
-  components: { DataTable, DropdownButton, FormDialog },
+  components: { DataTable, DropdownButton, FieldLabel, FormDialog },
 
   setup() {
     return {

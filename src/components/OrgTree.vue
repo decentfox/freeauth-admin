@@ -4,7 +4,7 @@
       <q-select
         ref="orgTypeSelect"
         v-model="selectedOrgType"
-        :popup-content-style="`width: ${width}px; word-break: break-all;`"
+        :popup-content-style="`width: ${selectWidth}px; word-break: break-all;`"
         style="word-break: break-all"
         dense
         filled
@@ -12,13 +12,18 @@
         :options="orgTypeOptions"
         option-label="name"
         option-value="id"
-        @popup-show="width = ($refs.orgTypeSelect as QSelect).$el.offsetWidth"
+        @popup-show="
+          selectWidth = ($refs.orgTypeSelect as QSelect).$el.offsetWidth
+        "
         @update:model-value="changeOrgType"
       >
         <template #option="scope">
           <q-item v-bind="scope.itemProps">
             <q-item-section>
-              <div class="row no-wrap" :style="`width: ${width * 0.8}px;`">
+              <div
+                class="row no-wrap"
+                :style="`width: ${selectWidth * 0.8}px;`"
+              >
                 <q-item-label
                   :class="
                     selectedOrgType.id === scope.opt.id
@@ -43,7 +48,7 @@
                 caption
                 lines="1"
                 class="q-mt-xs"
-                :style="`width: ${width * 0.8}px;`"
+                :style="`width: ${selectWidth * 0.8}px;`"
               >
                 {{ scope.opt.description }}
               </q-item-label>
@@ -95,7 +100,7 @@
         @menu-click="startToCreateObject"
       />
     </q-toolbar>
-    <div class="q-pa-xs row">
+    <div class="q-pa-xs row q-gutter-xs">
       <q-badge
         align="middle"
         :label="!selectedOrgType.is_deleted ? '正常' : '停用'"
@@ -105,12 +110,12 @@
         class="q-pa-sm"
       />
       <q-badge
-        label="代码：INNER"
+        :label="`代码：${selectedOrgType.code}`"
         class="q-pa-sm q-ml-xs bg-secondary text-black-white cursor-pointer"
-        @click="$utils.copyToClipboard(selectedOrgType.name)"
+        @click="$utils.copyToClipboard(selectedOrgType.code)"
       >
         <q-tooltip anchor="bottom left" self="top start">
-          组织类型的唯一标识符，可用于获取组织类型信息。
+          组织类型的唯一标识符，可用于获取组织类型信息
         </q-tooltip>
       </q-badge>
     </div>
@@ -142,7 +147,7 @@
     <q-tab-panel
       name="structure"
       class="scroll q-px-none"
-      style="height: calc(100vh - 200px)"
+      style="height: calc(100vh - 240px)"
     >
       <q-tree
         ref="orgTree"
@@ -233,7 +238,7 @@
         <div>
           <field-label name="组织类型名称" required />
           <q-input
-            v-model="orgTypeData.name"
+            v-model="orgTypeFormData.name"
             filled
             dense
             placeholder="请填写组织类型名称，如：合作商家"
@@ -249,7 +254,7 @@
             hint="组织类型的唯一标识符，可用于获取组织类型信息"
           />
           <q-input
-            v-model="orgTypeData.code"
+            v-model="orgTypeFormData.code"
             filled
             dense
             placeholder="请填写组织类型代码"
@@ -261,7 +266,7 @@
         <div>
           <field-label name="组织类型描述" />
           <q-input
-            v-model="orgTypeData.description"
+            v-model="orgTypeFormData.description"
             filled
             dense
             type="textarea"
@@ -269,14 +274,14 @@
             hide-bottom-space
           />
         </div>
-        <div v-if="orgTypeData.id">
+        <div v-if="operatedOrgType.id">
           <q-toggle
-            v-model="orgTypeData.is_deleted"
+            v-model="orgTypeFormData.is_deleted"
             label="是否标记为停用"
-            :disable="orgTypeData.is_protected"
+            :disable="operatedOrgType.is_protected"
           >
             <q-tooltip
-              v-if="orgTypeData.is_protected"
+              v-if="operatedOrgType.is_protected"
               anchor="bottom left"
               self="center start"
             >
@@ -484,7 +489,14 @@ export default defineComponent({
         is_deleted: false,
         is_protected: false,
       }),
-      width: 0,
+      operatedOrgType: ref<OrgTypeOption>({
+        id: '',
+        name: '',
+        code: '',
+        is_deleted: false,
+        is_protected: false,
+      }),
+      selectWidth: 0,
 
       // tree
       selected: ref(null),
@@ -494,7 +506,7 @@ export default defineComponent({
       // form dialog
       orgTypeForm: ref(false),
       orgTypeFormError: ref<OrgTypePostError>({}),
-      orgTypeData: ref<OrgTypePostData>({}),
+      orgTypeFormData: ref<OrgTypePostData>({}),
 
       createEnterpriseForm: ref(false),
       newEnterprise: ref<EnterprisePostData>({}),
@@ -547,12 +559,12 @@ export default defineComponent({
 
     openOrgTypeForm(orgType?: OrgTypeOption) {
       if (orgType) {
-        this.orgTypeData = {
-          id: orgType.id,
+        this.operatedOrgType = orgType;
+        this.orgTypeFormData = {
           name: orgType.name,
+          code: orgType.code,
           description: orgType.description,
           is_deleted: orgType.is_deleted,
-          is_protected: orgType.is_protected,
         };
       }
       this.orgTypeForm = true;
@@ -561,14 +573,14 @@ export default defineComponent({
     async saveOrgTypeForm() {
       try {
         this.orgTypeFormError = {};
-        if (!this.orgTypeData.id) {
-          await this.$api.post('/org_types', this.orgTypeData, {
+        if (!this.operatedOrgType.id) {
+          await this.$api.post('/org_types', this.orgTypeFormData, {
             successMsg: '组织类型创建成功',
           });
         } else {
           await this.$api.put(
-            `/org_types/${this.orgTypeData.id}`,
-            this.orgTypeData,
+            `/org_types/${this.operatedOrgType.id}`,
+            this.orgTypeFormData,
             {
               successMsg: '组织类型更新成功',
             }
@@ -579,22 +591,31 @@ export default defineComponent({
       } catch (e) {
         this.orgTypeFormError = (e as Error).cause || {};
       } finally {
-        this.loadOrgTypes(false);
+        this.loadOrgTypes();
       }
     },
 
     resetOrgTypeForm() {
       this.orgTypeFormError = {};
-      this.orgTypeData = {};
+      this.orgTypeFormData = {};
+      this.operatedOrgType = {
+        id: '',
+        name: '',
+        code: '',
+        is_deleted: false,
+        is_protected: false,
+      };
     },
 
-    async loadOrgTypes(initSelected = true) {
+    async loadOrgTypes() {
       const resp = await this.$api.get('/org_types');
       this.orgTypeOptions = resp.data.org_types;
-      if (initSelected) {
-        this.selectedOrgType = this.orgTypeOptions[0];
-        this.changeOrgType(this.selectedOrgType);
-      }
+      const selected = this.orgTypeOptions.filter(
+        (t) => t.id === this.selectedOrgType.id
+      );
+      this.selectedOrgType =
+        selected.length === 1 ? selected[0] : this.orgTypeOptions[0];
+      this.changeOrgType(this.selectedOrgType);
     },
 
     deleteOrgType(orgType: OrgTypeOption) {
@@ -625,7 +646,7 @@ export default defineComponent({
                 successMsg: '组织类型删除成功',
               });
             } finally {
-              this.loadOrgTypes(this.selectedOrgType.id === orgType.id);
+              this.loadOrgTypes();
             }
           }
         });

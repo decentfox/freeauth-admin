@@ -25,8 +25,6 @@ export interface OrgTypeOption {
 }
 
 export interface OrgTypePostData {
-  /** 组织类型 ID */
-  id?: string;
   /** 组织类型名称 */
   name?: string;
   /** 组织类型 Code */
@@ -35,8 +33,6 @@ export interface OrgTypePostData {
   description?: string;
   /** 组织类型是否停用 */
   is_deleted?: boolean;
-  /** 是否为默认组织类型 */
-  is_protected?: boolean;
 }
 
 export interface OrgTypePostError {

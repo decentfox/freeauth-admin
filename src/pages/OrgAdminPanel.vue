@@ -11,9 +11,9 @@
         <org-structure-tree
           ref="orgStructure"
           editable
-          :simple="simple"
           @update:select-node="onNodeUpdated"
           @update:change-org-type="onOrgTypeChanged"
+          @refresh="refresh($event)"
         />
       </template>
 
@@ -47,7 +47,7 @@
               style="height: calc(100vh - 150px)"
             >
               <data-table
-                :rows="enterprises"
+                ref="enterpriseTable"
                 :columns="enterpriseColumns"
                 sticky-action-column
                 :hide-filter="true"
@@ -58,7 +58,9 @@
                     dense
                     label="添加企业"
                     class="q-ml-sm q-px-md primary-btn"
-                    @click="($refs.orgStructure as OrgTree).createEnterprise()"
+                    @click="
+                      ($refs.orgStructure as OrgTree).openEnterpriseForm()
+                    "
                   />
                 </template>
                 <template #body-cell-actions="props">
@@ -181,7 +183,7 @@
             <tree-select
               :simple="simple"
               multi-select
-              :initial-selected-items="editedBranch"
+              :initial-selected-items="editedDepartment"
             />
           </div>
         </div>
@@ -343,6 +345,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
+import { DataTableComponent } from 'src/components/table/type';
 
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
@@ -352,176 +355,6 @@ import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 
 import { Enterprise, OrgTree, UserPostData, UserPostError } from './type';
-
-const structureData: QTreeNode[] = [
-  {
-    label: '1. 北京分公司',
-    id: 1,
-    enterpriseId: 1,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '1.1 产品部门',
-        id: 2,
-        parentId: 1,
-        children: [
-          {
-            label: '1.1.1 产品设计部门',
-            id: 3,
-            parentId: 2,
-          },
-          {
-            label: '1.1.2 产品研发部门',
-            id: 4,
-            parentId: 2,
-          },
-        ],
-      },
-      {
-        label: '1.2 成本部门',
-        id: 5,
-        parentId: 1,
-      },
-      {
-        label: '1.3 销售部门',
-        id: 6,
-        parentId: 1,
-      },
-    ],
-  },
-  {
-    label: '2. 上海分公司',
-    id: 101,
-    enterpriseId: 2,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '2.1 产品部门',
-        id: 102,
-        parentId: 101,
-        children: [
-          {
-            label: '2.1.1 产品设计部门',
-            id: 103,
-            parentId: 102,
-            children: [
-              {
-                label: '2.1.1.1 视觉设计部',
-                id: 104,
-                parentId: 103,
-              },
-              {
-                label: '2.1.1.2 交互设计部',
-                id: 107,
-                parentId: 103,
-              },
-            ],
-          },
-          {
-            label: '2.1.2 产品研发部门',
-            id: 111,
-            parentId: 102,
-          },
-        ],
-      },
-      {
-        label: '2.2 市场部门',
-        id: 112,
-        parentId: 101,
-      },
-      {
-        label: '2.3 销售部门',
-        id: 113,
-        parentId: 101,
-      },
-    ],
-  },
-];
-
-const structureData2: QTreeNode[] = [
-  {
-    label: '智能院科技有限公司',
-    id: 502,
-    enterpriseId: 3,
-    icon: 'account_balance',
-  },
-  {
-    label: '北京亚奥之星汽车服务有限公司',
-    id: 21,
-    enterpriseId: 4,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '1.1 售前部门',
-        id: 24,
-        parentId: 21,
-      },
-      {
-        label: '1.2 售后部门',
-        id: 25,
-        parentId: 21,
-      },
-      {
-        label: '1.3 维修部门',
-        id: 26,
-        parentId: 21,
-      },
-    ],
-  },
-
-  {
-    label: '利星行平治（北京）汽车有限公司',
-    id: 201,
-    enterpriseId: 5,
-    icon: 'account_balance',
-    children: [
-      {
-        label: '2.1 销售部门',
-        id: 211,
-        parentId: 201,
-      },
-      {
-        label: '2.2 市场部门',
-        id: 212,
-        parentId: 201,
-      },
-      {
-        label: '2.3 机修部门',
-        id: 213,
-        parentId: 201,
-      },
-    ],
-  },
-  {
-    label: '盛元书院科技有限公司',
-    id: 202,
-    enterpriseId: 6,
-    icon: 'account_balance',
-  },
-];
-
-const enterpriseData = [
-  {
-    id: 1,
-    code: 'BEIJNG',
-    name: '北京分公司',
-    tax_id: '91110106MA00775P0A',
-    issuing_bank: '中国工商银行股份有限公司北京天宁寺支行',
-    bank_account_num: '0200024809200034233',
-    contact_address: '北京经济技术开发区荣华中路19号1号楼B座309',
-    contact_phone_num: '15011592799',
-  },
-  {
-    id: 2,
-    code: 'SHANGHAI',
-    name: '上海分公司',
-    tax_id: '91110108780215415F',
-    issuing_bank: '中国民生银行股份有限公司上海方庄支行',
-    bank_account_num: '0119014170017913',
-    contact_address: '上海市大柳树路17号富海中心4号楼10层D东',
-    contact_phone_num: '18518225559',
-  },
-];
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -638,13 +471,13 @@ export default defineComponent({
       splitterModel: 350,
 
       // tree
-      simple: ref<QTreeNode[]>(structureData),
+      simple: ref<QTreeNode[]>(),
+      selectedOrgTypeId: ref(''),
 
       // table
       tab: ref('enterprises'),
       // enterprise
       enterpriseColumns: enterpriseColumns,
-      enterprises: enterpriseData,
       // users
       userColumns: userColumns,
       directDeptCheck: ref(false),
@@ -652,7 +485,7 @@ export default defineComponent({
       // form dialog
       newMemberForm: ref(false),
       newMemberTab: ref('member'),
-      editedBranch: ref<QTreeNode[]>(),
+      editedDepartment: ref<QTreeNode[]>(),
       // add new member
       newUser: ref<UserPostData>({}),
       userKeyword: ref(''),
@@ -669,26 +502,33 @@ export default defineComponent({
   methods: {
     operateOneEnterprise(evt: Event, enterprise: Enterprise) {
       if (evt.type === 'edit') {
-        (this.$refs.orgStructure as OrgTree).editEnterprise(enterprise.id);
+        (this.$refs.orgStructure as OrgTree).openEnterpriseForm(enterprise.id);
       } else if (evt.type === 'delete') {
-        (this.$refs.orgStructure as OrgTree).deleteEnterprise(enterprise.id);
+        (this.$refs.orgStructure as OrgTree).deleteOrganization(enterprise.id);
       }
     },
 
     onNodeUpdated(node: QTreeNode) {
-      this.editedBranch = node ? [node] : [];
+      this.editedDepartment = node ? [node] : [];
     },
 
-    onOrgTypeChanged(selected: string) {
-      // TODO
-      if (selected === '内部组织') {
-        this.simple = structureData;
-      } else {
-        this.simple = structureData2;
+    onOrgTypeChanged(selectedId: string) {
+      this.selectedOrgTypeId = selectedId;
+      this.loadEnterpriseTable();
+    },
+
+    refresh(evt: Event) {
+      if (evt.toString() === 'enterprise') {
+        this.loadEnterpriseTable();
       }
-      setTimeout(() => {
-        (this.$refs.orgStructure as OrgTree).expandTree();
-      }, 20);
+    },
+
+    async loadEnterpriseTable() {
+      const et = this.$refs.enterpriseTable as DataTableComponent;
+      et.fetchRows(
+        `/org_types/${this.selectedOrgTypeId}/enterprises/query`,
+        'POST'
+      );
     },
 
     searchUser(

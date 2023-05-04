@@ -249,17 +249,19 @@ export default defineComponent({
   },
 
   methods: {
-    async fetchRows() {
-      if (!this.apiUrl || this.loading) {
+    async fetchRows(customizedUrl?: string, customizedMethod?: string) {
+      const apiUrl = customizedUrl ? customizedUrl : this.apiUrl;
+      const apiMethod = customizedMethod ? customizedMethod : this.apiMethod;
+      if (!apiUrl || this.loading) {
         return;
       }
       this.loading = true;
       try {
         const resp = await this.$api.request({
-          url: this.apiUrl,
-          method: this.apiMethod,
-          data: this.apiMethod === 'POST' ? this.queryData : null,
-          params: this.apiMethod === 'GET' ? this.queryData : null,
+          url: apiUrl,
+          method: apiMethod,
+          data: apiMethod === 'POST' ? this.queryData : null,
+          params: apiMethod === 'GET' ? this.queryData : null,
           hideProgress: true,
         });
         const data = resp.data;

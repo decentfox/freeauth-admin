@@ -1,12 +1,39 @@
+export interface User {
+  id: string;
+  name?: string;
+  mobile?: string;
+  email?: string;
+  username: string;
+  depts?: string[];
+  last_login_at?: Date;
+  created_at?: Date;
+  is_deleted: boolean;
+}
+
+export interface UserPostData {
+  /** 用户姓名 */
+  name?: string;
+  /** 用户手机号 */
+  mobile?: string;
+  /** 用户邮箱 */
+  email?: string;
+  /** 用户用户名 */
+  username?: string;
+}
+
+export interface UserPostError {
+  name?: string;
+  mobile?: string;
+  email?: string;
+  username?: string;
+  __root__?: string;
+}
+
 export interface OrgTree {
-  /** 展开组织树结构 */
-  expandTree: () => void;
-  /** 创建企业机构的表单对话框 */
-  createEnterprise: () => void;
-  /** 编辑企业机构的表单对话框 */
-  editEnterprise: (enterpriseId: string) => void;
+  /** 打开企业机构的表单对话框 */
+  openEnterpriseForm: (enterpriseId?: string) => void;
   /** 删除企业机构的表单对话框 */
-  deleteEnterprise: (enterpriseId: string) => void;
+  deleteOrganization: (orgId: string) => void;
 }
 
 export interface OrgTypeOption {
@@ -41,86 +68,80 @@ export interface OrgTypePostError {
   __root__?: string;
 }
 
-export interface User {
+export interface Enterprise {
+  /** 企业机构 ID */
   id: string;
-  name?: string;
-  mobile?: string;
-  email?: string;
-  username: string;
-  depts?: string[];
-  last_login_at?: Date;
-  created_at?: Date;
-  is_deleted: boolean;
-}
-
-export interface UserPostData {
-  /** 用户姓名 */
-  name?: string;
-  /** 用户手机号 */
-  mobile?: string;
-  /** 用户邮箱 */
-  email?: string;
-  /** 用户用户名 */
-  username?: string;
-}
-
-export interface UserPostError {
-  name?: string;
-  mobile?: string;
-  email?: string;
-  username?: string;
-  __root__?: string;
+  /** 企业机构 Code */
+  code?: string;
+  /** 企业机构名称 */
+  name: string;
+  /** 企业机构纳税识别号 */
+  tax_id?: string;
+  /** 企业机构开户行 */
+  issuing_bank?: string;
+  /** 企业机构银行账号 */
+  bank_account_number?: string;
+  /** 企业机构办公地址 */
+  contact_address?: string;
+  /** 企业机构办公电话 */
+  contact_phone_num?: string;
 }
 
 export interface EnterprisePostData {
-  /** 企业机构 ID */
-  id?: string;
+  /** 企业机构所属组织类型 ID */
+  org_type_id?: string;
   /** 企业机构 Code */
   code?: string;
   /** 企业机构名称 */
   name?: string;
   /** 企业机构纳税识别号 */
-  taxId?: string;
+  tax_id?: string;
   /** 企业机构开户行 */
-  issuingBank?: string;
+  issuing_bank?: string;
   /** 企业机构银行账号 */
-  bankAccountNumber?: string;
+  bank_account_number?: string;
   /** 企业机构办公地址 */
-  contactAddress?: string;
+  contact_address?: string;
   /** 企业机构办公电话 */
-  contactPhoneNum?: string;
+  contact_phone_num?: string;
 }
 
-export interface Enterprise {
-  /** 企业 ID */
+export interface EnterprisePostError {
+  name?: string;
+  tax_id?: string;
+  code?: string;
+  __root__?: string;
+}
+
+export interface Department {
+  /** 部门分支 ID */
   id: string;
-  /** 企业 Code */
-  code: string;
-  /** 企业名称 */
+  /** 部门分支名称 */
   name: string;
-  /** 企业纳税识别号 */
-  taxId?: string;
-  /** 企业开户行 */
-  issuingBank?: string;
-  /** 企业银行账号 */
-  bankAccountNumber?: string;
-  /** 企业办公地址 */
-  contactAddress?: string;
-  /** 企业办公电话 */
-  contactPhoneNum?: string;
+  /** 部门分支 Code */
+  code?: string;
+  /** 部门分支描述 */
+  description?: string;
+  /** 所属上级部门 ID */
+  parent_id: string;
 }
 
-export interface BranchPostData {
+export interface DepartmentPostData {
   /** 部门分支名称 */
   name?: string;
   /** 部门分支 Code */
   code?: string;
   /** 部门分支描述 */
-  desc?: string;
+  description?: string;
   /** 所属上级部门 ID */
-  parentId?: number;
-  /** 直属企业 ID */
-  enterprise?: number;
+  parent_id?: string;
+}
+
+export interface DepartmentPostError {
+  name?: string;
+  code?: string;
+  parent_id?: string;
+  __root__?: string;
 }
 
 export interface Permission {

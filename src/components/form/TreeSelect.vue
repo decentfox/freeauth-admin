@@ -13,12 +13,12 @@
           dense
           square
         >
-          {{ node.label }}
+          {{ node.name }}
         </q-chip>
       </template>
       <template v-if="!multiSelect && selectedNode">
         <q-chip color="primary" text-color="white" square>
-          {{ selectedNode['label'] }}
+          {{ selectedNode.name }}
         </q-chip>
       </template>
       <template v-if="tickedNodes.length === 0 && !selectedNode">
@@ -32,6 +32,7 @@
         v-model:ticked="ticked"
         :nodes="simple"
         node-key="id"
+        label-key="name"
         selected-color="white"
         default-expand-all
         tick-strategy="strict"
@@ -43,6 +44,7 @@
         v-model:selected="selected"
         :nodes="simple"
         node-key="id"
+        label-key="name"
         selected-color="white"
         default-expand-all
         @update:selected="nodeSelected"
@@ -79,6 +81,8 @@ export default defineComponent({
     },
   },
 
+  emits: ['update:modelValue'],
+
   setup() {
     return {
       selected: ref(null),
@@ -86,6 +90,17 @@ export default defineComponent({
       selectedNode: ref<QTreeNode>(),
       tickedNodes: ref<QTreeNode>([]),
     };
+  },
+
+  watch: {
+    selected() {
+      console.error(this.selected);
+      this.$emit('update:modelValue', this.selected);
+    },
+
+    ticked() {
+      this.$emit('update:modelValue', this.ticked);
+    },
   },
 
   mounted() {

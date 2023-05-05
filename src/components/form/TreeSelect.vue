@@ -30,7 +30,7 @@
         v-if="multiSelect"
         ref="popupTree"
         v-model:ticked="ticked"
-        :nodes="simple"
+        :nodes="nodes"
         node-key="id"
         label-key="name"
         selected-color="white"
@@ -42,7 +42,7 @@
         v-else
         ref="popupTree"
         v-model:selected="selected"
-        :nodes="simple"
+        :nodes="nodes"
         node-key="id"
         label-key="name"
         selected-color="white"
@@ -61,7 +61,7 @@ export default defineComponent({
   name: 'TreeSelect',
 
   props: {
-    simple: {
+    nodes: {
       type: Array as PropType<QTreeNode[]>,
       default: () => {
         return [];
@@ -86,21 +86,10 @@ export default defineComponent({
   setup() {
     return {
       selected: ref(null),
-      ticked: ref<number[]>([]),
+      ticked: ref<string[]>([]),
       selectedNode: ref<QTreeNode>(),
       tickedNodes: ref<QTreeNode>([]),
     };
-  },
-
-  watch: {
-    selected() {
-      console.error(this.selected);
-      this.$emit('update:modelValue', this.selected);
-    },
-
-    ticked() {
-      this.$emit('update:modelValue', this.ticked);
-    },
   },
 
   mounted() {
@@ -119,13 +108,15 @@ export default defineComponent({
       this.selectedNode = (this.$refs.popupTree as QTree).getNodeByKey(
         this.selected
       );
+      this.$emit('update:modelValue', this.selected);
       (this.$refs.popup as QPopupProxy).hide();
     },
 
     nodeTicked() {
+      this.$emit('update:modelValue', this.ticked);
       setTimeout(() => {
         this.tickedNodes = (this.$refs.popupTree as QTree).getTickedNodes();
-      });
+      }, 20);
     },
   },
 });

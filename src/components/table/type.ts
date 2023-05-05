@@ -1,6 +1,12 @@
 export interface DataTableComponent {
   /** 基于当前搜索、筛选、排序、分页参数，手动触发获取数据的请求 */
-  fetchRows: (customizedUrl?: string, customizedMethod?: string) => void;
+  fetchRows: () => void;
+  /** 清空表格，重置至初始状态 */
+  clearRows: () => void;
+  /** 设置获取表格数据的 API 信息 */
+  setApiInfo: (apiUrl: string, apiMethod: string) => void;
+  /** 基于外部传入的键值，对表格数据进行过滤 */
+  onExternalFiltered: (key: string, value: string | boolean) => void;
 }
 
 export type Pagination = {
@@ -72,4 +78,5 @@ export type QueryData = {
   page?: number;
   /** 分页大小 */
   per_page?: number;
+  [index: string]: unknown;
 };

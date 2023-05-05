@@ -151,7 +151,7 @@
     >
       <q-tree
         ref="orgTree"
-        v-model:selected="selected"
+        :selected="selected"
         :nodes="orgTreeData"
         node-key="id"
         label-key="name"
@@ -406,7 +406,7 @@
           <field-label name="所属上级部门" required />
           <tree-select
             v-model="departmentFormData.parent_id"
-            :simple="orgTreeData"
+            :nodes="orgTreeData"
             :initial-selected-items="parentDepartment"
           />
           <!-- TODO show error -->
@@ -506,7 +506,7 @@ export default defineComponent({
       selectWidth: 0,
 
       // tree
-      selected: ref(null),
+      selected: ref(''),
       filter: ref(''),
       filterRef: ref(null),
       orgTreeData: ref<QTreeNode[]>([]),
@@ -542,12 +542,6 @@ export default defineComponent({
 
       parentDepartment: ref<QTreeNode[]>(),
     };
-  },
-
-  watch: {
-    selectedOrgType() {
-      this.loadOrgTree();
-    },
   },
 
   mounted() {
@@ -756,7 +750,8 @@ export default defineComponent({
     async openDepartmentForm(nodeId?: string, parentId?: string) {
       if (parentId) {
         const node = (this.$refs.orgTree as QTree).getNodeByKey(parentId);
-        this.parentDepartment = node ? [node] : [];
+        this.departmentFormData.parent_id = parentId;
+        this.parentDepartment = [node];
       }
       if (nodeId) {
         const resp = await this.$api.get(`/departments/${nodeId}`);
@@ -774,7 +769,6 @@ export default defineComponent({
     async saveDepartmentForm() {
       try {
         this.departmentFormError = {};
-        console.error(this.departmentFormData);
         if (!this.operatedDepartment.id) {
           await this.$api.post('/departments', this.departmentFormData, {
             successMsg: '部门分支创建成功',
@@ -845,12 +839,18 @@ export default defineComponent({
         });
     },
 
-    onNodeUpdated(selected: number) {
-      const node = (this.$refs.orgTree as QTree).getNodeByKey(selected);
-      this.$emit('update:selectNode', node);
+    onNodeUpdated(selected: string) {
+      if (selected !== null) {
+        this.selected = selected;
+        const node = (this.$refs.orgTree as QTree).getNodeByKey(selected);
+        this.$emit('update:selectNode', node);
+      }
+      return;
     },
 
     changeOrgType(selected: OrgTypeOption) {
+      this.loadOrgTree();
+      this.selected = '';
       this.$emit('update:changeOrgType', selected.id);
     },
   },

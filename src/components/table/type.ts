@@ -1,6 +1,6 @@
 export interface DataTableComponent {
   /** 基于当前搜索、筛选、排序、分页参数，手动触发获取数据的请求 */
-  fetchRows: () => void;
+  fetchRows: (customizedUrl?: string, customizedMethod?: string) => void;
 }
 
 export type Pagination = {

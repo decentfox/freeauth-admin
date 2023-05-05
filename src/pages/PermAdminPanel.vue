@@ -52,6 +52,7 @@
               v-model:selected="selected"
               :nodes="simple"
               node-key="id"
+              label-key="name"
               selected-color="white"
               :filter="filter"
               default-expand-all

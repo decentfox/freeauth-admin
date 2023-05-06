@@ -218,6 +218,10 @@ export default defineComponent({
 
   setup() {
     return {
+      // API related
+      url: ref(''),
+      method: ref(''),
+
       // Server side request
       loading: ref(false),
       queryData: ref<QueryData>({
@@ -245,23 +249,22 @@ export default defineComponent({
   },
 
   mounted() {
+    this.setApiInfo(this.apiUrl, this.apiMethod);
     this.fetchRows();
   },
 
   methods: {
-    async fetchRows(customizedUrl?: string, customizedMethod?: string) {
-      const apiUrl = customizedUrl ? customizedUrl : this.apiUrl;
-      const apiMethod = customizedMethod ? customizedMethod : this.apiMethod;
-      if (!apiUrl || this.loading) {
+    async fetchRows() {
+      if (!this.url || this.loading) {
         return;
       }
       this.loading = true;
       try {
         const resp = await this.$api.request({
-          url: apiUrl,
-          method: apiMethod,
-          data: apiMethod === 'POST' ? this.queryData : null,
-          params: apiMethod === 'GET' ? this.queryData : null,
+          url: this.url,
+          method: this.method,
+          data: this.method === 'POST' ? this.queryData : null,
+          params: this.method === 'GET' ? this.queryData : null,
           hideProgress: true,
         });
         const data = resp.data;
@@ -301,6 +304,21 @@ export default defineComponent({
     onFiltered(filters: FilterCondition[]) {
       this.queryData.filter_by = filters;
       this.fetchRows();
+    },
+
+    onExternalFiltered(key: string, value: string | boolean) {
+      this.queryData[key] = value;
+      this.fetchRows();
+    },
+
+    setApiInfo(apiUrl: string, apiMethod: string) {
+      this.url = apiUrl;
+      this.method = apiMethod;
+    },
+
+    clearRows() {
+      this.rows = [];
+      this.setApiInfo('', 'GET');
     },
   },
 });

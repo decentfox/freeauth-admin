@@ -28,19 +28,122 @@
         <div class="q-px-md q-py-sm">
           <q-toolbar class="q-pa-none">
             <q-tabs
-              v-model="tab"
+              v-model="leftPanelTab"
               dense
               class="text-grey-7"
               active-color="primary"
               indicator-color="primary"
               align="left"
               narrow-indicator
+              @update:model-value="switchPanelTab"
             >
-              <q-tab name="enterprises" label="企业信息" />
               <q-tab name="users" label="成员列表" />
+              <q-tab name="enterprises" label="企业信息" />
             </q-tabs>
           </q-toolbar>
-          <q-tab-panels v-model="tab" animated>
+          <q-tab-panels v-model="leftPanelTab" animated>
+            <q-tab-panel
+              name="users"
+              class="scroll q-pa-none frame-table"
+              style="height: calc(100vh - 150px)"
+            >
+              <data-table
+                ref="userTable"
+                :columns="userColumns"
+                sticky-action-column
+                :hide-filter="true"
+              >
+                <template #extra-filters>
+                  <q-checkbox
+                    v-model="directDeptCheck"
+                    label="仅展示部门的直属成员"
+                    @update:model-value="filterDirectUsers"
+                  />
+                </template>
+                <template #table-action>
+                  <div>
+                    <q-btn
+                      unelevated
+                      dense
+                      label="添加成员"
+                      class="q-ml-sm q-px-md primary-btn"
+                      :disable="!selectedNode.id"
+                      @click="openAddMembersForm"
+                    />
+                    <q-tooltip
+                      v-if="!selectedNode.id"
+                      anchor="bottom left"
+                      self="top start"
+                    >
+                      选择左侧组织后可添加成员
+                    </q-tooltip>
+                  </div>
+                </template>
+                <template #body-cell-departments="props">
+                  <q-td :props="props">
+                    <q-chip
+                      v-for="(dept, idx) in (props.row.departments as Department[])"
+                      :key="idx"
+                      clickable
+                      size="12px"
+                      square
+                      color="secondary"
+                    >
+                      {{ dept.name }}
+                    </q-chip>
+                  </q-td>
+                </template>
+                <template #body-cell-is_deleted="props">
+                  <q-td :props="props">
+                    <q-chip
+                      square
+                      size="12px"
+                      :label="!props.row.is_deleted ? '正常' : '禁用'"
+                      class="text-weight-bold q-pa-sm"
+                      :class="
+                        !props.row.is_deleted
+                          ? 'chip-status-on'
+                          : 'chip-status-off'
+                      "
+                    />
+                  </q-td>
+                </template>
+                <template #body-cell-actions="props">
+                  <q-td :props="props">
+                    <dropdown-button
+                      :buttons="[
+                        {
+                          label: !props.row.is_deleted
+                            ? '禁用账号'
+                            : '启用账号',
+                          icon: !props.row.is_deleted
+                            ? 'remove_circle_outline'
+                            : 'task_alt',
+                          actionType: !props.row.is_deleted
+                            ? 'disable'
+                            : 'enable',
+                        },
+                        {
+                          label: '变更部门',
+                          icon: 'sync_alt',
+                          actionType: 'change_dept',
+                        },
+                        {
+                          label: '移除成员',
+                          icon: 'person_remove',
+                          actionType: 'remove',
+                        },
+                        {
+                          label: '办理离职',
+                          icon: 'logout',
+                          actionType: 'delete',
+                        },
+                      ]"
+                    />
+                  </q-td>
+                </template>
+              </data-table>
+            </q-tab-panel>
             <q-tab-panel
               name="enterprises"
               class="scroll q-pa-none frame-table"
@@ -84,125 +187,48 @@
                 </template>
               </data-table>
             </q-tab-panel>
-            <q-tab-panel
-              name="users"
-              class="scroll q-pa-none frame-table"
-              style="height: calc(100vh - 150px)"
-            >
-              <data-table
-                api-url="/users/query"
-                api-method="POST"
-                :columns="userColumns"
-                sticky-action-column
-                :hide-filter="true"
-              >
-                <template #extra-filters>
-                  <q-checkbox
-                    v-model="directDeptCheck"
-                    label="仅展示部门的直属成员"
-                  />
-                </template>
-                <template #table-action>
-                  <q-btn
-                    unelevated
-                    dense
-                    label="添加成员"
-                    class="q-ml-sm q-px-md primary-btn"
-                    @click="newMemberForm = true"
-                  />
-                </template>
-                <template #body-cell-depts="props">
-                  <q-td :props="props">
-                    <q-chip
-                      v-for="(dept, idx) in props.row.depts"
-                      :key="idx"
-                      clickable
-                      size="12px"
-                      square
-                      color="secondary"
-                    >
-                      {{ dept }}
-                    </q-chip>
-                  </q-td>
-                </template>
-                <template #body-cell-is_deleted="props">
-                  <q-td :props="props">
-                    <q-chip
-                      square
-                      size="12px"
-                      :label="!props.row.is_deleted ? '正常' : '禁用'"
-                      class="text-weight-bold q-pa-sm"
-                      :class="
-                        !props.row.is_deleted
-                          ? 'chip-status-on'
-                          : 'chip-status-off'
-                      "
-                    />
-                  </q-td>
-                </template>
-                <template #body-cell-actions="props">
-                  <q-td :props="props">
-                    <dropdown-button
-                      :buttons="[
-                        {
-                          label: !props.row.is_deleted
-                            ? '禁用账号'
-                            : '启用账号',
-                          icon: !props.row.is_deleted
-                            ? 'remove_circle_outline'
-                            : 'task_alt',
-                          actionType: !props.row.is_deleted
-                            ? 'disable'
-                            : 'enable',
-                        },
-                        {
-                          label: '删除账号',
-                          icon: 'delete_outline',
-                          actionType: 'delete',
-                        },
-                      ]"
-                    />
-                  </q-td>
-                </template>
-              </data-table>
-            </q-tab-panel>
           </q-tab-panels>
         </div>
       </template>
     </q-splitter>
     <form-dialog
-      ref="newMemberDialog"
-      v-model="newMemberForm"
+      ref="addMembersDialog"
+      v-model="addMembersForm"
       title="添加成员"
       width="450px"
+      @confirm="saveAddMembersForm"
+      @close="resetNewMemberForm"
     >
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
             <field-label name="直属部门" required />
+            <!-- TODO show error -->
             <tree-select
-              :simple="simple"
+              v-model="newMemberFormData.organization_ids"
+              :nodes="orgTreeData"
               multi-select
-              :initial-selected-items="editedDepartment"
+              :initial-selected-items="parentDepartment"
             />
           </div>
         </div>
 
+        <!-- TODO show error -->
         <q-option-group
-          v-model="newMemberTab"
+          v-model="addMembersTab"
           inline
           class="q-px-md"
           :options="[
-            { label: '添加已有用户', value: 'member' },
-            { label: '创建全新用户', value: 'account' },
+            { label: '添加已有用户', value: 'existing' },
+            { label: '创建全新用户', value: 'new' },
           ]"
         />
         <q-separator inset />
-        <q-tab-panels v-model="newMemberTab" animated>
-          <q-tab-panel name="member">
+        <q-tab-panels v-model="addMembersTab" animated>
+          <q-tab-panel name="existing">
             <q-select
               ref="select"
-              v-model="selectedUsers"
+              v-model="newMemberFormData.users"
               :options="userOptions"
               placeholder="输入用户姓名进行搜索"
               filled
@@ -228,91 +254,95 @@
                   removable
                   dense
                   :tabindex="scope.tabindex"
-                  color="blue-1"
-                  text-color="primary"
-                  class="q-ma-none q-mt-xs q-mr-xs"
+                  color="primary"
+                  text-color="white"
+                  class="q-pa-sm"
+                  :label="scope.opt.name"
                   @remove="scope.removeAtIndex(scope.index)"
-                >
-                  <q-avatar color="primary" text-color="white">
-                    {{ scope.opt.name[0] }}
-                  </q-avatar>
-                  {{ scope.opt.name }}
-                </q-chip>
+                />
               </template>
               <template #option="scope">
-                <q-item
-                  v-bind="scope.itemProps"
-                  :disable="!scope.opt.is_active"
-                >
+                <q-item v-bind="scope.itemProps">
                   <q-item-section avatar>
-                    <q-avatar color="primary" text-color="white">
-                      {{ scope.opt.name[0] }}
-                    </q-avatar>
+                    <q-chip
+                      square
+                      size="12px"
+                      :label="!scope.opt.is_deleted ? '正常' : '禁用'"
+                      class="text-weight-bold q-pa-sm"
+                      :class="
+                        !scope.opt.is_deleted
+                          ? 'chip-status-on'
+                          : 'chip-status-off'
+                      "
+                    />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>{{ scope.opt.name }}</q-item-label>
-                    <q-item-label caption>{{ scope.opt.role }}</q-item-label>
+                    <q-item-label>
+                      {{ scope.opt.name }} {{ scope.opt.mobile }}
+                    </q-item-label>
+                    <q-item-label caption>{{ scope.opt.email }}</q-item-label>
                   </q-item-section>
                 </q-item>
               </template>
             </q-select>
           </q-tab-panel>
-          <q-tab-panel name="account">
+          <q-tab-panel name="new">
             <div class="q-gutter-md">
               <div>
                 <field-label name="登录信息" required hint="至少填写一项" />
                 <div class="q-gutter-sm">
                   <q-input
-                    v-model="newUser.username"
+                    v-model="newUserFormData.username"
                     filled
                     dense
                     placeholder="请填写用户名"
                     hide-bottom-space
                     class="col"
-                    :error="!!createUserFormError.username"
-                    :error-message="createUserFormError.username"
+                    :error="!!newUserFormError.username"
+                    :error-message="newUserFormError.username"
                   />
                   <q-input
-                    v-model="newUser.mobile"
+                    v-model="newUserFormData.mobile"
                     filled
                     dense
                     placeholder="请填写手机号"
                     hide-bottom-space
                     class="col"
-                    :error="!!createUserFormError.mobile"
-                    :error-message="createUserFormError.mobile"
+                    :error="!!newUserFormError.mobile"
+                    :error-message="newUserFormError.mobile"
                   />
                   <q-input
-                    v-model="newUser.email"
+                    v-model="newUserFormData.email"
                     filled
                     dense
                     placeholder="请填写邮箱"
                     hide-bottom-space
                     class="col"
-                    :error="!!createUserFormError.email"
-                    :error-message="createUserFormError.email"
+                    :error="!!newUserFormError.email"
+                    :error-message="newUserFormError.email"
                     @update:model-value="
-                      if (!newUser.email) firstLoginNotification = false;
+                      if (!newUserFormData.email)
+                        firstLoginNotification = false;
                     "
                   />
                 </div>
                 <div
-                  v-if="!!createUserFormError.__root__"
+                  v-if="!!newUserFormError.__root__"
                   class="error-hint text-negative"
                 >
-                  {{ createUserFormError.__root__ }}
+                  {{ newUserFormError.__root__ }}
                 </div>
               </div>
               <div>
                 <field-label name="用户姓名" />
                 <q-input
-                  v-model="newUser.name"
+                  v-model="newUserFormData.name"
                   filled
                   dense
                   placeholder="请填写用户姓名"
                   hide-bottom-space
-                  :error="!!createUserFormError.name"
-                  :error-message="createUserFormError.name"
+                  :error="!!newUserFormError.name"
+                  :error-message="newUserFormError.name"
                 />
               </div>
               <div>
@@ -323,10 +353,10 @@
                 <q-toggle
                   v-model="firstLoginNotification"
                   label="通过邮件发送初始默认登录信息"
-                  :disable="!newUser.email"
+                  :disable="!newUserFormData.email"
                 >
                   <q-tooltip
-                    v-if="!newUser.email"
+                    v-if="!newUserFormData.email"
                     anchor="bottom middle"
                     self="center end"
                   >
@@ -345,6 +375,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
+import { FormDialogComponent } from 'src/components/dialog/type';
 import { DataTableComponent } from 'src/components/table/type';
 
 import FormDialog from 'components/dialog/FormDialog.vue';
@@ -354,7 +385,16 @@ import TreeSelect from 'components/form/TreeSelect.vue';
 import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 
-import { Enterprise, OrgTree, UserPostData, UserPostError } from './type';
+import {
+  AddMembersPostData,
+  AddMembersPostError,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Department,
+  Enterprise,
+  OrgTree,
+  UserPostData,
+  UserPostError,
+} from './type';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -382,10 +422,10 @@ const userColumns: QTableProps['columns'] = [
     field: 'email',
   },
   {
-    name: 'depts',
-    label: '部门',
+    name: 'departments',
+    label: '直属组织',
     align: 'left',
-    field: 'depts',
+    field: 'departments',
   },
   {
     name: 'is_deleted',
@@ -471,11 +511,15 @@ export default defineComponent({
       splitterModel: 350,
 
       // tree
-      simple: ref<QTreeNode[]>(),
+      orgTreeData: ref<QTreeNode[]>(),
       selectedOrgTypeId: ref(''),
+      selectedNode: ref({
+        id: '',
+        name: '',
+      }),
 
       // table
-      tab: ref('enterprises'),
+      leftPanelTab: ref('users'),
       // enterprise
       enterpriseColumns: enterpriseColumns,
       // users
@@ -483,17 +527,18 @@ export default defineComponent({
       directDeptCheck: ref(false),
 
       // form dialog
-      newMemberForm: ref(false),
-      newMemberTab: ref('member'),
-      editedDepartment: ref<QTreeNode[]>(),
-      // add new member
-      newUser: ref<UserPostData>({}),
-      userKeyword: ref(''),
-      selectedUsers: ref([]),
+      addMembersForm: ref(false),
+      addMembersTab: ref('existing'),
+      parentDepartment: ref<QTreeNode[]>(),
+
+      // add new member, existing user
       userOptions: ref([]),
-      // add new account
-      createUserForm: ref(false),
-      createUserFormError: ref<UserPostError>({}),
+      newMemberFormData: ref<AddMembersPostData>({}),
+      newMemberFormError: ref<AddMembersPostError>({}),
+
+      // add new user
+      newUserFormData: ref<UserPostData>({}),
+      newUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(false),
       passwordChangingRequired: ref(false),
     };
@@ -509,12 +554,19 @@ export default defineComponent({
     },
 
     onNodeUpdated(node: QTreeNode) {
-      this.editedDepartment = node ? [node] : [];
+      this.selectedNode.id = node.id;
+      this.selectedNode.name = node.name;
+      this.loadUserTable();
     },
 
     onOrgTypeChanged(selectedId: string) {
       this.selectedOrgTypeId = selectedId;
+      this.selectedNode = {
+        id: '',
+        name: '',
+      };
       this.loadEnterpriseTable();
+      this.loadUserTable();
     },
 
     refresh(evt: Event) {
@@ -524,11 +576,47 @@ export default defineComponent({
     },
 
     async loadEnterpriseTable() {
-      const et = this.$refs.enterpriseTable as DataTableComponent;
-      et.fetchRows(
-        `/org_types/${this.selectedOrgTypeId}/enterprises/query`,
-        'POST'
-      );
+      if (this.leftPanelTab === 'enterprises') {
+        setTimeout(() => {
+          const et = this.$refs.enterpriseTable as DataTableComponent;
+          et.setApiInfo(
+            `/org_types/${this.selectedOrgTypeId}/enterprises/query`,
+            'POST'
+          );
+          et.fetchRows();
+        }, 20);
+      }
+    },
+
+    async loadUserTable() {
+      if (this.leftPanelTab === 'users') {
+        if (this.selectedNode.id) {
+          setTimeout(() => {
+            const ut = this.$refs.userTable as DataTableComponent;
+            ut.setApiInfo(
+              `/organizations/${this.selectedNode.id}/members`,
+              'POST'
+            );
+            ut.fetchRows();
+          }, 20);
+        } else {
+          const ut = this.$refs.userTable as DataTableComponent;
+          ut.clearRows();
+        }
+      }
+    },
+
+    switchPanelTab(val: string) {
+      if (val === 'users') {
+        this.loadUserTable();
+      } else if (val === 'enterprises') {
+        this.loadEnterpriseTable();
+      }
+    },
+
+    filterDirectUsers(val: boolean) {
+      const ut = this.$refs.userTable as DataTableComponent;
+      ut.onExternalFiltered('include_sub_members', !val);
     },
 
     searchUser(
@@ -542,12 +630,8 @@ export default defineComponent({
         return;
       }
       update(async () => {
-        // TODO
-        let resp = await this.$api.get('/users/options', {
-          params: {
-            keyword: kw,
-            is_active: true,
-          },
+        let resp = await this.$api.post('/users/query', {
+          q: kw,
         });
         this.userOptions = resp.data.rows;
       });
@@ -556,8 +640,69 @@ export default defineComponent({
     clearFilter() {
       (this.$refs.select as QSelect).updateInputValue('');
     },
+
+    async openAddMembersForm() {
+      const resp = await this.$api.get(
+        `/org_types/${this.selectedOrgTypeId}/organization_tree`
+      );
+      this.orgTreeData = resp.data;
+      this.parentDepartment = [this.selectedNode];
+      this.newUserFormData.organization_ids = [this.selectedNode.id];
+      this.newMemberFormData.organization_ids = [this.selectedNode.id];
+      this.addMembersForm = true;
+    },
+
+    async saveAddMembersForm() {
+      if (this.addMembersTab === 'existing' && this.newMemberFormData.users) {
+        this.newMemberFormData.user_ids = this.newMemberFormData.users.map(
+          (user) => user.id
+        );
+        try {
+          this.newMemberFormError = {};
+          await this.$api.post(
+            '/organizations/members',
+            this.newMemberFormData,
+            {
+              successMsg: '添加成员成功',
+            }
+          );
+          (this.$refs.addMembersDialog as FormDialogComponent).hide();
+          this.loadUserTable();
+          this.resetNewMemberForm();
+        } catch (e) {
+          this.newMemberFormError = (e as Error).cause || {};
+        }
+      } else if (this.addMembersTab == 'new') {
+        try {
+          this.newUserFormError = {};
+          await this.$api.post('/users', this.newUserFormData, {
+            successMsg: '成员创建成功',
+          });
+          (this.$refs.addMembersDialog as FormDialogComponent).hide();
+          this.loadUserTable();
+          this.resetNewUserForm();
+        } catch (e) {
+          this.newUserFormError = (e as Error).cause || {};
+        }
+      }
+    },
+
+    resetNewMemberForm() {
+      this.newMemberFormData = {};
+      this.newMemberFormError = {};
+    },
+
+    resetNewUserForm() {
+      this.newUserFormData = {};
+      this.newUserFormError = {};
+    },
   },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.error-hint {
+  font-size: 11px;
+  padding: 8px 0 0 12px;
+}
+</style>

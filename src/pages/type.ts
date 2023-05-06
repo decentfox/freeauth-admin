@@ -1,12 +1,21 @@
 export interface User {
+  /** 用户 ID */
   id: string;
+  /** 用户姓名 */
   name?: string;
+  /** 用户手机号 */
   mobile?: string;
+  /** 用户邮箱 */
   email?: string;
+  /** 用户用户名 */
   username: string;
-  depts?: string[];
+  /** 用户直属部门 */
+  departments?: Department[];
+  /** 用户最后登录时间 */
   last_login_at?: Date;
+  /** 用户最后创建时间 */
   created_at?: Date;
+  /** 用户是否禁用 */
   is_deleted: boolean;
 }
 
@@ -19,6 +28,8 @@ export interface UserPostData {
   email?: string;
   /** 用户用户名 */
   username?: string;
+  /** 用户直属部门 */
+  organization_ids?: string[];
 }
 
 export interface UserPostError {
@@ -141,6 +152,21 @@ export interface DepartmentPostError {
   name?: string;
   code?: string;
   parent_id?: string;
+  __root__?: string;
+}
+
+export interface AddMembersPostData {
+  /** 多个用户的 ID 集合 */
+  user_ids?: string[];
+  /** 多个组织的 ID 集合 */
+  organization_ids?: string[];
+  /** 多个用户的集合 TODO */
+  users?: User[];
+}
+
+export interface AddMembersPostError {
+  user_ids?: string;
+  organization_ids?: string;
   __root__?: string;
 }
 

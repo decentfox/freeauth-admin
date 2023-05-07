@@ -409,7 +409,12 @@
             :nodes="orgTreeData"
             :initial-selected-items="parentDepartment"
           />
-          <!-- TODO show error -->
+          <div
+            v-if="!!departmentFormError.parent_id"
+            class="error-hint text-negative"
+          >
+            {{ departmentFormError.parent_id }}
+          </div>
         </div>
         <div>
           <field-label name="部门名称" required />
@@ -665,7 +670,7 @@ export default defineComponent({
             title: '删除组织类型',
             content: `操作后，该组织类型【${orgName}】下的所有企业将一并执行删除；与这些企业相关联的用户将自动与企业解绑，但仍可继续正常使用。请问您确认要执行删除吗？`,
             buttons: [
-              { label: '取消' },
+              { label: '取消', class: 'secondary-btn' },
               {
                 label: '删除',
                 actionType: 'delete',
@@ -811,7 +816,7 @@ export default defineComponent({
             title: node.is_enterprise ? '删除企业' : '删除部门',
             content: `操作后，【${orgName}】的下属部门将一并执行删除；与其关联的用户将自动解绑，但仍可继续正常使用。请问您确认要执行删除吗？`,
             buttons: [
-              { label: '取消' },
+              { label: '取消', class: 'secondary-btn' },
               {
                 label: '删除',
                 actionType: 'delete',

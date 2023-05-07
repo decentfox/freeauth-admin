@@ -126,19 +126,16 @@
                         {
                           label: '变更部门',
                           icon: 'sync_alt',
-                          actionType: 'change_dept',
-                        },
-                        {
-                          label: '移除成员',
-                          icon: 'person_remove',
-                          actionType: 'remove',
+                          actionType: 'transfer',
                         },
                         {
                           label: '办理离职',
                           icon: 'logout',
-                          actionType: 'delete',
+                          actionType: 'resign',
                         },
                       ]"
+                      @click.stop
+                      @menu-click="operateOneUser($event, props.row)"
                     />
                   </q-td>
                 </template>
@@ -154,6 +151,7 @@
                 :columns="enterpriseColumns"
                 sticky-action-column
                 :hide-filter="true"
+                @row-click="copyInfoToClipboard"
               >
                 <template #table-action>
                   <q-btn
@@ -176,11 +174,17 @@
                           actionType: 'edit',
                         },
                         {
+                          label: '复制信息',
+                          icon: 'copy_all',
+                          actionType: 'copy',
+                        },
+                        {
                           label: '删除企业',
                           icon: 'delete_outline',
                           actionType: 'delete',
                         },
                       ]"
+                      @click.stop
                       @menu-click="operateOneEnterprise($event, props.row)"
                     />
                   </q-td>
@@ -203,17 +207,20 @@
         <div class="q-col-gutter-sm q-pa-md">
           <div>
             <field-label name="直属部门" required />
-            <!-- TODO show error -->
             <tree-select
               v-model="newMemberFormData.organization_ids"
               :nodes="orgTreeData"
               multi-select
               :initial-selected-items="parentDepartment"
             />
+            <div
+              v-if="!!newMemberFormError.organization_ids"
+              class="error-hint text-negative"
+            >
+              {{ newMemberFormError.organization_ids }}
+            </div>
           </div>
         </div>
-
-        <!-- TODO show error -->
         <q-option-group
           v-model="addMembersTab"
           inline
@@ -228,7 +235,7 @@
           <q-tab-panel name="existing">
             <q-select
               ref="select"
-              v-model="newMemberFormData.users"
+              v-model="selectedExistingUsers"
               :options="userOptions"
               placeholder="输入用户姓名进行搜索"
               filled
@@ -369,6 +376,35 @@
         </q-tab-panels>
       </template>
     </form-dialog>
+
+    <form-dialog
+      ref="transferDialog"
+      v-model="transferForm"
+      title="变更部门"
+      width="450px"
+      @confirm="saveTransferForm"
+      @close="resetTransferForm"
+    >
+      <template #form-content>
+        <div class="q-col-gutter-sm q-pa-md">
+          <div>
+            <field-label name="部门变更为" required />
+            <tree-select
+              v-model="transferFormData.organization_ids"
+              :nodes="orgTreeData"
+              multi-select
+              :initial-selected-items="parentDepartment"
+            />
+            <div
+              v-if="!!transferFormError.organization_ids"
+              class="error-hint text-negative"
+            >
+              {{ transferFormError.organization_ids }}
+            </div>
+          </div>
+        </div>
+      </template>
+    </form-dialog>
   </q-page>
 </template>
 
@@ -378,6 +414,7 @@ import { QSelect, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 import { DataTableComponent } from 'src/components/table/type';
 
+import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import DropdownButton from 'components/DropdownButton.vue';
 import FieldLabel from 'components/form/FieldLabel.vue';
@@ -392,6 +429,9 @@ import {
   Department,
   Enterprise,
   OrgTree,
+  TransferPostData,
+  TransferPostError,
+  User,
   UserPostData,
   UserPostError,
 } from './type';
@@ -533,6 +573,7 @@ export default defineComponent({
 
       // add new member, existing user
       userOptions: ref([]),
+      selectedExistingUsers: ref<User[]>(),
       newMemberFormData: ref<AddMembersPostData>({}),
       newMemberFormError: ref<AddMembersPostError>({}),
 
@@ -541,6 +582,11 @@ export default defineComponent({
       newUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(false),
       passwordChangingRequired: ref(false),
+
+      // transfer user
+      transferForm: ref(false),
+      transferFormData: ref<TransferPostData>({}),
+      transferFormError: ref<TransferPostError>({}),
     };
   },
 
@@ -550,6 +596,8 @@ export default defineComponent({
         (this.$refs.orgStructure as OrgTree).openEnterpriseForm(enterprise.id);
       } else if (evt.type === 'delete') {
         (this.$refs.orgStructure as OrgTree).deleteOrganization(enterprise.id);
+      } else if (evt.type === 'copy') {
+        this.copyInfoToClipboard(evt, enterprise);
       }
     },
 
@@ -653,8 +701,8 @@ export default defineComponent({
     },
 
     async saveAddMembersForm() {
-      if (this.addMembersTab === 'existing' && this.newMemberFormData.users) {
-        this.newMemberFormData.user_ids = this.newMemberFormData.users.map(
+      if (this.addMembersTab === 'existing' && this.selectedExistingUsers) {
+        this.newMemberFormData.user_ids = this.selectedExistingUsers.map(
           (user) => user.id
         );
         try {
@@ -696,13 +744,196 @@ export default defineComponent({
       this.newUserFormData = {};
       this.newUserFormError = {};
     },
+
+    operateOneUser(evt: Event, user: User) {
+      if (evt.type === 'disable') {
+        this.disableUsers([user]);
+      } else if (evt.type === 'enable') {
+        this.enableUsers([user]);
+      } else if (evt.type === 'resign') {
+        this.resignUsers([user]);
+      } else if (evt.type === 'transfer') {
+        this.openTransferForm(user);
+      }
+    },
+
+    async toggleUsersStatus(user_ids: string[], is_deleted: boolean) {
+      try {
+        await this.$api.put(
+          '/users/status',
+          { user_ids, is_deleted },
+          { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
+        );
+      } finally {
+        this.loadUserTable();
+      }
+    },
+
+    disableUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
+      this.$q
+        .dialog({
+          component: ConfirmDialog,
+          componentProps: {
+            title: '禁用成员',
+            content: `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
+            buttons: [
+              { label: '取消', class: 'secondary-btn' },
+              {
+                label: '禁用',
+                actionType: 'disable',
+                class: 'accent-btn',
+              },
+            ],
+          },
+        })
+        .onOk(({ type }) => {
+          if (type === 'disable') {
+            this.toggleUsersStatus(
+              users.map((u: User) => u.id),
+              true
+            );
+          }
+        });
+    },
+
+    enableUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
+      this.$q
+        .dialog({
+          component: ConfirmDialog,
+          componentProps: {
+            title: '恢复成员',
+            content: `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
+            buttons: [
+              { label: '取消', class: 'secondary-btn' },
+              {
+                label: '恢复',
+                actionType: 'enable',
+                class: 'accent-btn',
+              },
+            ],
+          },
+        })
+        .onOk(({ type }) => {
+          if (type === 'enable') {
+            this.toggleUsersStatus(
+              users.map((u: User) => u.id),
+              false
+            );
+          }
+        });
+    },
+
+    resignUsers(users: User[]) {
+      const userDesc = `${users[0].name || users[0].username}${
+        users[0].mobile ? `（${users[0].mobile}）` : ''
+      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
+
+      this.$q
+        .dialog({
+          component: ConfirmDialog,
+          componentProps: {
+            title: '办理离职',
+            content: `您正在请求为成员：${userDesc}办理离职。操作后，该成员授权、部门和角色等关系将被删除，转为普通用户。如需同时禁用该用户，请点击【离职并禁用】。
+`,
+            buttons: [
+              { label: '取消', class: 'secondary-btn' },
+              {
+                label: '离职',
+                actionType: 'resign',
+                class: 'accent-btn',
+              },
+              {
+                label: '离职并禁用',
+                actionType: 'resign_disable',
+                class: 'accent-btn',
+              },
+            ],
+          },
+        })
+        .onOk(async ({ type }) => {
+          if (['resign', 'resign_disable'].indexOf(type) >= 0) {
+            let postData = {};
+            if (type === 'resign') {
+              postData = { user_ids: users.map((u: User) => u.id) };
+            } else if (type === 'resign_disable') {
+              postData = {
+                user_ids: users.map((u: User) => u.id),
+                is_deleted: true,
+              };
+            }
+            try {
+              await this.$api.request({
+                method: 'POST',
+                url: '/users/resign',
+                data: postData,
+                successMsg: '离职办理成功',
+              });
+            } finally {
+              this.loadUserTable();
+            }
+          }
+        });
+    },
+
+    async openTransferForm(user: User) {
+      const resp = await this.$api.get(
+        `/org_types/${this.selectedOrgTypeId}/organization_tree`
+      );
+      this.orgTreeData = resp.data;
+      this.transferFormData.user_id = user.id;
+      this.parentDepartment = user.departments;
+      if (user.departments) {
+        this.transferFormData.organization_ids = user.departments.map(
+          (d) => d.id
+        );
+      }
+      this.transferForm = true;
+    },
+
+    async saveTransferForm() {
+      try {
+        this.transferFormError = {};
+        await this.$api.put(
+          `/users/${this.transferFormData.user_id}/organizations`,
+          this.transferFormData,
+          {
+            successMsg: '部门变更成功',
+          }
+        );
+        (this.$refs.transferDialog as FormDialogComponent).hide();
+        this.loadUserTable();
+        this.resetTransferForm();
+      } catch (e) {
+        this.transferFormError = (e as Error).cause || {};
+      }
+    },
+
+    resetTransferForm() {
+      this.transferFormData = {};
+      this.transferFormError = {};
+    },
+
+    copyInfoToClipboard(evt: Event, row: Enterprise) {
+      const info = [
+        '企业全称：' + row.name,
+        '企业 Code：' + (row.code ? row.code : ''),
+        '纳税识别号：' + (row.tax_id ? row.tax_id : ''),
+        '开户行：' + (row.issuing_bank ? row.issuing_bank : ''),
+        '银行账号：' + (row.bank_account_number ? row.bank_account_number : ''),
+        '办公地址：' + (row.contact_address ? row.contact_address : ''),
+        '办公电话：' + (row.contact_phone_num ? row.contact_phone_num : ''),
+      ];
+      let text = info.join('\n');
+      this.$utils.copyToClipboard(text);
+    },
   },
 });
 </script>
 
-<style lang="scss" scoped>
-.error-hint {
-  font-size: 11px;
-  padding: 8px 0 0 12px;
-}
-</style>
+<style lang="scss" scoped></style>

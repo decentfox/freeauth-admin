@@ -53,7 +53,8 @@
                 actionType: 'delete',
               },
             ]"
-            @menu-click="operateOneUser($event, [props.row])"
+            @click.stop
+            @menu-click="operateOneUser($event, props.row)"
           />
         </q-td>
       </template>
@@ -333,7 +334,7 @@ export default defineComponent({
         await this.$api.put(
           '/users/status',
           { user_ids, is_deleted },
-          { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
+          { successMsg: `${is_deleted ? '禁用' : '启用'}用户成功` }
         );
       } finally {
         (this.$refs.table as DataTableComponent).fetchRows();
@@ -344,7 +345,7 @@ export default defineComponent({
       try {
         this.createUserFormError = {};
         await this.$api.post('/users', this.newUser, {
-          successMsg: '成员创建成功',
+          successMsg: '用户创建成功',
         });
         (this.$refs.createUserDialog as FormDialogComponent).hide();
         (this.$refs.table as DataTableComponent).fetchRows();
@@ -367,10 +368,10 @@ export default defineComponent({
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '禁用成员',
-            content: `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
+            title: '禁用用户',
+            content: `您正在请求禁用用户：${userDesc}，操作后，该用户将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
             buttons: [
-              { label: '取消' },
+              { label: '取消', class: 'secondary-btn' },
               {
                 label: '禁用',
                 actionType: 'disable',
@@ -397,10 +398,10 @@ export default defineComponent({
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '恢复成员',
-            content: `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
+            title: '恢复用户',
+            content: `您正在请求启用用户：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
             buttons: [
-              { label: '取消' },
+              { label: '取消', class: 'secondary-btn' },
               {
                 label: '恢复',
                 actionType: 'enable',
@@ -428,10 +429,10 @@ export default defineComponent({
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '删除成员',
-            content: `您正在请求删除成员：${userDesc}，数据删除后将无法进行恢复，您确认要继续删除吗？`,
+            title: '删除用户',
+            content: `您正在请求删除用户：${userDesc}，数据删除后将无法进行恢复，您确认要继续删除吗？`,
             buttons: [
-              { label: '取消' },
+              { label: '取消', class: 'secondary-btn' },
               {
                 label: '删除',
                 actionType: 'delete',
@@ -448,7 +449,7 @@ export default defineComponent({
                 method: 'DELETE',
                 url: '/users',
                 data: { user_ids: userIds },
-                successMsg: '成员删除成功',
+                successMsg: '删除用户成功',
               });
             } finally {
               (this.$refs.table as DataTableComponent).fetchRows();
@@ -457,13 +458,13 @@ export default defineComponent({
         });
     },
 
-    operateOneUser(evt: Event, users: User[]) {
+    operateOneUser(evt: Event, user: User) {
       if (evt.type === 'disable') {
-        this.disableUsers(users);
+        this.disableUsers([user]);
       } else if (evt.type === 'enable') {
-        this.enableUsers(users);
+        this.enableUsers([user]);
       } else if (evt.type === 'delete') {
-        this.deleteUsers(users);
+        this.deleteUsers([user]);
       }
     },
 
@@ -474,9 +475,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.error-hint {
-  font-size: 11px;
-  padding: 8px 0 0 12px;
-}
-</style>
+<style lang="scss" scoped></style>

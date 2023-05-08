@@ -21,7 +21,7 @@
           :key="button.label"
           v-bind="button"
           v-close-popup
-          flat
+          unelevated
           :class="button.class"
           @click="onClick(button)"
         />

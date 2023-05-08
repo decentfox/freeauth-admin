@@ -51,6 +51,7 @@
                       actionType: 'delete',
                     },
                   ]"
+                  @click.stop
                   @menu-click="operateOneRole"
                 />
               </div>

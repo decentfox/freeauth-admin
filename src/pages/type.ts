@@ -8,7 +8,7 @@ export interface User {
   /** 用户邮箱 */
   email?: string;
   /** 用户用户名 */
-  username: string;
+  username?: string;
   /** 用户直属部门 */
   departments?: Department[];
   /** 用户最后登录时间 */
@@ -16,7 +16,7 @@ export interface User {
   /** 用户最后创建时间 */
   created_at?: Date;
   /** 用户是否禁用 */
-  is_deleted: boolean;
+  is_deleted?: boolean;
 }
 
 export interface UserPostData {
@@ -76,7 +76,6 @@ export interface OrgTypePostData {
 export interface OrgTypePostError {
   name?: string;
   code?: string;
-  __root__?: string;
 }
 
 export interface Enterprise {
@@ -121,7 +120,6 @@ export interface EnterprisePostError {
   name?: string;
   tax_id?: string;
   code?: string;
-  __root__?: string;
 }
 
 export interface Department {
@@ -152,7 +150,6 @@ export interface DepartmentPostError {
   name?: string;
   code?: string;
   parent_id?: string;
-  __root__?: string;
 }
 
 export interface AddMembersPostData {
@@ -160,14 +157,23 @@ export interface AddMembersPostData {
   user_ids?: string[];
   /** 多个组织的 ID 集合 */
   organization_ids?: string[];
-  /** 多个用户的集合 TODO */
-  users?: User[];
 }
 
 export interface AddMembersPostError {
   user_ids?: string;
   organization_ids?: string;
-  __root__?: string;
+}
+
+export interface TransferPostData {
+  /** 用户的 ID */
+  user_id?: string;
+  /** 组织的 ID */
+  organization_ids?: string[];
+}
+
+export interface TransferPostError {
+  user_id?: string;
+  organization_ids?: string;
 }
 
 export interface Permission {

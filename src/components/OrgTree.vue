@@ -158,6 +158,7 @@
         selected-color="white"
         :filter="filter"
         default-expand-all
+        :duration="1"
         @update:selected="onNodeUpdated"
       >
         <template #default-header="prop">
@@ -799,6 +800,7 @@ export default defineComponent({
     resetDepartmentForm() {
       this.departmentFormError = {};
       this.departmentFormData = {};
+      this.parentDepartment = [];
       this.operatedDepartment = {
         id: '',
         name: '',

@@ -738,11 +738,13 @@ export default defineComponent({
     resetNewMemberForm() {
       this.newMemberFormData = {};
       this.newMemberFormError = {};
+      this.selectedExistingUsers = [];
     },
 
     resetNewUserForm() {
       this.newUserFormData = {};
       this.newUserFormError = {};
+      this.selectedExistingUsers = [];
     },
 
     operateOneUser(evt: Event, user: User) {

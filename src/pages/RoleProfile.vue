@@ -1,6 +1,6 @@
 <template>
   <q-page class="full-width">
-    <q-item-label header>用户详情页（{{ userId }}）</q-item-label>
+    <q-item-label header>角色详情页（{{ roleId }}）</q-item-label>
     <q-btn @click="goBack">back</q-btn>
   </q-page>
 </template>
@@ -9,12 +9,12 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: 'UserProfile',
+  name: 'RoleProfile',
 
   components: {},
 
   props: {
-    userId: {
+    roleId: {
       type: String,
       default: null,
     },

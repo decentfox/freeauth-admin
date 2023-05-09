@@ -35,6 +35,7 @@
         label-key="name"
         selected-color="white"
         default-expand-all
+        no-transition
         tick-strategy="strict"
         @update:ticked="nodeTicked"
       />
@@ -47,6 +48,7 @@
         label-key="name"
         selected-color="white"
         default-expand-all
+        no-transition
         @update:selected="nodeSelected"
       />
     </q-popup-proxy>

@@ -12,7 +12,7 @@
         </q-item-section>
         <q-space />
       </q-item>
-      <q-card-section class="q-py-md">
+      <q-card-section class="q-py-sm">
         {{ content }}
       </q-card-section>
       <q-card-actions align="right">

@@ -14,6 +14,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/LoginSettings.vue'),
       },
       {
+        path: '/common_settings',
+        component: () => import('pages/CommonSettings.vue'),
+      },
+      {
         path: '/user_admin_panel',
         component: () => import('pages/UserAdminPanel.vue'),
       },
@@ -29,6 +33,11 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/role_admin_panel',
         component: () => import('pages/RoleAdminPanel.vue'),
+      },
+      {
+        path: '/role_profile/:roleId',
+        component: () => import('pages/RoleProfile.vue'),
+        props: true,
       },
       {
         path: '/perm_admin_panel',

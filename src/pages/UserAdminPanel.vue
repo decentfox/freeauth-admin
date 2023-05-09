@@ -9,8 +9,8 @@
       search-placeholder="搜索用户信息"
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
-      @批量禁用="(selected) => disableUsers(selected)"
-      @批量启用="(selected) => enableUsers(selected)"
+      @批量禁用="(selected) => toggleUsersStatus(selected, true)"
+      @批量启用="(selected) => toggleUsersStatus(selected, false)"
       @批量删除="(selected) => deleteUsers(selected)"
       @row-click="goToUserProfile"
     >
@@ -29,7 +29,7 @@
             square
             size="12px"
             :label="!props.row.is_deleted ? '正常' : '禁用'"
-            class="text-weight-bold q-pa-sm"
+            class="text-weight-bold q-pa-sm q-ml-none"
             :class="
               !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
             "
@@ -329,18 +329,6 @@ export default defineComponent({
   },
 
   methods: {
-    async toggleUsersStatus(user_ids: string[], is_deleted: boolean) {
-      try {
-        await this.$api.put(
-          '/users/status',
-          { user_ids, is_deleted },
-          { successMsg: `${is_deleted ? '禁用' : '启用'}用户成功` }
-        );
-      } finally {
-        (this.$refs.table as DataTableComponent).fetchRows();
-      }
-    },
-
     async createUser() {
       try {
         this.createUserFormError = {};
@@ -360,62 +348,44 @@ export default defineComponent({
       this.newUser = {};
     },
 
-    disableUsers(users: User[]) {
+    toggleUsersStatus(users: User[], isDeleted: boolean) {
       const userDesc = `${users[0].name || users[0].username}${
         users[0].mobile ? `（${users[0].mobile}）` : ''
       }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '禁用用户',
-            content: `您正在请求禁用用户：${userDesc}，操作后，该用户将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '禁用',
-                actionType: 'disable',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(({ type }) => {
-          if (type === 'disable') {
-            this.toggleUsersStatus(
-              users.map((u: User) => u.id),
-              true
-            );
-          }
-        });
-    },
+      const content = isDeleted
+        ? `您正在请求禁用用户：${userDesc}，操作后，该用户将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`
+        : `您正在请求启用用户：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`;
 
-    enableUsers(users: User[]) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
       this.$q
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '恢复用户',
-            content: `您正在请求启用用户：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
+            title: isDeleted ? '禁用用户' : '恢复用户',
+            content: content,
             buttons: [
               { label: '取消', class: 'secondary-btn' },
               {
-                label: '恢复',
-                actionType: 'enable',
+                label: isDeleted ? '禁用' : '恢复',
+                actionType: 'toggle',
                 class: 'accent-btn',
               },
             ],
           },
         })
-        .onOk(({ type }) => {
-          if (type === 'enable') {
-            this.toggleUsersStatus(
-              users.map((u: User) => u.id),
-              false
-            );
+        .onOk(async ({ type }) => {
+          if (type === 'toggle') {
+            try {
+              await this.$api.put(
+                '/users/status',
+                {
+                  user_ids: users.map((u: User) => u.id),
+                  is_deleted: isDeleted,
+                },
+                { successMsg: `${isDeleted ? '禁用' : '启用'}用户成功` }
+              );
+            } finally {
+              (this.$refs.table as DataTableComponent).fetchRows();
+            }
           }
         });
     },
@@ -460,9 +430,9 @@ export default defineComponent({
 
     operateOneUser(evt: Event, user: User) {
       if (evt.type === 'disable') {
-        this.disableUsers([user]);
+        this.toggleUsersStatus([user], true);
       } else if (evt.type === 'enable') {
-        this.enableUsers([user]);
+        this.toggleUsersStatus([user], false);
       } else if (evt.type === 'delete') {
         this.deleteUsers([user]);
       }

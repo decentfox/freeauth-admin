@@ -4,7 +4,7 @@
       v-model="splitterModel"
       class="q-py-sm"
       unit="px"
-      :limits="[250, 500]"
+      :limits="[250, 400]"
     >
       <!--the first splitted screen-->
       <template #before>
@@ -51,7 +51,8 @@
                 ref="userTable"
                 :columns="userColumns"
                 sticky-action-column
-                :hide-filter="true"
+                search-placeholder="搜索用户信息"
+                hide-filter
               >
                 <template #extra-filters>
                   <q-checkbox
@@ -88,6 +89,7 @@
                       size="12px"
                       square
                       color="secondary"
+                      class="q-ml-none"
                     >
                       {{ dept.name }}
                     </q-chip>
@@ -99,7 +101,7 @@
                       square
                       size="12px"
                       :label="!props.row.is_deleted ? '正常' : '禁用'"
-                      class="text-weight-bold q-pa-sm"
+                      class="text-weight-bold q-pa-sm q-ml-none"
                       :class="
                         !props.row.is_deleted
                           ? 'chip-status-on'
@@ -150,14 +152,15 @@
                 ref="enterpriseTable"
                 :columns="enterpriseColumns"
                 sticky-action-column
-                :hide-filter="true"
+                search-placeholder="搜索企业信息"
+                hide-filter
                 @row-click="copyInfoToClipboard"
               >
                 <template #table-action>
                   <q-btn
                     unelevated
                     dense
-                    label="添加企业"
+                    label="创建企业"
                     class="q-ml-sm q-px-md primary-btn"
                     @click="
                       ($refs.orgStructure as OrgTree).openEnterpriseForm()
@@ -386,7 +389,7 @@
       @close="resetTransferForm"
     >
       <template #form-content>
-        <div class="q-col-gutter-sm q-pa-md">
+        <div class="q-gutter-md q-pa-md">
           <div>
             <field-label name="部门变更为" required />
             <tree-select
@@ -401,6 +404,9 @@
             >
               {{ transferFormError.organization_ids }}
             </div>
+          </div>
+          <div class="text-caption hint-label">
+            注意：变更部门可能会影响该成员当前关联的角色，若该成员当前关联的角色在变更后的部门中不存在，则该角色会被自动移除。因此，操作部门变更后，建议您前往【角色管理】检查该成员的角色配置。
           </div>
         </div>
       </template>
@@ -548,10 +554,9 @@ export default defineComponent({
   setup() {
     return {
       // splitter
-      splitterModel: 350,
+      splitterModel: 300,
 
       // tree
-      orgTreeData: ref<QTreeNode[]>(),
       selectedOrgTypeId: ref(''),
       selectedNode: ref({
         id: '',
@@ -567,6 +572,7 @@ export default defineComponent({
       directDeptCheck: ref(false),
 
       // form dialog
+      orgTreeData: ref<QTreeNode[]>(),
       addMembersForm: ref(false),
       addMembersTab: ref('existing'),
       parentDepartment: ref<QTreeNode[]>(),
@@ -627,30 +633,22 @@ export default defineComponent({
       if (this.leftPanelTab === 'enterprises') {
         setTimeout(() => {
           const et = this.$refs.enterpriseTable as DataTableComponent;
-          et.setApiInfo(
-            `/org_types/${this.selectedOrgTypeId}/enterprises/query`,
-            'POST'
-          );
-          et.fetchRows();
+          et.setApiInfo('/enterprises/query', 'POST');
+          et.onExternalFiltered('org_type_id', this.selectedOrgTypeId);
         }, 20);
       }
     },
 
     async loadUserTable() {
-      if (this.leftPanelTab === 'users') {
-        if (this.selectedNode.id) {
-          setTimeout(() => {
-            const ut = this.$refs.userTable as DataTableComponent;
-            ut.setApiInfo(
-              `/organizations/${this.selectedNode.id}/members`,
-              'POST'
-            );
-            ut.fetchRows();
-          }, 20);
-        } else {
+      if (this.leftPanelTab === 'users' && this.selectedNode.id) {
+        setTimeout(() => {
           const ut = this.$refs.userTable as DataTableComponent;
-          ut.clearRows();
-        }
+          ut.setApiInfo(
+            `/organizations/${this.selectedNode.id}/members`,
+            'POST'
+          );
+          ut.fetchRows();
+        }, 20);
       }
     },
 
@@ -711,7 +709,7 @@ export default defineComponent({
             '/organizations/members',
             this.newMemberFormData,
             {
-              successMsg: '添加成员成功',
+              successMsg: '成员添加成功',
             }
           );
           (this.$refs.addMembersDialog as FormDialogComponent).hide();
@@ -749,9 +747,9 @@ export default defineComponent({
 
     operateOneUser(evt: Event, user: User) {
       if (evt.type === 'disable') {
-        this.disableUsers([user]);
+        this.toggleUsersStatus([user], true);
       } else if (evt.type === 'enable') {
-        this.enableUsers([user]);
+        this.toggleUsersStatus([user], false);
       } else if (evt.type === 'resign') {
         this.resignUsers([user]);
       } else if (evt.type === 'transfer') {
@@ -759,74 +757,43 @@ export default defineComponent({
       }
     },
 
-    async toggleUsersStatus(user_ids: string[], is_deleted: boolean) {
-      try {
-        await this.$api.put(
-          '/users/status',
-          { user_ids, is_deleted },
-          { successMsg: `${is_deleted ? '禁用' : '启用'}成员成功` }
-        );
-      } finally {
-        this.loadUserTable();
-      }
-    },
-
-    disableUsers(users: User[]) {
+    toggleUsersStatus(users: User[], isDeleted: boolean) {
       const userDesc = `${users[0].name || users[0].username}${
         users[0].mobile ? `（${users[0].mobile}）` : ''
       }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
+      const content = isDeleted
+        ? `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`
+        : `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`;
       this.$q
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '禁用成员',
-            content: `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`,
+            title: isDeleted ? '禁用用户' : '恢复用户',
+            content: content,
             buttons: [
               { label: '取消', class: 'secondary-btn' },
               {
-                label: '禁用',
-                actionType: 'disable',
+                label: isDeleted ? '禁用' : '恢复',
+                actionType: 'toggle',
                 class: 'accent-btn',
               },
             ],
           },
         })
-        .onOk(({ type }) => {
-          if (type === 'disable') {
-            this.toggleUsersStatus(
-              users.map((u: User) => u.id),
-              true
-            );
-          }
-        });
-    },
-
-    enableUsers(users: User[]) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '恢复成员',
-            content: `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '恢复',
-                actionType: 'enable',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(({ type }) => {
-          if (type === 'enable') {
-            this.toggleUsersStatus(
-              users.map((u: User) => u.id),
-              false
-            );
+        .onOk(async ({ type }) => {
+          if (type === 'toggle') {
+            try {
+              await this.$api.put(
+                '/users/status',
+                {
+                  user_ids: users.map((u: User) => u.id),
+                  is_deleted: isDeleted,
+                },
+                { successMsg: `${isDeleted ? '禁用' : '启用'}成员成功` }
+              );
+            } finally {
+              this.loadUserTable();
+            }
           }
         });
     },

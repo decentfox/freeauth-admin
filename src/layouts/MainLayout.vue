@@ -128,6 +128,7 @@ const menuLinkList: MainMenuSection[] = [
       {
         title: '参数设置',
         icon: 'settings_suggest',
+        link: '/common_settings',
       },
     ],
   },

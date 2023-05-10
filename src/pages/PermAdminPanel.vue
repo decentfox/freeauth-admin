@@ -56,6 +56,7 @@
               selected-color="white"
               :filter="filter"
               default-expand-all
+              no-transition
             >
               <template #default-header="prop">
                 <div class="row items-center tree-item" style="width: 100%">

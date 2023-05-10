@@ -52,9 +52,10 @@
               >
                 {{ scope.opt.description }}
               </q-item-label>
+            </q-item-section>
+            <q-item-section side>
               <dropdown-button
                 v-if="editable"
-                class="absolute-right q-pa-sm"
                 :buttons="[
                   {
                     label: '编辑类型',
@@ -158,7 +159,7 @@
         selected-color="white"
         :filter="filter"
         default-expand-all
-        :duration="1"
+        no-transition
         @update:selected="onNodeUpdated"
       >
         <template #default-header="prop">
@@ -471,7 +472,7 @@ import {
   Enterprise,
   EnterprisePostData,
   EnterprisePostError,
-  OrgTypeOption,
+  OrgType,
   OrgTypePostData,
   OrgTypePostError,
 } from 'src/pages/type';
@@ -501,8 +502,8 @@ export default defineComponent({
   setup() {
     return {
       // org selector
-      orgTypeOptions: ref<OrgTypeOption[]>([]),
-      selectedOrgType: ref<OrgTypeOption>({
+      orgTypeOptions: ref<OrgType[]>([]),
+      selectedOrgType: ref<OrgType>({
         id: '',
         name: '',
         code: '',
@@ -521,7 +522,7 @@ export default defineComponent({
       orgTypeForm: ref(false),
       orgTypeFormError: ref<OrgTypePostError>({}),
       orgTypeFormData: ref<OrgTypePostData>({}),
-      operatedOrgType: ref<OrgTypeOption>({
+      operatedOrgType: ref<OrgType>({
         id: '',
         name: '',
         code: '',
@@ -566,13 +567,16 @@ export default defineComponent({
       this.changeOrgType(this.selectedOrgType);
     },
 
-    async loadOrgTree() {
+    async loadOrgTree(resetSelectedNode = false) {
       const resp = await this.$api.get(
         `/org_types/${this.selectedOrgType.id}/organization_tree`
       );
       this.orgTreeData = resp.data;
       setTimeout(() => {
         (this.$refs.orgTree as QTree).expandAll();
+        if (resetSelectedNode) {
+          this.onNodeUpdated(resp.data.length > 0 ? resp.data[0].id : '');
+        }
       }, 20);
     },
 
@@ -603,7 +607,7 @@ export default defineComponent({
 
     /** organization type related methods */
 
-    startToManageOrgType(evt: Event, orgType: OrgTypeOption) {
+    startToManageOrgType(evt: Event, orgType: OrgType) {
       if (evt.type === 'edit_type') {
         this.openOrgTypeForm(orgType);
       } else if (evt.type === 'delete_type') {
@@ -611,7 +615,7 @@ export default defineComponent({
       }
     },
 
-    async openOrgTypeForm(orgType?: OrgTypeOption) {
+    async openOrgTypeForm(orgType?: OrgType) {
       if (orgType) {
         const resp = await this.$api.get(`/org_types/${orgType.id}`);
         this.operatedOrgType = resp.data;
@@ -642,11 +646,10 @@ export default defineComponent({
           );
         }
         (this.$refs.orgTypeDialog as FormDialogComponent).hide();
+        this.loadOrgTypes();
         this.resetOrgTypeForm();
       } catch (e) {
         this.orgTypeFormError = (e as Error).cause || {};
-      } finally {
-        this.loadOrgTypes();
       }
     },
 
@@ -662,7 +665,7 @@ export default defineComponent({
       };
     },
 
-    deleteOrgType(orgType: OrgTypeOption) {
+    deleteOrgType(orgType: OrgType) {
       const orgName = orgType.name;
       this.$q
         .dialog({
@@ -733,12 +736,11 @@ export default defineComponent({
           );
         }
         (this.$refs.enterpriseDialog as FormDialogComponent).hide();
+        this.$emit('refresh', 'enterprise');
+        this.loadOrgTree();
         this.resetEnterpriseForm();
       } catch (e) {
         this.enterpriseFormError = (e as Error).cause || {};
-      } finally {
-        this.$emit('refresh', 'enterprise');
-        this.loadOrgTree();
       }
     },
 
@@ -789,11 +791,10 @@ export default defineComponent({
           );
         }
         (this.$refs.departmentDialog as FormDialogComponent).hide();
+        this.loadOrgTree();
         this.resetDepartmentForm();
       } catch (e) {
         this.departmentFormError = (e as Error).cause || {};
-      } finally {
-        this.loadOrgTree();
       }
     },
 
@@ -847,7 +848,7 @@ export default defineComponent({
     },
 
     onNodeUpdated(selected: string) {
-      if (selected !== null) {
+      if (!!selected) {
         this.selected = selected;
         const node = (this.$refs.orgTree as QTree).getNodeByKey(selected);
         this.$emit('update:selectNode', node);
@@ -855,9 +856,8 @@ export default defineComponent({
       return;
     },
 
-    changeOrgType(selected: OrgTypeOption) {
-      this.loadOrgTree();
-      this.selected = '';
+    changeOrgType(selected: OrgType) {
+      this.loadOrgTree(true);
       this.$emit('update:changeOrgType', selected.id);
     },
   },

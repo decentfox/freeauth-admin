@@ -150,7 +150,7 @@
                       可用角色
                       <q-icon name="error_outline" size="14px">
                         <q-tooltip anchor="center right" self="center start">
-                          左侧所选企业下用户可选择的角色
+                          当前组织类型下的用户可选角色列表
                         </q-tooltip>
                       </q-icon>
                     </q-item-label>
@@ -326,87 +326,21 @@
           inline
           class="q-px-md"
           :options="[
-            { label: '全局角色', value: 'global' },
-            { label: '专属某组织类型', value: 'org_type' },
-            { label: '专属某企业', value: 'enterprise' },
+            { label: '全局可选角色', value: 'global' },
+            { label: '指定组织类型下可选角色', value: 'org_type' },
           ]"
         />
         <div v-if="roleTypeTab === 'org_type'">
           <field-label name="所属组织类型" required />
           <q-select
-            v-model="selectedOrgTypes"
+            v-model="selectedOrgType"
             :options="orgTypeOptions"
             dense
             filled
             class="full-width"
             option-label="name"
             option-value="id"
-            multiple
-            use-chips
           />
-        </div>
-        <div v-if="roleTypeTab === 'enterprise'">
-          <field-label name="所属企业" required />
-          <q-select
-            ref="select"
-            v-model="selectedEnterprises"
-            :options="enterpriseOptions"
-            placeholder="输入企业名称进行搜索"
-            filled
-            dense
-            use-input
-            hide-dropdown-icon
-            multiple
-            map-options
-            hide-bottom-space
-            virtual-scroll-slice-size="5"
-            :rules="[(val) => (val && val.length > 0) || '至少选择一个企业']"
-            @filter="searchEnterprise"
-            @update:model-value="clearFilter"
-          >
-            <template #no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  找不到任何匹配项
-                </q-item-section>
-              </q-item>
-            </template>
-            <template #selected-item="scope">
-              <q-chip
-                removable
-                dense
-                :tabindex="scope.tabindex"
-                color="primary"
-                text-color="white"
-                class="q-pa-sm"
-                :label="scope.opt.name"
-                @remove="scope.removeAtIndex(scope.index)"
-              />
-            </template>
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section>
-                  <q-item-label>
-                    {{ scope.opt.name }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-chip
-                    square
-                    size="12px"
-                    :label="scope.opt.org_type.name"
-                    class="q-pa-sm bg-secondary"
-                  />
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <div
-            v-if="!!roleFormError.organization_ids"
-            class="error-hint text-negative"
-          >
-            {{ roleFormError.organization_ids }}
-          </div>
         </div>
       </div>
       <q-separator inset />
@@ -487,11 +421,7 @@
                     square
                     size="12px"
                     :label="
-                      scope.opt.is_global_role
-                        ? '全局角色'
-                        : scope.opt.is_enterprise_role
-                        ? '企业角色'
-                        : '组织类型角色'
+                      scope.opt.is_global_role ? '全局角色' : '组织类型角色'
                     "
                     class="q-pa-sm bg-secondary"
                   />
@@ -507,7 +437,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { date, QSelect, QTableProps, QTreeNode } from 'quasar';
+import { date, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
@@ -525,7 +455,6 @@ import {
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
-  Enterprise,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Organization,
   OrgType,
@@ -697,9 +626,10 @@ export default defineComponent({
 
       // form dialog
       orgTypeOptions: ref<OrgType[]>([]),
-      selectedOrgTypes: ref<OrgType[]>([]),
-      enterpriseOptions: ref<Enterprise[]>([]),
-      selectedEnterprises: ref<Enterprise[]>([]),
+      selectedOrgType: ref({
+        id: '',
+        name: '',
+      }),
       roleTypeTab: ref('global'),
       roleForm: ref(false),
       roleFormData: ref<RolePostData>({}),
@@ -727,7 +657,6 @@ export default defineComponent({
     onNodeUpdated(node: QTreeNode) {
       this.selectedNode.id = node.id;
       this.selectedNode.name = node.name;
-      this.loadAvailableRoles();
       this.loadUserTable();
     },
 
@@ -737,22 +666,17 @@ export default defineComponent({
         id: '',
         name: '',
       };
-      // (this.$refs.userTable as DataTableComponent).clearRows();
-      // (this.$refs.roleTable as DataTableComponent).clearRows();
+      this.loadAvailableRoles();
     },
 
     async loadAvailableRoles() {
-      if (this.selectedNode.id) {
+      if (this.selectedOrgTypeId) {
         const resp = await this.$api.post(
-          `/organizations/${this.selectedNode.id}/roles/query`,
+          `/organizations/${this.selectedOrgTypeId}/roles/query`,
           {}
         );
         this.availableRoleOptions = resp.data;
         this.availableRoleSet = [
-          {
-            label: '企业角色',
-            roles: resp.data.filter((r: Role) => r.is_enterprise_role),
-          },
           {
             label: '组织类型角色',
             roles: resp.data.filter((r: Role) => r.is_org_type_role),
@@ -787,13 +711,7 @@ export default defineComponent({
       try {
         this.roleFormError = {};
         if (this.roleTypeTab === 'org_type') {
-          this.roleFormData.organization_ids = this.selectedOrgTypes.map(
-            (ot) => ot.id
-          );
-        } else if (this.roleTypeTab === 'enterprise') {
-          this.roleFormData.organization_ids = this.selectedEnterprises.map(
-            (ot) => ot.id
-          );
+          this.roleFormData.organization_ids = [this.selectedOrgType.id];
         }
         await this.$api.post('/roles', this.roleFormData, {
           successMsg: '角色创建成功',
@@ -809,36 +727,16 @@ export default defineComponent({
     resetRoleForm() {
       this.roleFormData = {};
       this.roleFormError = {};
-      this.selectedOrgTypes = [];
-      this.selectedEnterprises = [];
+      this.selectedOrgType = {
+        id: '',
+        name: '',
+      };
       this.roleTypeTab = 'global';
     },
 
     async loadOrgTypes() {
       const resp = await this.$api.get('/org_types');
       this.orgTypeOptions = resp.data.org_types;
-    },
-
-    searchEnterprise(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/enterprises/query', {
-          q: kw,
-        });
-        this.enterpriseOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     toggleRoles(roles: Role[], isDeleted: boolean) {

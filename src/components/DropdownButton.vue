@@ -1,6 +1,6 @@
 <template>
   <q-btn flat dense :class="btnClass" :style="btnStyle">
-    <q-icon size="18px" :name="btnIcon" />{{ btnLabel }}
+    <q-icon v-if="btnIcon" size="18px" :name="btnIcon" />{{ btnLabel }}
     <q-menu class="q-px-xs" anchor="bottom right" self="top right">
       <q-list dense>
         <q-item

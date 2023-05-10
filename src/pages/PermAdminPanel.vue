@@ -158,7 +158,6 @@
             hide-filter
             hide-export
             hide-import
-            selection="none"
             class="q-py-md"
           >
             <template #table-action>

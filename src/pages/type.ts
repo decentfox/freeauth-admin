@@ -224,6 +224,18 @@ export interface SetRolePostError {
   role_ids?: string;
 }
 
+export interface BindUsersPostData {
+  /** 用户的 ID */
+  user_ids?: string[];
+  /** 角色的 ID */
+  role_ids?: string[];
+}
+
+export interface BindUsersPostError {
+  user_ids?: string;
+  role_ids?: string;
+}
+
 export interface Permission {
   name: string;
   desc?: string;

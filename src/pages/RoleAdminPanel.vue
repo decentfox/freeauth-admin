@@ -10,7 +10,7 @@
           sticky-action-column
           search-placeholder="搜索角色信息"
           :filter-columns="filterColumns"
-          selection="none"
+          wrap-cells
           hide-import
           hide-export
         >
@@ -45,7 +45,7 @@
           <template #body-cell-name="props">
             <q-td
               :props="props"
-              class="cursor-pointer text-primary"
+              class="cursor-pointer text-primary text-weight-bold"
               @click="goToRoleProfile($event, props.row.id)"
             >
               {{ props.row.name }}
@@ -94,7 +94,7 @@
                     {
                       label: '添加主体',
                       icon: 'manage_accounts',
-                      actionType: 'add_user',
+                      actionType: 'bind_users',
                     },
                     {
                       label: '配置权限',
@@ -189,7 +189,7 @@
                             text-color="grey-7"
                             icon="person_add"
                             size="10px"
-                            @click="bindUsersToRole(role)"
+                            @click="goToRoleProfile($event, role.id)"
                           >
                           </q-btn>
                         </q-item-section>
@@ -218,7 +218,6 @@
                     hide-filter
                     hide-export
                     hide-import
-                    selection="none"
                   >
                     <template #table-action>
                       <q-btn
@@ -230,6 +229,26 @@
                       >
                         <q-tooltip>切换视图</q-tooltip>
                       </q-btn>
+                    </template>
+                    <template #header-cell-roles="props">
+                      <q-th :props="props">
+                        {{ props.col.label }}
+                        <q-icon name="error_outline" size="14px">
+                          <q-tooltip anchor="center right" self="center start">
+                            角色用于限制用户的操作权限
+                          </q-tooltip>
+                        </q-icon>
+                      </q-th>
+                    </template>
+                    <template #header-cell-departments="props">
+                      <q-th :props="props">
+                        {{ props.col.label }}
+                        <q-icon name="error_outline" size="14px">
+                          <q-tooltip anchor="center right" self="center start">
+                            所属组织可以用于数据范围约束
+                          </q-tooltip>
+                        </q-icon>
+                      </q-th>
                     </template>
                     <template #body-cell-user_info="props">
                       <q-td :props="props">
@@ -485,6 +504,8 @@ const columns: QTableProps['columns'] = [
     label: '描述',
     align: 'left',
     field: 'description',
+    style: 'max-width: 400px',
+    headerStyle: 'max-width: 400px',
   },
   {
     name: 'organizations',
@@ -651,6 +672,10 @@ export default defineComponent({
         this.toggleRoles([role], false);
       } else if (evt.type === 'delete') {
         this.deleteRoles([role]);
+      } else if (evt.type === 'bind_users') {
+        this.goToRoleProfile(evt, role.id);
+      } else if (evt.type === 'set_perms') {
+        this.goToRoleProfile(evt, role.id);
       }
     },
 
@@ -811,11 +836,6 @@ export default defineComponent({
             }
           }
         });
-    },
-
-    bindUsersToRole(role: Role) {
-      console.error(role);
-      alert('跳转至角色详情页进行配置');
     },
 
     operateOneUser(evt: Event, user: User) {

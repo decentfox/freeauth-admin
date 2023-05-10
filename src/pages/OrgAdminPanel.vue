@@ -85,7 +85,6 @@
                     <q-chip
                       v-for="(dept, idx) in (props.row.departments as Department[])"
                       :key="idx"
-                      clickable
                       size="12px"
                       square
                       color="secondary"
@@ -126,7 +125,7 @@
                             : 'enable',
                         },
                         {
-                          label: '变更部门',
+                          label: '变更组织',
                           icon: 'sync_alt',
                           actionType: 'transfer',
                         },
@@ -209,7 +208,7 @@
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
-            <field-label name="直属部门" required />
+            <field-label name="直属组织" required />
             <tree-select
               v-model="newMemberFormData.organization_ids"
               :nodes="orgTreeData"
@@ -383,7 +382,7 @@
     <form-dialog
       ref="transferDialog"
       v-model="transferForm"
-      title="变更部门"
+      title="变更组织归属"
       width="450px"
       @confirm="saveTransferForm"
       @close="resetTransferForm"
@@ -391,7 +390,7 @@
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
           <div>
-            <field-label name="部门变更为" required />
+            <field-label name="组织归属变更为" required />
             <tree-select
               v-model="transferFormData.organization_ids"
               :nodes="orgTreeData"
@@ -406,7 +405,7 @@
             </div>
           </div>
           <div class="text-caption hint-label">
-            注意：变更部门可能会影响该成员当前关联的角色，若该成员当前关联的角色在变更后的部门中不存在，则该角色会被自动移除。因此，操作部门变更后，建议您前往【角色管理】检查该成员的角色配置。
+            注意：如需彻底移除所属组织，请点击【办理离职】。
           </div>
         </div>
       </template>
@@ -808,7 +807,7 @@ export default defineComponent({
           component: ConfirmDialog,
           componentProps: {
             title: '办理离职',
-            content: `您正在请求为成员：${userDesc}办理离职。操作后，该成员授权、部门和角色等关系将被删除，转为普通用户。如需同时禁用该用户，请点击【离职并禁用】。
+            content: `您正在请求为成员：${userDesc}办理离职。操作后，该成员授权、组织部门和角色等关系将被删除，转为普通用户。如需同时禁用该用户，请点击【离职并禁用】。
 `,
             buttons: [
               { label: '取消', class: 'secondary-btn' },
@@ -872,7 +871,7 @@ export default defineComponent({
           `/users/${this.transferFormData.user_id}/organizations`,
           this.transferFormData,
           {
-            successMsg: '部门变更成功',
+            successMsg: '组织归属变更成功',
           }
         );
         (this.$refs.transferDialog as FormDialogComponent).hide();

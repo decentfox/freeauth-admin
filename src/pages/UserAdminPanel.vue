@@ -7,6 +7,7 @@
       api-method="POST"
       sticky-action-column
       search-placeholder="搜索用户信息"
+      selection="multiple"
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="(selected) => toggleUsersStatus(selected, true)"

@@ -150,6 +150,8 @@ export interface AddMembersPostData {
   user_ids?: string[];
   /** 多个组织的 ID 集合 */
   organization_ids?: string[];
+  /** 组织类型 ID */
+  org_type_id?: string;
 }
 
 export interface AddMembersPostError {
@@ -178,16 +180,12 @@ export interface Role {
   code?: string;
   /** 角色描述 */
   description?: string;
-  /** 所属组织 */
-  organizations?: Organization[];
+  /** 所属组织类型 */
+  org_type?: Organization;
   /** 角色创建时间 */
   created_at?: Date;
   /** 用户是否禁用 */
   is_deleted?: boolean;
-  is_department_role?: boolean;
-  is_enterprise_role?: boolean;
-  is_global_role?: boolean;
-  is_org_type_role?: boolean;
 }
 
 export interface RoleSet {
@@ -196,20 +194,20 @@ export interface RoleSet {
 }
 
 export interface RolePostData {
-  /** 部门分支名称 */
+  /** 角色名称 */
   name?: string;
-  /** 部门分支 Code */
+  /** 角色 Code */
   code?: string;
-  /** 部门分支描述 */
+  /** 角色描述 */
   description?: string;
-  /** 所属上级部门 ID */
-  organization_ids?: string[];
+  /** 所属组织类型 ID */
+  org_type_id?: string;
 }
 
 export interface RolePostError {
   name?: string;
   code?: string;
-  organization_ids?: string;
+  org_type_id?: string;
 }
 
 export interface SetRolePostData {
@@ -221,6 +219,18 @@ export interface SetRolePostData {
 
 export interface SetRolePostError {
   user_id?: string;
+  role_ids?: string;
+}
+
+export interface BindUsersPostData {
+  /** 用户的 ID */
+  user_ids?: string[];
+  /** 角色的 ID */
+  role_ids?: string[];
+}
+
+export interface BindUsersPostError {
+  user_ids?: string;
   role_ids?: string;
 }
 

@@ -10,7 +10,7 @@
           sticky-action-column
           search-placeholder="搜索角色信息"
           :filter-columns="filterColumns"
-          selection="none"
+          wrap-cells
           hide-import
           hide-export
         >
@@ -32,7 +32,7 @@
               <q-tooltip>切换视图</q-tooltip>
             </q-btn>
           </template>
-          <template #header-cell-organizations="props">
+          <template #header-cell-org_type="props">
             <q-th :props="props">
               {{ props.col.label }}
               <q-icon name="error_outline" size="14px">
@@ -45,24 +45,23 @@
           <template #body-cell-name="props">
             <q-td
               :props="props"
-              class="cursor-pointer text-primary"
+              class="cursor-pointer text-primary text-weight-bold"
               @click="goToRoleProfile($event, props.row.id)"
             >
               {{ props.row.name }}
             </q-td>
           </template>
-          <template #body-cell-organizations="props">
+          <template #body-cell-org_type="props">
             <q-td :props="props">
               <q-chip
-                v-for="(org, idx) in (props.row.organizations as Organization[])"
-                :key="idx"
+                v-if="props.row.org_type"
                 clickable
                 size="12px"
                 square
                 color="secondary"
                 class="q-ml-none"
               >
-                {{ org.name }}
+                {{ props.row.org_type.name }}
               </q-chip>
             </q-td>
           </template>
@@ -94,7 +93,7 @@
                     {
                       label: '添加主体',
                       icon: 'manage_accounts',
-                      actionType: 'add_user',
+                      actionType: 'bind_users',
                     },
                     {
                       label: '配置权限',
@@ -189,7 +188,7 @@
                             text-color="grey-7"
                             icon="person_add"
                             size="10px"
-                            @click="bindUsersToRole(role)"
+                            @click="goToRoleProfile($event, role.id)"
                           >
                           </q-btn>
                         </q-item-section>
@@ -218,7 +217,6 @@
                     hide-filter
                     hide-export
                     hide-import
-                    selection="none"
                   >
                     <template #table-action>
                       <q-btn
@@ -230,6 +228,26 @@
                       >
                         <q-tooltip>切换视图</q-tooltip>
                       </q-btn>
+                    </template>
+                    <template #header-cell-roles="props">
+                      <q-th :props="props">
+                        {{ props.col.label }}
+                        <q-icon name="error_outline" size="14px">
+                          <q-tooltip anchor="center right" self="center start">
+                            角色用于限制用户的操作权限
+                          </q-tooltip>
+                        </q-icon>
+                      </q-th>
+                    </template>
+                    <template #header-cell-departments="props">
+                      <q-th :props="props">
+                        {{ props.col.label }}
+                        <q-icon name="error_outline" size="14px">
+                          <q-tooltip anchor="center right" self="center start">
+                            所属组织可以用于数据范围约束
+                          </q-tooltip>
+                        </q-icon>
+                      </q-th>
                     </template>
                     <template #body-cell-user_info="props">
                       <q-td :props="props">
@@ -340,6 +358,8 @@
             class="full-width"
             option-label="name"
             option-value="id"
+            :error="!!roleFormError.org_type_id"
+            :error-message="roleFormError.org_type_id"
           />
         </div>
       </div>
@@ -420,9 +440,7 @@
                   <q-chip
                     square
                     size="12px"
-                    :label="
-                      scope.opt.is_global_role ? '全局角色' : '组织类型角色'
-                    "
+                    :label="!scope.opt.org_type ? '全局角色' : '组织类型角色'"
                     class="q-pa-sm bg-secondary"
                   />
                 </q-item-section>
@@ -485,12 +503,14 @@ const columns: QTableProps['columns'] = [
     label: '描述',
     align: 'left',
     field: 'description',
+    style: 'max-width: 400px',
+    headerStyle: 'max-width: 400px',
   },
   {
-    name: 'organizations',
+    name: 'org_type',
     label: '角色归属',
     align: 'left',
-    field: 'organizations',
+    field: 'org_type',
   },
   {
     name: 'created_at',
@@ -651,6 +671,10 @@ export default defineComponent({
         this.toggleRoles([role], false);
       } else if (evt.type === 'delete') {
         this.deleteRoles([role]);
+      } else if (evt.type === 'bind_users') {
+        this.goToRoleProfile(evt, role.id);
+      } else if (evt.type === 'set_perms') {
+        this.goToRoleProfile(evt, role.id);
       }
     },
 
@@ -671,19 +695,18 @@ export default defineComponent({
 
     async loadAvailableRoles() {
       if (this.selectedOrgTypeId) {
-        const resp = await this.$api.post(
-          `/organizations/${this.selectedOrgTypeId}/roles/query`,
-          {}
-        );
-        this.availableRoleOptions = resp.data;
+        const resp = await this.$api.post('/roles/query', {
+          org_type_id: this.selectedOrgTypeId,
+        });
+        this.availableRoleOptions = resp.data.rows;
         this.availableRoleSet = [
           {
             label: '组织类型角色',
-            roles: resp.data.filter((r: Role) => r.is_org_type_role),
+            roles: resp.data.rows.filter((r: Role) => !!r.org_type),
           },
           {
             label: '全局角色',
-            roles: resp.data.filter((r: Role) => r.is_global_role),
+            roles: resp.data.rows.filter((r: Role) => !r.org_type),
           },
         ];
       }
@@ -711,7 +734,7 @@ export default defineComponent({
       try {
         this.roleFormError = {};
         if (this.roleTypeTab === 'org_type') {
-          this.roleFormData.organization_ids = [this.selectedOrgType.id];
+          this.roleFormData.org_type_id = this.selectedOrgType.id;
         }
         await this.$api.post('/roles', this.roleFormData, {
           successMsg: '角色创建成功',
@@ -811,11 +834,6 @@ export default defineComponent({
             }
           }
         });
-    },
-
-    bindUsersToRole(role: Role) {
-      console.error(role);
-      alert('跳转至角色详情页进行配置');
     },
 
     operateOneUser(evt: Event, user: User) {

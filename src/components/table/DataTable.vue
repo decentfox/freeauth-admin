@@ -212,7 +212,7 @@ export default defineComponent({
     /** 是否可以勾选表格行 */
     selection: {
       type: QTable['selection'],
-      default: 'multiple',
+      default: 'none',
     },
   },
 

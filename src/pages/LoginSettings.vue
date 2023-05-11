@@ -414,7 +414,9 @@ export default defineComponent({
       if (!this.codeLogin && !this.pwdLogin) return;
       setTimeout(() => {
         (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
-          target === 'code' && this.codeLogin ? 'code' : 'password'
+          (target === 'code' && this.codeLogin) || !this.pwdLogin
+            ? 'code'
+            : 'password'
         );
       }, 20);
     },

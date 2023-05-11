@@ -1,23 +1,23 @@
 <template>
   <q-card bordered class="q-pa-md preview">
+    <div class="row items-center q-pt-lg q-pl-md">
+      <q-img
+        :src="loginSettings.guardLogo"
+        spinner-color="white"
+        class="q-mx-md img-wrapper"
+        :class="{ 'bg-grey-2': !loginSettings.guardLogo }"
+      />
+      <div class="text-weight-bold text-h6 text-grey-10">
+        {{ loginSettings.guardTitle || `自定义标题` }}
+      </div>
+    </div>
     <q-tab-panels
       ref="innerPanel"
       v-model="previewPanel"
       animated
       class="bg-white preview-panel"
     >
-      <q-tab-panel name="signup">
-        <div class="row items-center q-pt-sm">
-          <q-img
-            :src="loginSettings.guardLogo"
-            spinner-color="white"
-            class="q-mx-md img-wrapper"
-            :class="{ 'bg-grey-2': !loginSettings.guardLogo }"
-          />
-          <div class="text-weight-bold text-h6 text-grey-10">
-            {{ loginSettings.guardTitle || `自定义标题` }}
-          </div>
-        </div>
+      <q-tab-panel name="signup" class="q-pt-none">
         <q-tabs
           v-model="signupTab"
           dense
@@ -88,17 +88,6 @@
       </q-tab-panel>
 
       <q-tab-panel name="login">
-        <div class="row items-center q-pt-sm">
-          <q-img
-            :src="loginSettings.guardLogo"
-            spinner-color="white"
-            class="q-mx-md img-wrapper"
-            :class="{ 'bg-grey-2': !loginSettings.guardLogo }"
-          />
-          <div class="text-weight-bold text-h6 text-grey-10">
-            {{ loginSettings.guardTitle || `自定义标题` }}
-          </div>
-        </div>
         <q-tabs
           v-model="loginTab"
           dense

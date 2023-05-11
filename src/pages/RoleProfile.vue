@@ -66,9 +66,9 @@
                     ]"
                     disable
                   />
-                  <div v-if="role.organizations?.length">
+                  <div v-if="!!role.org_type">
                     <q-chip size="12px" square color="secondary">
-                      {{ role.organizations[0].name }}
+                      {{ role.org_type.name }}
                     </q-chip>
                   </div>
                 </div>
@@ -265,10 +265,7 @@
               {{ bindUsersFormError.user_ids }}
             </div>
           </div>
-          <div
-            v-if="role.organizations?.length"
-            class="text-caption hint-label"
-          >
+          <div v-if="!!role.org_type" class="text-caption hint-label">
             提示：该角色为组织类型角色，因此只能搜索该角色所属组织类型下的用户进行角色关联。
           </div>
         </div>
@@ -387,9 +384,7 @@ export default defineComponent({
       const resp = await this.$api.get(`/roles/${this.roleId}`);
       this.role = resp.data;
       this.roleFormData = Object.assign({}, resp.data);
-      this.roleTypeTab = this.role.organizations?.length
-        ? 'org_type'
-        : 'global';
+      this.roleTypeTab = !!this.role.org_type ? 'org_type' : 'global';
     },
 
     switchPanelTab(val: string) {
@@ -457,13 +452,10 @@ export default defineComponent({
         return;
       }
       update(async () => {
-        let getUsersUrl =
-          this.role.organizations && this.role.organizations.length > 0
-            ? `/organizations/${this.role.organizations[0].id}/members`
-            : '/users/query';
-
-        let resp = await this.$api.post(getUsersUrl, {
+        let resp = await this.$api.post('/users/query', {
           q: kw,
+          org_type_id: this.role.org_type?.id,
+          include_unassigned_users: !!this.role.org_type ? false : true,
         });
         this.userOptions = resp.data.rows;
       });

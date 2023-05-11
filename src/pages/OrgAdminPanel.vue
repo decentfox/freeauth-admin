@@ -677,6 +677,8 @@ export default defineComponent({
       update(async () => {
         let resp = await this.$api.post('/users/query', {
           q: kw,
+          org_type_id: this.selectedOrgTypeId,
+          include_unassigned_users: true,
         });
         this.userOptions = resp.data.rows;
       });
@@ -706,7 +708,12 @@ export default defineComponent({
           this.newMemberFormError = {};
           await this.$api.post(
             '/organizations/members',
-            this.newMemberFormData,
+            Object.assign(
+              {
+                org_type_id: this.selectedOrgTypeId,
+              },
+              this.newMemberFormData
+            ),
             {
               successMsg: '成员添加成功',
             }
@@ -720,9 +727,18 @@ export default defineComponent({
       } else if (this.addMembersTab == 'new') {
         try {
           this.newUserFormError = {};
-          await this.$api.post('/users', this.newUserFormData, {
-            successMsg: '成员创建成功',
-          });
+          await this.$api.post(
+            '/users',
+            Object.assign(
+              {
+                org_type_id: this.selectedOrgTypeId,
+              },
+              this.newUserFormData
+            ),
+            {
+              successMsg: '成员创建成功',
+            }
+          );
           (this.$refs.addMembersDialog as FormDialogComponent).hide();
           this.loadUserTable();
           this.resetNewUserForm();

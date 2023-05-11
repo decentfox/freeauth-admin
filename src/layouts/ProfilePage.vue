@@ -10,7 +10,7 @@
           size="12px"
           :label="status ? '正常' : '禁用'"
           class="text-weight-bold q-pa-sm q-mr-md"
-          :class="!status ? 'chip-status-on' : 'chip-status-off'"
+          :class="status ? 'chip-status-on' : 'chip-status-off'"
         />
         <div class="text-h6">{{ name }}</div>
       </slot>

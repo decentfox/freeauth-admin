@@ -479,6 +479,20 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Department,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Organization,
+  OrgType,
+  Role,
+  RolePostData,
+  RolePostError,
+  RoleSet,
+  SetRolePostData,
+  SetRolePostError,
+  User,
+} from 'pages/type';
 import { date, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 
@@ -493,21 +507,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Organization,
-  OrgType,
-  Role,
-  RolePostData,
-  RolePostError,
-  RoleSet,
-  SetRolePostData,
-  SetRolePostError,
-  User,
-} from './type';
 
 const columns: QTableProps['columns'] = [
   {

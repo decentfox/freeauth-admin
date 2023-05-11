@@ -13,7 +13,6 @@
       @批量禁用="(selected) => toggleUsersStatus(selected, true)"
       @批量启用="(selected) => toggleUsersStatus(selected, false)"
       @批量删除="(selected) => deleteUsers(selected)"
-      @row-click="goToUserProfile"
     >
       <template #table-action>
         <q-btn
@@ -23,6 +22,15 @@
           class="q-ml-sm q-px-md primary-btn"
           @click="createUserForm = true"
         />
+      </template>
+      <template #body-cell-name="props">
+        <q-td
+          :props="props"
+          class="cursor-pointer text-primary text-weight-bold"
+          @click="goToUserProfile($event, props.row.id)"
+        >
+          {{ props.row.name }}
+        </q-td>
       </template>
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
@@ -155,6 +163,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { User, UserPostData, UserPostError } from 'pages/type';
 import { date, QTableProps } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
@@ -168,8 +177,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import { User, UserPostData, UserPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -439,8 +446,8 @@ export default defineComponent({
       }
     },
 
-    goToUserProfile(evt: Event, row: User) {
-      this.$router.push(`/user_profile/${row.id}`);
+    goToUserProfile(evt: Event, userId: string) {
+      this.$router.push(`/user_profile/${userId}`);
     },
   },
 });

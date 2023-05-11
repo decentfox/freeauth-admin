@@ -1,18 +1,17 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn unelevated dense class="no-hover-btn hint-label" @click="goBack">
-      <q-icon size="18px" name="arrow_back_ios_new" />返回
-    </q-btn>
-    <q-toolbar class="q-my-xs">
-      <q-chip
-        square
-        size="12px"
-        :label="!role.is_deleted ? '正常' : '禁用'"
-        class="text-weight-bold q-pa-sm q-mr-md"
-        :class="!role.is_deleted ? 'chip-status-on' : 'chip-status-off'"
-      />
-      <div class="text-h6">{{ role.name }}</div>
-      <q-space />
+  <profile-page
+    ref="profile"
+    v-model:tab-value="panelTab"
+    :name="role.name"
+    :status="!role.is_deleted"
+    :tabs="[
+      { name: 'role', label: '基本信息' },
+      { name: 'users', label: '管理主体' },
+      { name: 'perms', label: '配置权限' },
+    ]"
+    @update:tab-value="switchPanelTab"
+  >
+    <template #toolbar-right>
       <dropdown-button
         btn-label="更多操作"
         btn-icon="expand_more"
@@ -32,24 +31,8 @@
         ]"
         @menu-click="operateOneRole($event, role)"
       />
-    </q-toolbar>
-    <q-tabs
-      v-model="panelTab"
-      dense
-      class="text-grey-7"
-      active-color="primary"
-      indicator-color="primary"
-      align="left"
-      narrow-indicator
-      @update:model-value="switchPanelTab"
-    >
-      <q-tab name="role" label="基本信息" />
-      <q-tab name="users" label="管理主体" />
-      <q-tab name="perms" label="配置权限" />
-    </q-tabs>
-
-    <q-separator inset />
-    <q-tab-panels v-model="panelTab" animated>
+    </template>
+    <template #panels>
       <q-tab-panel name="role">
         <q-card flat bordered class="q-pa-md">
           <q-form>
@@ -187,119 +170,111 @@
         </data-table>
       </q-tab-panel>
       <q-tab-panel name="perms"> TODO </q-tab-panel>
-    </q-tab-panels>
-    <form-dialog
-      ref="bindUsersDialog"
-      v-model="bindUsersForm"
-      title="添加主体"
-      width="450px"
-      @confirm="saveBindUsersForm"
-      @close="resetBindUsersForm"
-    >
-      <template #form-content>
-        <div class="q-gutter-md q-pa-md">
-          <div>
-            <field-label name="关联主体" required />
-            <q-select
-              ref="select"
-              v-model="selectedUsers"
-              :options="userOptions"
-              placeholder="输入用户姓名进行搜索"
-              filled
-              dense
-              use-input
-              hide-dropdown-icon
-              multiple
-              map-options
-              virtual-scroll-slice-size="5"
-              @filter="searchUser"
-              @update:model-value="clearFilter"
-            >
-              <template #no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    找不到任何匹配项
-                  </q-item-section>
-                </q-item>
-              </template>
-              <template #selected-item="scope">
-                <q-chip
-                  removable
-                  dense
-                  :tabindex="scope.tabindex"
-                  color="primary"
-                  text-color="white"
-                  class="q-pa-sm"
-                  :label="scope.opt.name"
-                  @remove="scope.removeAtIndex(scope.index)"
-                />
-              </template>
-              <template #option="scope">
-                <q-item v-bind="scope.itemProps">
-                  <q-item-section avatar>
-                    <q-chip
-                      square
-                      size="12px"
-                      :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                      class="text-weight-bold q-pa-sm"
-                      :class="
-                        !scope.opt.is_deleted
-                          ? 'chip-status-on'
-                          : 'chip-status-off'
-                      "
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>
-                      {{ scope.opt.name }}（{{ scope.opt.username }}）
-                    </q-item-label>
-                    <q-item-label caption>
-                      {{ scope.opt.mobile }} {{ scope.opt.email }}
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section v-if="!!scope.opt.org_type" side>
-                    <q-chip
-                      square
-                      size="12px"
-                      :label="scope.opt.org_type.name"
-                      class="q-pa-sm bg-secondary"
-                    />
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-            <div
-              v-if="!!bindUsersFormError.user_ids"
-              class="error-hint text-negative"
-            >
-              {{ bindUsersFormError.user_ids }}
+    </template>
+    <template #dialog>
+      <form-dialog
+        ref="bindUsersDialog"
+        v-model="bindUsersForm"
+        title="添加主体"
+        width="450px"
+        @confirm="saveBindUsersForm"
+        @close="resetBindUsersForm"
+      >
+        <template #form-content>
+          <div class="q-gutter-md q-pa-md">
+            <div>
+              <field-label name="关联主体" required />
+              <q-select
+                ref="select"
+                v-model="selectedUsers"
+                :options="userOptions"
+                placeholder="输入用户姓名进行搜索"
+                filled
+                dense
+                use-input
+                hide-dropdown-icon
+                multiple
+                map-options
+                virtual-scroll-slice-size="5"
+                @filter="searchUser"
+                @update:model-value="clearFilter"
+              >
+                <template #no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      找不到任何匹配项
+                    </q-item-section>
+                  </q-item>
+                </template>
+                <template #selected-item="scope">
+                  <q-chip
+                    removable
+                    dense
+                    :tabindex="scope.tabindex"
+                    color="primary"
+                    text-color="white"
+                    class="q-pa-sm"
+                    :label="scope.opt.name"
+                    @remove="scope.removeAtIndex(scope.index)"
+                  />
+                </template>
+                <template #option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <q-chip
+                        square
+                        size="12px"
+                        :label="!scope.opt.is_deleted ? '正常' : '禁用'"
+                        class="text-weight-bold q-pa-sm"
+                        :class="
+                          !scope.opt.is_deleted
+                            ? 'chip-status-on'
+                            : 'chip-status-off'
+                        "
+                      />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>
+                        {{ scope.opt.name }}（{{ scope.opt.username }}）
+                      </q-item-label>
+                      <q-item-label caption>
+                        {{ scope.opt.mobile }} {{ scope.opt.email }}
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section v-if="!!scope.opt.org_type" side>
+                      <q-chip
+                        square
+                        size="12px"
+                        :label="scope.opt.org_type.name"
+                        class="q-pa-sm bg-secondary"
+                      />
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+              <div
+                v-if="!!bindUsersFormError.user_ids"
+                class="error-hint text-negative"
+              >
+                {{ bindUsersFormError.user_ids }}
+              </div>
+            </div>
+            <div v-if="!!role.org_type" class="text-caption hint-label">
+              提示：该角色为组织类型【{{
+                role.org_type.name
+              }}】角色，因此只能搜索到【{{
+                role.org_type.name
+              }}】下的用户进行关联。如未搜索到目标用户，请先检查其组织归属。
             </div>
           </div>
-          <div v-if="!!role.org_type" class="text-caption hint-label">
-            提示：该角色为组织类型【{{
-              role.org_type.name
-            }}】角色，因此只能搜索到【{{
-              role.org_type.name
-            }}】下的用户进行关联。如未搜索到目标用户，请先检查其组织归属。
-          </div>
-        </div>
-      </template>
-    </form-dialog>
-  </q-page>
+        </template>
+      </form-dialog>
+    </template>
+  </profile-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps } from 'quasar';
-import { FormDialogComponent } from 'src/components/dialog/type';
-import { DataTableComponent } from 'src/components/table/type';
-
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import DataTable from 'components/table/DataTable.vue';
-
 import {
   BindUsersPostData,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -308,7 +283,18 @@ import {
   RolePostData,
   RolePostError,
   User,
-} from './type';
+} from 'pages/type';
+import { QSelect, QTableProps } from 'quasar';
+import { FormDialogComponent } from 'src/components/dialog/type';
+import { DataTableComponent } from 'src/components/table/type';
+import ProfilePage from 'src/layouts/ProfilePage.vue';
+import { Profile } from 'src/layouts/type';
+
+import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import FormDialog from 'components/dialog/FormDialog.vue';
+import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
+import DataTable from 'components/table/DataTable.vue';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -359,7 +345,13 @@ const userColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'RoleProfile',
 
-  components: { DataTable, DropdownButton, FieldLabel, FormDialog },
+  components: {
+    DataTable,
+    DropdownButton,
+    FieldLabel,
+    FormDialog,
+    ProfilePage,
+  },
 
   props: {
     roleId: {
@@ -372,7 +364,6 @@ export default defineComponent({
     return {
       role: ref<Role>({
         id: '',
-        name: '',
       }),
       panelTab: ref('role'),
       userColumns: userColumns,
@@ -408,6 +399,16 @@ export default defineComponent({
           et.setApiInfo(`/roles/${this.role.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
+      }
+    },
+
+    operateOneRole(evt: Event, role: Role) {
+      if (evt.type === 'disable') {
+        this.toggleRoles([role], true);
+      } else if (evt.type === 'enable') {
+        this.toggleRoles([role], false);
+      } else if (evt.type === 'delete') {
+        this.deleteRoles([role]);
       }
     },
 
@@ -523,16 +524,6 @@ export default defineComponent({
       }
     },
 
-    operateOneRole(evt: Event, role: Role) {
-      if (evt.type === 'disable') {
-        this.toggleRoles([role], true);
-      } else if (evt.type === 'enable') {
-        this.toggleRoles([role], false);
-      } else if (evt.type === 'delete') {
-        this.deleteRoles([role]);
-      }
-    },
-
     toggleRoles(roles: Role[], isDeleted: boolean) {
       const roleDesc = `${roles[0].name}${
         roles.length > 1 ? `等 ${roles.length} 角色` : ''
@@ -562,7 +553,7 @@ export default defineComponent({
               await this.$api.put(
                 '/roles/status',
                 { ids: roles.map((r: Role) => r.id), is_deleted: isDeleted },
-                { successMsg: `${isDeleted ? '禁用' : '启用'}用户成功` }
+                { successMsg: `${isDeleted ? '禁用' : '启用'}角色成功` }
               );
             } finally {
               this.loadRoleInfo();
@@ -598,18 +589,14 @@ export default defineComponent({
                 method: 'DELETE',
                 url: '/roles',
                 data: { ids: roles.map((u: Role) => u.id) },
-                successMsg: '删除用户成功',
+                successMsg: '删除角色成功',
               });
-              this.goBack();
+              (this.$refs.profile as Profile).goBack();
             } catch (e) {
               throw e;
             }
           }
         });
-    },
-
-    goBack() {
-      this.$router.back();
     },
   },
 });

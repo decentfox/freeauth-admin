@@ -19,11 +19,11 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/user_admin_panel',
-        component: () => import('pages/UserAdminPanel.vue'),
+        component: () => import('pages/user/UserAdminPanel.vue'),
       },
       {
         path: '/user_profile/:userId',
-        component: () => import('pages/UserProfile.vue'),
+        component: () => import('pages/user/UserProfile.vue'),
         props: true,
       },
       {
@@ -32,11 +32,11 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/role_admin_panel',
-        component: () => import('pages/RoleAdminPanel.vue'),
+        component: () => import('pages/role/RoleAdminPanel.vue'),
       },
       {
         path: '/role_profile/:roleId',
-        component: () => import('pages/RoleProfile.vue'),
+        component: () => import('pages/role/RoleProfile.vue'),
         props: true,
       },
       {

@@ -175,7 +175,7 @@ export interface Role {
   /** 角色 ID */
   id: string;
   /** 角色名称 */
-  name: string;
+  name?: string;
   /** 角色 Code */
   code?: string;
   /** 角色描述 */

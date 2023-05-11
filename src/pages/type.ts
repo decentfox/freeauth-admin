@@ -145,7 +145,7 @@ export interface DepartmentPostError {
   parent_id?: string;
 }
 
-export interface AddMembersPostData {
+export interface BindUsersPostData {
   /** 多个用户的 ID 集合 */
   user_ids?: string[];
   /** 多个组织的 ID 集合 */
@@ -154,7 +154,7 @@ export interface AddMembersPostData {
   org_type_id?: string;
 }
 
-export interface AddMembersPostError {
+export interface BindUsersPostError {
   user_ids?: string;
   organization_ids?: string;
 }

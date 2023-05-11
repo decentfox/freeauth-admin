@@ -203,23 +203,23 @@
       title="添加成员"
       width="450px"
       @confirm="saveAddMembersForm"
-      @close="resetNewMemberForm"
+      @close="resetAddMembersForm"
     >
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
             <field-label name="直属组织" required />
             <tree-select
-              v-model="newMemberFormData.organization_ids"
+              v-model="bindUsersFormData.organization_ids"
               :nodes="orgTreeData"
               multi-select
               :initial-selected-items="parentDepartment"
             />
             <div
-              v-if="!!newMemberFormError.organization_ids"
+              v-if="!!bindUsersFormError.organization_ids"
               class="error-hint text-negative"
             >
-              {{ newMemberFormError.organization_ids }}
+              {{ bindUsersFormError.organization_ids }}
             </div>
           </div>
         </div>
@@ -235,65 +235,96 @@
         <q-separator inset />
         <q-tab-panels v-model="addMembersTab" animated>
           <q-tab-panel name="existing">
-            <q-select
-              ref="select"
-              v-model="selectedExistingUsers"
-              :options="userOptions"
-              placeholder="输入用户姓名进行搜索"
-              filled
-              dense
-              use-input
-              hide-dropdown-icon
-              multiple
-              map-options
-              virtual-scroll-slice-size="5"
-              :rules="[(val) => (val && val.length > 0) || '至少选择一名成员']"
-              @filter="searchUser"
-              @update:model-value="clearFilter"
-            >
-              <template #no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    找不到任何匹配项
-                  </q-item-section>
-                </q-item>
-              </template>
-              <template #selected-item="scope">
-                <q-chip
-                  removable
+            <div class="q-gutter-md">
+              <div>
+                <field-label name="关联用户" required />
+                <q-select
+                  ref="select"
+                  v-model="selectedExistingUsers"
+                  :options="userOptions"
+                  placeholder="输入用户姓名进行搜索"
+                  filled
                   dense
-                  :tabindex="scope.tabindex"
-                  color="primary"
-                  text-color="white"
-                  class="q-pa-sm"
-                  :label="scope.opt.name"
-                  @remove="scope.removeAtIndex(scope.index)"
-                />
-              </template>
-              <template #option="scope">
-                <q-item v-bind="scope.itemProps">
-                  <q-item-section avatar>
+                  use-input
+                  hide-dropdown-icon
+                  multiple
+                  map-options
+                  virtual-scroll-slice-size="5"
+                  @filter="searchUser"
+                  @update:model-value="clearFilter"
+                >
+                  <template #no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        找不到任何匹配项
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template #selected-item="scope">
                     <q-chip
-                      square
-                      size="12px"
-                      :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                      class="text-weight-bold q-pa-sm"
-                      :class="
-                        !scope.opt.is_deleted
-                          ? 'chip-status-on'
-                          : 'chip-status-off'
-                      "
+                      removable
+                      dense
+                      :tabindex="scope.tabindex"
+                      color="primary"
+                      text-color="white"
+                      class="q-pa-sm"
+                      :label="scope.opt.name"
+                      @remove="scope.removeAtIndex(scope.index)"
                     />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>
-                      {{ scope.opt.name }} {{ scope.opt.mobile }}
-                    </q-item-label>
-                    <q-item-label caption>{{ scope.opt.email }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
+                  </template>
+                  <template #option="scope">
+                    <q-item
+                      v-bind="scope.itemProps"
+                      :disable="
+                        !!scope.opt.org_type &&
+                        scope.opt.org_type.id !== selectedOrgType.id
+                      "
+                    >
+                      <q-item-section avatar>
+                        <q-chip
+                          square
+                          size="12px"
+                          :label="!scope.opt.is_deleted ? '正常' : '禁用'"
+                          class="text-weight-bold q-pa-sm"
+                          :class="
+                            !scope.opt.is_deleted
+                              ? 'chip-status-on'
+                              : 'chip-status-off'
+                          "
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ scope.opt.name }}（{{ scope.opt.username }}）
+                        </q-item-label>
+                        <q-item-label caption>
+                          {{ scope.opt.mobile }} {{ scope.opt.email }}
+                        </q-item-label>
+                      </q-item-section>
+                      <q-item-section v-if="!!scope.opt.org_type" side>
+                        <q-chip
+                          square
+                          size="12px"
+                          :label="scope.opt.org_type.name"
+                          class="q-pa-sm bg-secondary"
+                        />
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+                <div
+                  v-if="!!bindUsersFormError.user_ids"
+                  class="error-hint text-negative"
+                >
+                  {{ bindUsersFormError.user_ids }}
+                </div>
+              </div>
+              <div class="text-caption hint-label">
+                提示：仅能选择尚无组织归属或属于当前页所选【{{
+                  selectedOrgType.name
+                }}】下的用户。
+              </div>
+            </div>
           </q-tab-panel>
           <q-tab-panel name="new">
             <div class="q-gutter-md">
@@ -405,7 +436,7 @@
             </div>
           </div>
           <div class="text-caption hint-label">
-            注意：如需彻底移除所属组织，请点击【办理离职】。
+            提示：如需彻底移除所属组织，请点击【办理离职】。
           </div>
         </div>
       </template>
@@ -428,12 +459,13 @@ import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
 
 import {
-  AddMembersPostData,
-  AddMembersPostError,
+  BindUsersPostData,
+  BindUsersPostError,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
   Enterprise,
   OrgTree,
+  OrgType,
   TransferPostData,
   TransferPostError,
   User,
@@ -556,7 +588,10 @@ export default defineComponent({
       splitterModel: 300,
 
       // tree
-      selectedOrgTypeId: ref(''),
+      selectedOrgType: ref({
+        id: '',
+        name: '',
+      }),
       selectedNode: ref({
         id: '',
         name: '',
@@ -579,8 +614,8 @@ export default defineComponent({
       // add new member, existing user
       userOptions: ref([]),
       selectedExistingUsers: ref<User[]>(),
-      newMemberFormData: ref<AddMembersPostData>({}),
-      newMemberFormError: ref<AddMembersPostError>({}),
+      bindUsersFormData: ref<BindUsersPostData>({}),
+      bindUsersFormError: ref<BindUsersPostError>({}),
 
       // add new user
       newUserFormData: ref<UserPostData>({}),
@@ -612,8 +647,8 @@ export default defineComponent({
       this.loadUserTable();
     },
 
-    onOrgTypeChanged(selectedId: string) {
-      this.selectedOrgTypeId = selectedId;
+    onOrgTypeChanged(selected: OrgType) {
+      this.selectedOrgType = selected;
       this.selectedNode = {
         id: '',
         name: '',
@@ -633,7 +668,7 @@ export default defineComponent({
         setTimeout(() => {
           const et = this.$refs.enterpriseTable as DataTableComponent;
           et.setApiInfo('/enterprises/query', 'POST');
-          et.onExternalFiltered('org_type_id', this.selectedOrgTypeId);
+          et.onExternalFiltered('org_type_id', this.selectedOrgType.id);
         }, 20);
       }
     },
@@ -677,7 +712,6 @@ export default defineComponent({
       update(async () => {
         let resp = await this.$api.post('/users/query', {
           q: kw,
-          org_type_id: this.selectedOrgTypeId,
           include_unassigned_users: true,
         });
         this.userOptions = resp.data.rows;
@@ -690,29 +724,29 @@ export default defineComponent({
 
     async openAddMembersForm() {
       const resp = await this.$api.get(
-        `/org_types/${this.selectedOrgTypeId}/organization_tree`
+        `/org_types/${this.selectedOrgType.id}/organization_tree`
       );
       this.orgTreeData = resp.data;
       this.parentDepartment = [this.selectedNode];
       this.newUserFormData.organization_ids = [this.selectedNode.id];
-      this.newMemberFormData.organization_ids = [this.selectedNode.id];
+      this.bindUsersFormData.organization_ids = [this.selectedNode.id];
       this.addMembersForm = true;
     },
 
     async saveAddMembersForm() {
       if (this.addMembersTab === 'existing' && this.selectedExistingUsers) {
-        this.newMemberFormData.user_ids = this.selectedExistingUsers.map(
+        this.bindUsersFormData.user_ids = this.selectedExistingUsers.map(
           (user) => user.id
         );
         try {
-          this.newMemberFormError = {};
+          this.bindUsersFormError = {};
           await this.$api.post(
             '/organizations/members',
             Object.assign(
               {
-                org_type_id: this.selectedOrgTypeId,
+                org_type_id: this.selectedOrgType.id,
               },
-              this.newMemberFormData
+              this.bindUsersFormData
             ),
             {
               successMsg: '成员添加成功',
@@ -720,9 +754,9 @@ export default defineComponent({
           );
           (this.$refs.addMembersDialog as FormDialogComponent).hide();
           this.loadUserTable();
-          this.resetNewMemberForm();
+          this.resetAddMembersForm();
         } catch (e) {
-          this.newMemberFormError = (e as Error).cause || {};
+          this.bindUsersFormError = (e as Error).cause || {};
         }
       } else if (this.addMembersTab == 'new') {
         try {
@@ -731,7 +765,7 @@ export default defineComponent({
             '/users',
             Object.assign(
               {
-                org_type_id: this.selectedOrgTypeId,
+                org_type_id: this.selectedOrgType.id,
               },
               this.newUserFormData
             ),
@@ -741,23 +775,20 @@ export default defineComponent({
           );
           (this.$refs.addMembersDialog as FormDialogComponent).hide();
           this.loadUserTable();
-          this.resetNewUserForm();
+          this.resetAddMembersForm();
         } catch (e) {
           this.newUserFormError = (e as Error).cause || {};
         }
       }
     },
 
-    resetNewMemberForm() {
-      this.newMemberFormData = {};
-      this.newMemberFormError = {};
-      this.selectedExistingUsers = [];
-    },
-
-    resetNewUserForm() {
+    resetAddMembersForm() {
+      this.bindUsersFormData = {};
+      this.bindUsersFormError = {};
       this.newUserFormData = {};
       this.newUserFormError = {};
       this.selectedExistingUsers = [];
+      this.addMembersTab = 'existing';
     },
 
     operateOneUser(evt: Event, user: User) {
@@ -867,7 +898,7 @@ export default defineComponent({
 
     async openTransferForm(user: User) {
       const resp = await this.$api.get(
-        `/org_types/${this.selectedOrgTypeId}/organization_tree`
+        `/org_types/${this.selectedOrgType.id}/organization_tree`
       );
       this.orgTreeData = resp.data;
       this.transferFormData.user_id = user.id;

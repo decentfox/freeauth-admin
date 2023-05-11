@@ -251,9 +251,19 @@
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>
-                      {{ scope.opt.name }} {{ scope.opt.mobile }}
+                      {{ scope.opt.name }}（{{ scope.opt.username }}）
                     </q-item-label>
-                    <q-item-label caption>{{ scope.opt.email }}</q-item-label>
+                    <q-item-label caption>
+                      {{ scope.opt.mobile }} {{ scope.opt.email }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section v-if="!!scope.opt.org_type" side>
+                    <q-chip
+                      square
+                      size="12px"
+                      :label="scope.opt.org_type.name"
+                      class="q-pa-sm bg-secondary"
+                    />
                   </q-item-section>
                 </q-item>
               </template>
@@ -266,7 +276,11 @@
             </div>
           </div>
           <div v-if="!!role.org_type" class="text-caption hint-label">
-            提示：该角色为组织类型角色，因此只能搜索该角色所属组织类型下的用户进行角色关联。
+            提示：该角色为组织类型【{{
+              role.org_type.name
+            }}】角色，因此只能搜索到【{{
+              role.org_type.name
+            }}】下的用户进行关联。如未搜索到目标用户，请先检查其组织归属。
           </div>
         </div>
       </template>

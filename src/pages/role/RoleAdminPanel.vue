@@ -107,7 +107,11 @@
                     },
                   ]"
                   @click.stop
-                  @menu-click="operateOneRole($event, props.row)"
+                  @disable="toggleRoles([props.row], true)"
+                  @enable="toggleRoles([props.row], false)"
+                  @delete="deleteRoles([props.row])"
+                  @bind-users="goToRoleProfile($event, props.row.id)"
+                  @set-perms="goToRoleProfile($event, props.row.id)"
                 />
               </div>
             </q-td>
@@ -316,7 +320,7 @@
                             },
                           ]"
                           @click.stop
-                          @menu-click="operateOneUser($event, props.row)"
+                          @set-roles="openSetRoleForm(props.row)"
                         />
                       </q-td>
                     </template>
@@ -855,12 +859,10 @@ export default defineComponent({
         });
     },
 
-    operateOneUser(evt: Event, user: User) {
-      if (evt.type === 'set_roles') {
-        this.setRoleForm = true;
-        this.setRoleFormData.user_id = user.id;
-        this.selectedRoles = user.roles || [];
-      }
+    openSetRoleForm(user: User) {
+      this.setRoleForm = true;
+      this.setRoleFormData.user_id = user.id;
+      this.selectedRoles = user.roles || [];
     },
 
     async saveSetRoleForm() {

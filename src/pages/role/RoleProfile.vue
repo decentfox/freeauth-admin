@@ -29,7 +29,9 @@
             actionType: 'delete',
           },
         ]"
-        @menu-click="operateOneRole($event, role)"
+        @disable="toggleRoles([role], true)"
+        @enable="toggleRoles([role], false)"
+        @delete="deleteRoles([role])"
       />
     </template>
     <template #panels>
@@ -163,7 +165,7 @@
                   },
                 ]"
                 @click.stop
-                @menu-click="operateOneUser($event, props.row)"
+                @unbind="unbindUser([props.row])"
               />
             </q-td>
           </template>
@@ -399,22 +401,6 @@ export default defineComponent({
           et.setApiInfo(`/roles/${this.role.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
-      }
-    },
-
-    operateOneRole(evt: Event, role: Role) {
-      if (evt.type === 'disable') {
-        this.toggleRoles([role], true);
-      } else if (evt.type === 'enable') {
-        this.toggleRoles([role], false);
-      } else if (evt.type === 'delete') {
-        this.deleteRoles([role]);
-      }
-    },
-
-    operateOneUser(evt: Event, user: User) {
-      if (evt.type === 'unbind') {
-        this.unbindUser([user]);
       }
     },
 

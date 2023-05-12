@@ -111,33 +111,50 @@
                 </template>
                 <template #body-cell-actions="props">
                   <q-td :props="props">
-                    <dropdown-button
-                      :buttons="[
-                        {
-                          label: !props.row.is_deleted
-                            ? '禁用账号'
-                            : '启用账号',
-                          icon: !props.row.is_deleted
-                            ? 'remove_circle_outline'
-                            : 'task_alt',
-                          actionType: !props.row.is_deleted
-                            ? 'disable'
-                            : 'enable',
-                        },
-                        {
-                          label: '变更组织',
-                          icon: 'sync_alt',
-                          actionType: 'transfer',
-                        },
-                        {
-                          label: '办理离职',
-                          icon: 'logout',
-                          actionType: 'resign',
-                        },
-                      ]"
-                      @click.stop
-                      @menu-click="operateOneUser($event, props.row)"
-                    />
+                    <user-operations ref="userOps" @refresh="refreshUserData">
+                      <template #actions>
+                        <dropdown-button
+                          :buttons="[
+                            {
+                              label: !props.row.is_deleted
+                                ? '禁用账号'
+                                : '启用账号',
+                              icon: !props.row.is_deleted
+                                ? 'remove_circle_outline'
+                                : 'task_alt',
+                              actionType: !props.row.is_deleted
+                                ? 'disable'
+                                : 'enable',
+                            },
+                            {
+                              label: '变更组织',
+                              icon: 'sync_alt',
+                              actionType: 'transfer',
+                            },
+                            {
+                              label: '办理离职',
+                              icon: 'logout',
+                              actionType: 'resign',
+                            },
+                          ]"
+                          @click.stop
+                          @disable="
+                            ($refs.userOps as UserMethods).toggleUsersStatus(
+                              [props.row],
+                              true
+                            )
+                          "
+                          @enable="
+                            ($refs.userOps as UserMethods).toggleUsersStatus(
+                              [props.row],
+                              false
+                            )
+                          "
+                          @resign="resignUsers([props.row])"
+                          @transfer="openTransferForm(props.row)"
+                        />
+                      </template>
+                    </user-operations>
                   </q-td>
                 </template>
               </data-table>
@@ -187,7 +204,17 @@
                         },
                       ]"
                       @click.stop
-                      @menu-click="operateOneEnterprise($event, props.row)"
+                      @edit="
+                        ($refs.orgStructure as OrgTree).openEnterpriseForm(
+                          props.row.id
+                        )
+                      "
+                      @copy="copyInfoToClipboard(props.row)"
+                      @delete="
+                        ($refs.orgStructure as OrgTree).deleteOrganization(
+                          props.row.id
+                        )
+                      "
                     />
                   </q-td>
                 </template>
@@ -449,6 +476,9 @@ import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 import { DataTableComponent } from 'src/components/table/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { UserMethods } from 'src/components/user/type';
+import UserOperations from 'src/components/user/UserOperations.vue';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
@@ -464,6 +494,7 @@ import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
   Enterprise,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   OrgTree,
   OrgType,
   TransferPostData,
@@ -580,6 +611,7 @@ export default defineComponent({
     FormDialog,
     OrgStructureTree,
     TreeSelect,
+    UserOperations,
   },
 
   setup() {
@@ -631,16 +663,6 @@ export default defineComponent({
   },
 
   methods: {
-    operateOneEnterprise(evt: Event, enterprise: Enterprise) {
-      if (evt.type === 'edit') {
-        (this.$refs.orgStructure as OrgTree).openEnterpriseForm(enterprise.id);
-      } else if (evt.type === 'delete') {
-        (this.$refs.orgStructure as OrgTree).deleteOrganization(enterprise.id);
-      } else if (evt.type === 'copy') {
-        this.copyInfoToClipboard(evt, enterprise);
-      }
-    },
-
     onNodeUpdated(node: QTreeNode) {
       this.selectedNode.id = node.id;
       this.selectedNode.name = node.name;
@@ -791,57 +813,10 @@ export default defineComponent({
       this.addMembersTab = 'existing';
     },
 
-    operateOneUser(evt: Event, user: User) {
-      if (evt.type === 'disable') {
-        this.toggleUsersStatus([user], true);
-      } else if (evt.type === 'enable') {
-        this.toggleUsersStatus([user], false);
-      } else if (evt.type === 'resign') {
-        this.resignUsers([user]);
-      } else if (evt.type === 'transfer') {
-        this.openTransferForm(user);
+    refreshUserData(evt: Event) {
+      if (evt.type === 'disable' || evt.type === 'enable') {
+        this.loadUserTable();
       }
-    },
-
-    toggleUsersStatus(users: User[], isDeleted: boolean) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-      const content = isDeleted
-        ? `您正在请求禁用成员：${userDesc}，操作后，该成员将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`
-        : `您正在请求启用成员：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: isDeleted ? '禁用用户' : '恢复用户',
-            content: content,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: isDeleted ? '禁用' : '恢复',
-                actionType: 'toggle',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'toggle') {
-            try {
-              await this.$api.put(
-                '/users/status',
-                {
-                  user_ids: users.map((u: User) => u.id),
-                  is_deleted: isDeleted,
-                },
-                { successMsg: `${isDeleted ? '禁用' : '启用'}成员成功` }
-              );
-            } finally {
-              this.loadUserTable();
-            }
-          }
-        });
     },
 
     resignUsers(users: User[]) {
@@ -934,7 +909,7 @@ export default defineComponent({
       this.transferFormError = {};
     },
 
-    copyInfoToClipboard(evt: Event, row: Enterprise) {
+    copyInfoToClipboard(row: Enterprise) {
       const info = [
         '企业全称：' + row.name,
         '企业 Code：' + (row.code ? row.code : ''),

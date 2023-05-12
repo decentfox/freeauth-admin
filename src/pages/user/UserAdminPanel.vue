@@ -10,9 +10,9 @@
       selection="multiple"
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
-      @批量禁用="(selected) => toggleUsersStatus(selected, true)"
-      @批量启用="(selected) => toggleUsersStatus(selected, false)"
-      @批量删除="(selected) => deleteUsers(selected)"
+      @批量禁用="(selected) => ($refs.userOps as UserMethods).toggleUsersStatus(selected, true)"
+      @批量启用="(selected) => ($refs.userOps as UserMethods).toggleUsersStatus(selected, false)"
+      @批量删除="(selected) => ($refs.userOps as UserMethods).deleteUsers(selected)"
     >
       <template #table-action>
         <q-btn
@@ -47,24 +47,42 @@
       </template>
       <template #body-cell-actions="props">
         <q-td :props="props" @click.stop>
-          <dropdown-button
-            :buttons="[
-              {
-                label: !props.row.is_deleted ? '禁用账号' : '启用账号',
-                icon: !props.row.is_deleted
-                  ? 'remove_circle_outline'
-                  : 'task_alt',
-                actionType: !props.row.is_deleted ? 'disable' : 'enable',
-              },
-              {
-                label: '删除账号',
-                icon: 'delete_outline',
-                actionType: 'delete',
-              },
-            ]"
-            @click.stop
-            @menu-click="operateOneUser($event, props.row)"
-          />
+          <user-operations ref="userOps" @refresh="refreshUserData">
+            <template #actions>
+              <dropdown-button
+                :buttons="[
+                  {
+                    label: !props.row.is_deleted ? '禁用账号' : '启用账号',
+                    icon: !props.row.is_deleted
+                      ? 'remove_circle_outline'
+                      : 'task_alt',
+                    actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                  },
+                  {
+                    label: '删除账号',
+                    icon: 'delete_outline',
+                    actionType: 'delete',
+                  },
+                ]"
+                @click.stop
+                @disable="
+                  ($refs.userOps as UserMethods).toggleUsersStatus(
+                    [props.row],
+                    true
+                  )
+                "
+                @enable="
+                  ($refs.userOps as UserMethods).toggleUsersStatus(
+                    [props.row],
+                    false
+                  )
+                "
+                @delete="
+                  ($refs.userOps as UserMethods).deleteUsers([props.row])
+                "
+              />
+            </template>
+          </user-operations>
         </q-td>
       </template>
     </data-table>
@@ -163,10 +181,12 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { User, UserPostData, UserPostError } from 'pages/type';
+import { UserPostData, UserPostError } from 'pages/type';
 import { date, QTableProps } from 'quasar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { UserMethods } from 'src/components/user/type';
+import UserOperations from 'src/components/user/UserOperations.vue';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import DropdownButton from 'components/DropdownButton.vue';
@@ -322,7 +342,13 @@ const filterColumns: FilterColumn[] = [
 export default defineComponent({
   name: 'UserAdminPanel',
 
-  components: { DataTable, DropdownButton, FieldLabel, FormDialog },
+  components: {
+    DataTable,
+    DropdownButton,
+    FieldLabel,
+    FormDialog,
+    UserOperations,
+  },
 
   setup() {
     return {
@@ -356,94 +382,8 @@ export default defineComponent({
       this.newUser = {};
     },
 
-    toggleUsersStatus(users: User[], isDeleted: boolean) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-      const content = isDeleted
-        ? `您正在请求禁用用户：${userDesc}，操作后，该用户将无法登录系统及重置密码，但您仍可在后台对该账号进行编辑及重新启用。`
-        : `您正在请求启用用户：${userDesc}，操作后，账号状态将恢复正常，用户可以重新登录系统。`;
-
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: isDeleted ? '禁用用户' : '恢复用户',
-            content: content,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: isDeleted ? '禁用' : '恢复',
-                actionType: 'toggle',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'toggle') {
-            try {
-              await this.$api.put(
-                '/users/status',
-                {
-                  user_ids: users.map((u: User) => u.id),
-                  is_deleted: isDeleted,
-                },
-                { successMsg: `${isDeleted ? '禁用' : '启用'}用户成功` }
-              );
-            } finally {
-              (this.$refs.table as DataTableComponent).fetchRows();
-            }
-          }
-        });
-    },
-
-    deleteUsers(users: User[]) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '删除用户',
-            content: `您正在请求删除用户：${userDesc}，数据删除后将无法进行恢复，您确认要继续删除吗？`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '删除',
-                actionType: 'delete',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'delete') {
-            const userIds: string[] = users.map((u: User) => u.id);
-            try {
-              await this.$api.request({
-                method: 'DELETE',
-                url: '/users',
-                data: { user_ids: userIds },
-                successMsg: '删除用户成功',
-              });
-            } finally {
-              (this.$refs.table as DataTableComponent).fetchRows();
-            }
-          }
-        });
-    },
-
-    operateOneUser(evt: Event, user: User) {
-      if (evt.type === 'disable') {
-        this.toggleUsersStatus([user], true);
-      } else if (evt.type === 'enable') {
-        this.toggleUsersStatus([user], false);
-      } else if (evt.type === 'delete') {
-        this.deleteUsers([user]);
-      }
+    refreshUserData() {
+      (this.$refs.table as DataTableComponent).fetchRows();
     },
 
     goToUserProfile(evt: Event, userId: string) {

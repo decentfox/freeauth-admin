@@ -1,56 +1,77 @@
 <template>
   <q-toggle
-    v-model="limit.status"
+    :model-value="modelValue"
     left-label
     :label="toggleLabel"
     class="text-weight-bold"
     icon="verified_user"
+    @update:model-value="
+      (value) => {
+        $emit('update:modelValue', value);
+      }
+    "
   />
   <q-item-label class="text-caption hint-label">
     {{ description }}
   </q-item-label>
   <div
-    v-if="limit.status && (limit.duration || limit.times)"
+    v-if="modelValue && (interval !== null || maxAttempts !== null)"
     class="row q-gutter-sm q-pt-xs"
   >
     <q-input
-      v-if="limit.duration"
-      v-model.number="limit.duration"
+      v-if="interval !== null"
+      :model-value="interval"
       type="number"
       dense
       filled
       suffix="分钟"
       style="max-width: 120px"
       hint="限定周期时间"
+      @update:model-value="
+        (value) => {
+          $emit('update:interval', parseInt(value as string) || 0);
+        }
+      "
     />
     <q-input
-      v-if="limit.times"
-      v-model.number="limit.times"
+      v-if="maxAttempts != null"
+      :model-value="maxAttempts"
       type="number"
       dense
       filled
       suffix="次"
       style="max-width: 120px"
       :hint="actionHint"
+      @update:model-value="
+        (value) => {
+          $emit('update:maxAttempts', parseInt(value as string) || 0);
+        }
+      "
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
-
-import { SecurityConfig } from './type';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'SecurityConfigItem',
 
   props: {
-    /** 安全设置项的数值 */
-    value: {
-      type: Object as PropType<SecurityConfig>,
-      default: () => {
-        return {};
-      },
+    /** 是否启用该安全项 */
+    modelValue: {
+      type: Boolean,
+      default: false,
+    },
+    /** 安全项作用的周期 */
+    interval: {
+      type: Number,
+      default: null,
+    },
+    /** 安全项作用周期内允许的操作次数 */
+    maxAttempts: {
+      type: Number,
+      default: null,
     },
     /** 安全设置项的名称 */
     toggleLabel: {
@@ -69,21 +90,10 @@ export default defineComponent({
     },
   },
 
-  emits: ['input'],
+  emits: ['update:modelValue', 'update:interval', 'update:maxAttempts'],
 
   setup() {
     return {};
-  },
-
-  computed: {
-    limit: {
-      get() {
-        return this.value;
-      },
-      set(val: number) {
-        this.$emit('input', val);
-      },
-    },
   },
 
   methods: {},

@@ -858,7 +858,7 @@ export default defineComponent({
 
     changeOrgType(selected: OrgType) {
       this.loadOrgTree(true);
-      this.$emit('update:changeOrgType', selected.id);
+      this.$emit('update:changeOrgType', selected);
     },
   },
 });

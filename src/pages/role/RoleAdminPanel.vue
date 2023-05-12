@@ -351,15 +351,17 @@
         <div v-if="roleTypeTab === 'org_type'">
           <field-label name="所属组织类型" required />
           <q-select
-            v-model="selectedOrgType"
+            v-model="roleFormData.org_type_id"
             :options="orgTypeOptions"
             dense
             filled
             class="full-width"
             option-label="name"
             option-value="id"
-            :error="!!roleFormError.org_type_id"
-            :error-message="roleFormError.org_type_id"
+            emit-value
+            map-options
+            hide-bottom-space
+            :rules="[(val) => !!val || '请选择所属组织类型']"
           />
         </div>
       </div>
@@ -415,9 +417,9 @@
     @close="resetSetRoleForm"
   >
     <template #form-content>
-      <div class="q-col-gutter-md q-pa-md">
+      <div class="q-gutter-md q-pa-md">
         <div>
-          <field-label name="关联角色" required />
+          <field-label name="关联角色" />
           <q-select
             v-model="selectedRoles"
             :options="availableRoleOptions"
@@ -431,6 +433,19 @@
           >
             <template #option="scope">
               <q-item v-bind="scope.itemProps">
+                <q-item-section avatar>
+                  <q-chip
+                    square
+                    size="12px"
+                    :label="!scope.opt.is_deleted ? '正常' : '禁用'"
+                    class="text-weight-bold q-pa-sm"
+                    :class="
+                      !scope.opt.is_deleted
+                        ? 'chip-status-on'
+                        : 'chip-status-off'
+                    "
+                  />
+                </q-item-section>
                 <q-item-section>
                   <q-item-label>
                     {{ scope.opt.name }}
@@ -440,13 +455,22 @@
                   <q-chip
                     square
                     size="12px"
-                    :label="!scope.opt.org_type ? '全局角色' : '组织类型角色'"
+                    :label="
+                      !scope.opt.org_type
+                        ? '全局角色'
+                        : scope.opt.org_type.name + '角色'
+                    "
                     class="q-pa-sm bg-secondary"
                   />
                 </q-item-section>
               </q-item>
             </template>
           </q-select>
+        </div>
+        <div class="text-caption hint-label">
+          提示：仅能选择全局角色或属于当前页所选【{{
+            selectedOrgType.name
+          }}】下的角色。
         </div>
       </div>
     </template>
@@ -455,6 +479,20 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Department,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Organization,
+  OrgType,
+  Role,
+  RolePostData,
+  RolePostError,
+  RoleSet,
+  SetRolePostData,
+  SetRolePostError,
+  User,
+} from 'pages/type';
 import { date, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 
@@ -469,21 +507,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Organization,
-  OrgType,
-  Role,
-  RolePostData,
-  RolePostError,
-  RoleSet,
-  SetRolePostData,
-  SetRolePostError,
-  User,
-} from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -636,7 +659,10 @@ export default defineComponent({
       // structure mode
       splitterModel: 300,
       secondSplitterModel: 250,
-      selectedOrgTypeId: ref(''),
+      selectedOrgType: ref({
+        id: '',
+        name: '',
+      }),
       selectedNode: ref({
         id: '',
         name: '',
@@ -646,10 +672,6 @@ export default defineComponent({
 
       // form dialog
       orgTypeOptions: ref<OrgType[]>([]),
-      selectedOrgType: ref({
-        id: '',
-        name: '',
-      }),
       roleTypeTab: ref('global'),
       roleForm: ref(false),
       roleFormData: ref<RolePostData>({}),
@@ -684,8 +706,8 @@ export default defineComponent({
       this.loadUserTable();
     },
 
-    onOrgTypeChanged(selectedId: string) {
-      this.selectedOrgTypeId = selectedId;
+    onOrgTypeChanged(selected: OrgType) {
+      this.selectedOrgType = selected;
       this.selectedNode = {
         id: '',
         name: '',
@@ -694,9 +716,9 @@ export default defineComponent({
     },
 
     async loadAvailableRoles() {
-      if (this.selectedOrgTypeId) {
+      if (this.selectedOrgType.id) {
         const resp = await this.$api.post('/roles/query', {
-          org_type_id: this.selectedOrgTypeId,
+          org_type_id: this.selectedOrgType.id,
         });
         this.availableRoleOptions = resp.data.rows;
         this.availableRoleSet = [
@@ -733,8 +755,8 @@ export default defineComponent({
     async saveRoleForm() {
       try {
         this.roleFormError = {};
-        if (this.roleTypeTab === 'org_type') {
-          this.roleFormData.org_type_id = this.selectedOrgType.id;
+        if (this.roleTypeTab === 'global') {
+          this.roleFormData.org_type_id = undefined;
         }
         await this.$api.post('/roles', this.roleFormData, {
           successMsg: '角色创建成功',
@@ -750,16 +772,13 @@ export default defineComponent({
     resetRoleForm() {
       this.roleFormData = {};
       this.roleFormError = {};
-      this.selectedOrgType = {
-        id: '',
-        name: '',
-      };
       this.roleTypeTab = 'global';
     },
 
     async loadOrgTypes() {
       const resp = await this.$api.get('/org_types');
       this.orgTypeOptions = resp.data.org_types;
+      this.roleFormData.org_type_id = this.orgTypeOptions[0].id;
     },
 
     toggleRoles(roles: Role[], isDeleted: boolean) {
@@ -827,7 +846,7 @@ export default defineComponent({
                 method: 'DELETE',
                 url: '/roles',
                 data: { ids: roles.map((u: Role) => u.id) },
-                successMsg: '删除用户成功',
+                successMsg: '删除角色成功',
               });
             } finally {
               (this.$refs.roleTable as DataTableComponent).fetchRows();

@@ -468,6 +468,8 @@
 import { defineComponent, ref } from 'vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QInput, QSelect, QTree, QTreeNode } from 'quasar';
+
+import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import {
   Department,
   DepartmentPostData,
@@ -478,20 +480,12 @@ import {
   OrgType,
   OrgTypePostData,
   OrgTypePostError,
-} from 'src/pages/type';
-
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import TreeSelect from 'components/form/TreeSelect.vue';
+} from 'pages/type';
 
 import { FormDialogComponent } from './dialog/type';
 
 export default defineComponent({
   name: 'OrgTree',
-
-  components: { DropdownButton, FieldLabel, FormDialog, TreeSelect },
 
   props: {
     editable: {

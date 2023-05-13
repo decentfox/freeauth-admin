@@ -3,6 +3,6 @@ export interface ProfileTab {
   label: string;
 }
 
-export interface Profile {
+export interface ProfileComponent {
   goBack: () => void;
 }

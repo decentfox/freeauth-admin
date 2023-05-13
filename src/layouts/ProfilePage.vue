@@ -52,8 +52,6 @@ import { ProfileTab } from './type';
 export default defineComponent({
   name: 'ProfilePage',
 
-  components: {},
-
   props: {
     status: {
       type: Boolean,

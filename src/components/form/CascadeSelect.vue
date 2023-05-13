@@ -28,16 +28,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import CascadeItem from 'components/form/CascadeItem.vue';
-
 import { CascadeOption } from './type';
 
 export default defineComponent({
   name: 'CascadeSelect',
-
-  components: {
-    CascadeItem,
-  },
 
   props: {
     modelValue: {

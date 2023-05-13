@@ -291,9 +291,6 @@ import { defineComponent, ref } from 'vue';
 import { mapActions, mapState } from 'pinia';
 import { QFile } from 'quasar';
 
-import LoginSettingPanel from 'components/login/LoginSettingPanel.vue';
-import SecurityConfigItem from 'components/login/SecurityConfigItem.vue';
-import SignupAndLoginFrame from 'components/login/SignupAndLoginFrame.vue';
 import {
   AuthMode,
   AuthModeLabel,
@@ -302,13 +299,7 @@ import {
 import { loginSettingsStore } from 'stores/login-settings-store';
 
 export default defineComponent({
-  name: 'IndexPage',
-
-  components: {
-    LoginSettingPanel,
-    SecurityConfigItem,
-    SignupAndLoginFrame,
-  },
+  name: 'LoginSettings',
 
   setup() {
     return {

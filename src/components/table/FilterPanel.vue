@@ -132,8 +132,6 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { date, QForm } from 'quasar';
 
-import DateSelect from 'components/form/DateSelect.vue';
-
 import {
   FilterColumn,
   FilterCondition,
@@ -143,8 +141,6 @@ import {
 
 export default defineComponent({
   name: 'FilterPanel',
-
-  components: { DateSelect },
 
   props: {
     columns: {

@@ -28,7 +28,6 @@
 import { defineComponent } from 'vue';
 import { date, QTableProps } from 'quasar';
 
-import DataTable from 'components/table/DataTable.vue';
 import { FilterColumn, FilterOperator } from 'components/table/type';
 
 enum EventType {
@@ -191,8 +190,6 @@ const filterColumns: FilterColumn[] = [
 
 export default defineComponent({
   name: 'AuditLogs',
-
-  components: { DataTable },
 
   setup() {
     return {

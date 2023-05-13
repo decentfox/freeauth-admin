@@ -155,13 +155,10 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { QTable, QTableColumn, QTableProps } from 'quasar';
 
-import FilterPanel from './FilterPanel.vue';
 import { FilterColumn, FilterCondition, Pagination, QueryData } from './type';
 
 export default defineComponent({
   name: 'DataTable',
-
-  components: { FilterPanel },
 
   props: {
     /** 获取数据接口 URL */

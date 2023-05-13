@@ -1,48 +1,4 @@
-export interface User {
-  /** 用户 ID */
-  id: string;
-  /** 用户姓名 */
-  name?: string;
-  /** 用户手机号 */
-  mobile?: string;
-  /** 用户邮箱 */
-  email?: string;
-  /** 用户用户名 */
-  username?: string;
-  /** 用户直属部门 */
-  departments?: Department[];
-  /** 用户关联角色 */
-  roles?: Role[];
-  /** 用户最后登录时间 */
-  last_login_at?: Date;
-  /** 用户创建时间 */
-  created_at?: Date;
-  /** 用户是否禁用 */
-  is_deleted?: boolean;
-}
-
-export interface UserPostData {
-  /** 用户姓名 */
-  name?: string;
-  /** 用户手机号 */
-  mobile?: string;
-  /** 用户邮箱 */
-  email?: string;
-  /** 用户用户名 */
-  username?: string;
-  /** 用户直属部门 */
-  organization_ids?: string[];
-}
-
-export interface UserPostError {
-  name?: string;
-  mobile?: string;
-  email?: string;
-  username?: string;
-  __root__?: string;
-}
-
-export interface OrgTree {
+export interface OrgTreeComponent {
   /** 打开企业机构的表单对话框 */
   openEnterpriseForm: (enterpriseId?: string) => void;
   /** 删除企业机构的表单对话框 */
@@ -59,10 +15,11 @@ export interface Organization {
 }
 
 export interface OrgType extends Organization {
+  /** 组织类型 Code */
   code: string;
   /** 组织类型描述 */
   description?: string;
-  /** 组织类型是否停用 */
+  /** 组织类型状态：true-停用；false-正常 */
   is_deleted: boolean;
   /** 是否为默认组织类型 */
   is_protected: boolean;
@@ -85,6 +42,7 @@ export interface OrgTypePostError {
 }
 
 export interface Enterprise extends Organization {
+  /** 企业机构纳税识别号 */
   tax_id?: string;
   /** 企业机构开户行 */
   issuing_bank?: string;
@@ -169,69 +127,6 @@ export interface TransferPostData {
 export interface TransferPostError {
   user_id?: string;
   organization_ids?: string;
-}
-
-export interface Role {
-  /** 角色 ID */
-  id: string;
-  /** 角色名称 */
-  name?: string;
-  /** 角色 Code */
-  code?: string;
-  /** 角色描述 */
-  description?: string;
-  /** 所属组织类型 */
-  org_type?: Organization;
-  /** 角色创建时间 */
-  created_at?: Date;
-  /** 用户是否禁用 */
-  is_deleted?: boolean;
-}
-
-export interface RoleSet {
-  label: string;
-  roles: Role[];
-}
-
-export interface RolePostData {
-  /** 角色名称 */
-  name?: string;
-  /** 角色 Code */
-  code?: string;
-  /** 角色描述 */
-  description?: string;
-  /** 所属组织类型 ID */
-  org_type_id?: string;
-}
-
-export interface RolePostError {
-  name?: string;
-  code?: string;
-  org_type_id?: string;
-}
-
-export interface SetRolePostData {
-  /** 用户的 ID */
-  user_id?: string;
-  /** 角色的 ID */
-  role_ids?: string[];
-}
-
-export interface SetRolePostError {
-  user_id?: string;
-  role_ids?: string;
-}
-
-export interface BindUsersPostData {
-  /** 用户的 ID */
-  user_ids?: string[];
-  /** 角色的 ID */
-  role_ids?: string[];
-}
-
-export interface BindUsersPostError {
-  user_ids?: string;
-  role_ids?: string;
 }
 
 export interface Permission {

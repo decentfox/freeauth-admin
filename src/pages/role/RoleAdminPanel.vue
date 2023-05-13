@@ -483,6 +483,20 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { date, QTableProps, QTreeNode } from 'quasar';
+
+import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import FormDialog from 'components/dialog/FormDialog.vue';
+import { FormDialogComponent } from 'components/dialog/type';
+import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
+import OrgStructureTree from 'components/OrgTree.vue';
+import DataTable from 'components/table/DataTable.vue';
+import {
+  DataTableComponent,
+  FilterColumn,
+  FilterOperator,
+} from 'components/table/type';
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
@@ -497,20 +511,6 @@ import {
   SetRolePostError,
   User,
 } from 'pages/type';
-import { date, QTableProps, QTreeNode } from 'quasar';
-import { FormDialogComponent } from 'src/components/dialog/type';
-
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import OrgStructureTree from 'components/OrgTree.vue';
-import DataTable from 'components/table/DataTable.vue';
-import {
-  DataTableComponent,
-  FilterColumn,
-  FilterOperator,
-} from 'components/table/type';
 
 const columns: QTableProps['columns'] = [
   {

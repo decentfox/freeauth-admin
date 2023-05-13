@@ -10,9 +10,13 @@
       selection="multiple"
       :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
-      @批量禁用="(selected) => ($refs.userOps as UserMethods).toggleUsersStatus(selected, true)"
-      @批量启用="(selected) => ($refs.userOps as UserMethods).toggleUsersStatus(selected, false)"
-      @批量删除="(selected) => ($refs.userOps as UserMethods).deleteUsers(selected)"
+      @批量禁用="
+        (selected) => toggleUsersStatus(selected, true, refreshUserData)
+      "
+      @批量启用="
+        (selected) => toggleUsersStatus(selected, false, refreshUserData)
+      "
+      @批量删除="(selected) => deleteUsers(selected, refreshUserData)"
     >
       <template #table-action>
         <q-btn
@@ -47,42 +51,26 @@
       </template>
       <template #body-cell-actions="props">
         <q-td :props="props" @click.stop>
-          <user-operations ref="userOps" @refresh="refreshUserData">
-            <template #actions>
-              <dropdown-button
-                :buttons="[
-                  {
-                    label: !props.row.is_deleted ? '禁用账号' : '启用账号',
-                    icon: !props.row.is_deleted
-                      ? 'remove_circle_outline'
-                      : 'task_alt',
-                    actionType: !props.row.is_deleted ? 'disable' : 'enable',
-                  },
-                  {
-                    label: '删除账号',
-                    icon: 'delete_outline',
-                    actionType: 'delete',
-                  },
-                ]"
-                @click.stop
-                @disable="
-                  ($refs.userOps as UserMethods).toggleUsersStatus(
-                    [props.row],
-                    true
-                  )
-                "
-                @enable="
-                  ($refs.userOps as UserMethods).toggleUsersStatus(
-                    [props.row],
-                    false
-                  )
-                "
-                @delete="
-                  ($refs.userOps as UserMethods).deleteUsers([props.row])
-                "
-              />
-            </template>
-          </user-operations>
+          <dropdown-button
+            :buttons="[
+              {
+                label: !props.row.is_deleted ? '禁用账号' : '启用账号',
+                icon: !props.row.is_deleted
+                  ? 'remove_circle_outline'
+                  : 'task_alt',
+                actionType: !props.row.is_deleted ? 'disable' : 'enable',
+              },
+              {
+                label: '删除账号',
+                icon: 'delete_outline',
+                actionType: 'delete',
+              },
+            ]"
+            @click.stop
+            @disable="toggleUsersStatus([props.row], true, refreshUserData)"
+            @enable="toggleUsersStatus([props.row], false, refreshUserData)"
+            @delete="deleteUsers([props.row], refreshUserData)"
+          />
         </q-td>
       </template>
     </data-table>
@@ -181,11 +169,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { UserPostData, UserPostError } from 'pages/type';
 import { date, QTableProps } from 'quasar';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { UserMethods } from 'src/components/user/type';
-import UserOperations from 'src/components/user/UserOperations.vue';
 
 import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
@@ -197,6 +181,8 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
+import { UserOperationsMixin } from 'components/user/UserOperations';
+import { UserPostData, UserPostError } from 'pages/type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -347,8 +333,9 @@ export default defineComponent({
     DropdownButton,
     FieldLabel,
     FormDialog,
-    UserOperations,
   },
+
+  mixins: [UserOperationsMixin],
 
   setup() {
     return {

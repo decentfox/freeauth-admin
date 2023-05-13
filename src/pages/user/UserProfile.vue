@@ -12,39 +12,31 @@
     ]"
   >
     <template #toolbar-right>
-      <user-operations ref="userOps" @refresh="refreshUserData">
-        <template #actions>
-          <dropdown-button
-            btn-label="更多操作"
-            btn-icon="expand_more"
-            btn-class="q-px-md secondary-btn"
-            :buttons="[
-              {
-                label: !user.is_deleted ? '禁用账号' : '启用账号',
-                icon: !user.is_deleted ? 'remove_circle_outline' : 'task_alt',
-                actionType: !user.is_deleted ? 'disable' : 'enable',
-              },
-              {
-                label: '重置密码',
-                icon: 'restart_alt',
-                actionType: 'reset_password',
-              },
-              {
-                label: '删除账号',
-                icon: 'delete_outline',
-                actionType: 'delete',
-              },
-            ]"
-            @disable="
-              ($refs.userOps as UserMethods).toggleUsersStatus([user], true)
-            "
-            @enable="
-              ($refs.userOps as UserMethods).toggleUsersStatus([user], false)
-            "
-            @delete="($refs.userOps as UserMethods).deleteUsers([user])"
-          />
-        </template>
-      </user-operations>
+      <dropdown-button
+        btn-label="更多操作"
+        btn-icon="expand_more"
+        btn-class="q-px-md secondary-btn"
+        :buttons="[
+          {
+            label: !user.is_deleted ? '禁用账号' : '启用账号',
+            icon: !user.is_deleted ? 'remove_circle_outline' : 'task_alt',
+            actionType: !user.is_deleted ? 'disable' : 'enable',
+          },
+          {
+            label: '重置密码',
+            icon: 'restart_alt',
+            actionType: 'reset_password',
+          },
+          {
+            label: '删除账号',
+            icon: 'delete_outline',
+            actionType: 'delete',
+          },
+        ]"
+        @disable="toggleUsersStatus([user], true, refreshUserData)"
+        @enable="toggleUsersStatus([user], false, refreshUserData)"
+        @delete="deleteUsers([user], refreshUserData)"
+      />
     </template>
     <template #panels>
       <q-tab-panel name="user">
@@ -170,16 +162,14 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { User, UserPostData, UserPostError } from 'pages/type';
 import { QTableProps } from 'quasar';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { UserMethods } from 'src/components/user/type';
-import UserOperations from 'src/components/user/UserOperations.vue';
-import ProfilePage from 'src/layouts/ProfilePage.vue';
-import { Profile } from 'src/layouts/type';
 
 import DropdownButton from 'components/DropdownButton.vue';
 import FieldLabel from 'components/form/FieldLabel.vue';
+import { UserOperationsMixin } from 'components/user/UserOperations';
+import ProfilePage from 'layouts/ProfilePage.vue';
+import { Profile } from 'layouts/type';
+import { User, UserPostData, UserPostError } from 'pages/type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -247,7 +237,9 @@ const deptColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'UserProfile',
 
-  components: { DropdownButton, FieldLabel, ProfilePage, UserOperations },
+  components: { DropdownButton, FieldLabel, ProfilePage },
+
+  mixins: [UserOperationsMixin],
 
   props: {
     userId: {
@@ -288,10 +280,10 @@ export default defineComponent({
       }
     },
 
-    refreshUserData(evt: Event) {
-      if (evt.type === 'disable' || evt.type === 'disable') {
+    refreshUserData(op: string) {
+      if (['disable', 'disable'].includes(op)) {
         this.loadUserInfo();
-      } else if (evt.type === 'delete') {
+      } else if (op === 'delete') {
         (this.$refs.profile as Profile).goBack();
       }
     },

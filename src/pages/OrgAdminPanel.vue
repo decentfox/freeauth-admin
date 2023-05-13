@@ -111,50 +111,40 @@
                 </template>
                 <template #body-cell-actions="props">
                   <q-td :props="props">
-                    <user-operations ref="userOps" @refresh="refreshUserData">
-                      <template #actions>
-                        <dropdown-button
-                          :buttons="[
-                            {
-                              label: !props.row.is_deleted
-                                ? '禁用账号'
-                                : '启用账号',
-                              icon: !props.row.is_deleted
-                                ? 'remove_circle_outline'
-                                : 'task_alt',
-                              actionType: !props.row.is_deleted
-                                ? 'disable'
-                                : 'enable',
-                            },
-                            {
-                              label: '变更组织',
-                              icon: 'sync_alt',
-                              actionType: 'transfer',
-                            },
-                            {
-                              label: '办理离职',
-                              icon: 'logout',
-                              actionType: 'resign',
-                            },
-                          ]"
-                          @click.stop
-                          @disable="
-                            ($refs.userOps as UserMethods).toggleUsersStatus(
-                              [props.row],
-                              true
-                            )
-                          "
-                          @enable="
-                            ($refs.userOps as UserMethods).toggleUsersStatus(
-                              [props.row],
-                              false
-                            )
-                          "
-                          @resign="resignUsers([props.row])"
-                          @transfer="openTransferForm(props.row)"
-                        />
-                      </template>
-                    </user-operations>
+                    <dropdown-button
+                      :buttons="[
+                        {
+                          label: !props.row.is_deleted
+                            ? '禁用账号'
+                            : '启用账号',
+                          icon: !props.row.is_deleted
+                            ? 'remove_circle_outline'
+                            : 'task_alt',
+                          actionType: !props.row.is_deleted
+                            ? 'disable'
+                            : 'enable',
+                        },
+                        {
+                          label: '变更组织',
+                          icon: 'sync_alt',
+                          actionType: 'transfer',
+                        },
+                        {
+                          label: '办理离职',
+                          icon: 'logout',
+                          actionType: 'resign',
+                        },
+                      ]"
+                      @click.stop
+                      @disable="
+                        toggleUsersStatus([props.row], true, loadUserTable)
+                      "
+                      @enable="
+                        toggleUsersStatus([props.row], false, loadUserTable)
+                      "
+                      @resign="resignUsers([props.row])"
+                      @transfer="openTransferForm(props.row)"
+                    />
                   </q-td>
                 </template>
               </data-table>
@@ -476,9 +466,6 @@ import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
 import { FormDialogComponent } from 'src/components/dialog/type';
 import { DataTableComponent } from 'src/components/table/type';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { UserMethods } from 'src/components/user/type';
-import UserOperations from 'src/components/user/UserOperations.vue';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import FormDialog from 'components/dialog/FormDialog.vue';
@@ -487,6 +474,7 @@ import FieldLabel from 'components/form/FieldLabel.vue';
 import TreeSelect from 'components/form/TreeSelect.vue';
 import OrgStructureTree from 'components/OrgTree.vue';
 import DataTable from 'components/table/DataTable.vue';
+import { UserOperationsMixin } from 'components/user/UserOperations';
 
 import {
   BindUsersPostData,
@@ -611,8 +599,9 @@ export default defineComponent({
     FormDialog,
     OrgStructureTree,
     TreeSelect,
-    UserOperations,
   },
+
+  mixins: [UserOperationsMixin],
 
   setup() {
     return {
@@ -811,12 +800,6 @@ export default defineComponent({
       this.newUserFormError = {};
       this.selectedExistingUsers = [];
       this.addMembersTab = 'existing';
-    },
-
-    refreshUserData(evt: Event) {
-      if (evt.type === 'disable' || evt.type === 'enable') {
-        this.loadUserTable();
-      }
     },
 
     resignUsers(users: User[]) {

@@ -29,7 +29,9 @@
             actionType: 'delete',
           },
         ]"
-        @menu-click="operateOneRole($event, role)"
+        @disable="toggleRoles([role], true)"
+        @enable="toggleRoles([role], false)"
+        @delete="deleteRoles([role])"
       />
     </template>
     <template #panels>
@@ -163,7 +165,7 @@
                   },
                 ]"
                 @click.stop
-                @menu-click="operateOneUser($event, props.row)"
+                @unbind="unbindUser([props.row])"
               />
             </q-td>
           </template>
@@ -275,6 +277,17 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { QSelect, QTableProps } from 'quasar';
+
+import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import FormDialog from 'components/dialog/FormDialog.vue';
+import { FormDialogComponent } from 'components/dialog/type';
+import DropdownButton from 'components/DropdownButton.vue';
+import FieldLabel from 'components/form/FieldLabel.vue';
+import DataTable from 'components/table/DataTable.vue';
+import { DataTableComponent } from 'components/table/type';
+import ProfilePage from 'layouts/ProfilePage.vue';
+import { Profile } from 'layouts/type';
 import {
   BindUsersPostData,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -284,17 +297,6 @@ import {
   RolePostError,
   User,
 } from 'pages/type';
-import { QSelect, QTableProps } from 'quasar';
-import { FormDialogComponent } from 'src/components/dialog/type';
-import { DataTableComponent } from 'src/components/table/type';
-import ProfilePage from 'src/layouts/ProfilePage.vue';
-import { Profile } from 'src/layouts/type';
-
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import DataTable from 'components/table/DataTable.vue';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -399,22 +401,6 @@ export default defineComponent({
           et.setApiInfo(`/roles/${this.role.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
-      }
-    },
-
-    operateOneRole(evt: Event, role: Role) {
-      if (evt.type === 'disable') {
-        this.toggleRoles([role], true);
-      } else if (evt.type === 'enable') {
-        this.toggleRoles([role], false);
-      } else if (evt.type === 'delete') {
-        this.deleteRoles([role]);
-      }
-    },
-
-    operateOneUser(evt: Event, user: User) {
-      if (evt.type === 'unbind') {
-        this.unbindUser([user]);
       }
     },
 

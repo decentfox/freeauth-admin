@@ -24,8 +24,8 @@
           },
           {
             label: '重置密码',
-            icon: 'delete_outline',
-            actionType: 'delete',
+            icon: 'restart_alt',
+            actionType: 'reset_password',
           },
           {
             label: '删除账号',
@@ -33,7 +33,9 @@
             actionType: 'delete',
           },
         ]"
-        @menu-click="operateOneUser($event, user)"
+        @disable="toggleUsersStatus([user], true, refreshUserData)"
+        @enable="toggleUsersStatus([user], false, refreshUserData)"
+        @delete="deleteUsers([user], refreshUserData)"
       />
     </template>
     <template #panels>
@@ -110,6 +112,7 @@
       <q-tab-panel name="organizations">
         <q-table
           flat
+          wrap-cells
           hide-pagination
           :rows="user.departments"
           :columns="deptColumns"
@@ -118,10 +121,39 @@
       <q-tab-panel name="roles">
         <q-table
           flat
+          wrap-cells
           hide-pagination
           :rows="user.roles"
           :columns="roleColumns"
-        />
+        >
+          <template #body-cell-org_type="props">
+            <q-td :props="props">
+              <q-chip
+                v-if="props.row.org_type"
+                clickable
+                size="12px"
+                square
+                color="secondary"
+                class="q-ml-none"
+              >
+                {{ props.row.org_type.name }}
+              </q-chip>
+            </q-td>
+          </template>
+          <template #body-cell-is_deleted="props">
+            <q-td :props="props">
+              <q-chip
+                square
+                size="12px"
+                :label="!props.row.is_deleted ? '正常' : '禁用'"
+                class="text-weight-bold q-pa-sm q-ml-none"
+                :class="
+                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
+                "
+              />
+            </q-td>
+          </template>
+        </q-table>
       </q-tab-panel>
       <q-tab-panel name="perms"> TODO </q-tab-panel>
     </template>
@@ -130,12 +162,14 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { User, UserPostData, UserPostError } from 'pages/type';
 import { QTableProps } from 'quasar';
-import ProfilePage from 'src/layouts/ProfilePage.vue';
 
 import DropdownButton from 'components/DropdownButton.vue';
 import FieldLabel from 'components/form/FieldLabel.vue';
+import { UserOperationsMixin } from 'components/user/UserOperations';
+import ProfilePage from 'layouts/ProfilePage.vue';
+import { Profile } from 'layouts/type';
+import { User, UserPostData, UserPostError } from 'pages/type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -149,6 +183,27 @@ const roleColumns: QTableProps['columns'] = [
     label: '代码',
     align: 'left',
     field: 'code',
+  },
+  {
+    name: 'description',
+    label: '描述',
+    align: 'left',
+    field: 'description',
+    style: 'max-width: 400px',
+    headerStyle: 'max-width: 400px',
+  },
+  {
+    name: 'org_type',
+    label: '角色归属',
+    align: 'left',
+    field: 'org_type',
+  },
+  {
+    name: 'is_deleted',
+    label: '状态',
+    align: 'center',
+    field: 'is_deleted',
+    sortable: true,
   },
   {
     name: 'actions',
@@ -184,6 +239,8 @@ export default defineComponent({
 
   components: { DropdownButton, FieldLabel, ProfilePage },
 
+  mixins: [UserOperationsMixin],
+
   props: {
     userId: {
       type: String,
@@ -215,22 +272,19 @@ export default defineComponent({
       const resp = await this.$api.get(`/users/${this.userId}`);
       this.user = resp.data;
       this.userFormData = Object.assign({}, resp.data);
-      console.error(this.user);
     },
 
     switchPanelTab(val: string) {
-      if (val === 'roles') {
+      if (val === 'perms') {
+        // TODO
       }
     },
 
-    operateOneUser(evt: Event, user: User) {
-      console.error(user);
-      if (evt.type === 'disable') {
-        //this.toggleUsers([user], true);
-      } else if (evt.type === 'enable') {
-        //this.toggleUsers([user], false);
-      } else if (evt.type === 'delete') {
-        //this.deleteUsers([user]);
+    refreshUserData(op: string) {
+      if (['disable', 'disable'].includes(op)) {
+        this.loadUserInfo();
+      } else if (op === 'delete') {
+        (this.$refs.profile as Profile).goBack();
       }
     },
 

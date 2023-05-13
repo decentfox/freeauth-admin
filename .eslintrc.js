@@ -92,7 +92,7 @@ module.exports = {
         groups: [
           ['^(react|vue|vite)', '^@?\\w'],
           // Internal packages.
-          ['^(@|stores|components)(/.*|$)'],
+          ['^(@|stores|components|layouts|pages)(/.*|$)'],
           // Side effect imports.
           ['^\\u0000'],
           // Parent imports. Put `..` last.

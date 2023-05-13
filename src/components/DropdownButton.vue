@@ -11,7 +11,7 @@
           clickable
           class="q-my-xs"
           :disable="button.disable"
-          @click="onClick(button)"
+          @click="$emit(button.actionType.replace('_', '-'))"
         >
           <q-item-section v-if="button.icon" avatar class="q-pr-none">
             <q-icon :name="button.icon" size="16px" />
@@ -63,13 +63,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['menuClick'],
-
-  methods: {
-    onClick(button: MenuButton) {
-      this.$emit('menuClick', { type: button.actionType });
-    },
-  },
+  methods: {},
 });
 </script>
 

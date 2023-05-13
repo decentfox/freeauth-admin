@@ -71,7 +71,8 @@
                   },
                 ]"
                 @click.stop
-                @menu-click="startToManageOrgType($event, scope.opt)"
+                @edit-type="openOrgTypeForm(scope.opt)"
+                @delete-type="deleteOrgType(scope.opt)"
               />
             </q-item-section>
           </q-item>
@@ -98,7 +99,9 @@
             actionType: 'department',
           },
         ]"
-        @menu-click="startToCreateObject"
+        @org-type="openOrgTypeForm()"
+        @enterprise="openEnterpriseForm()"
+        @department="openDepartmentForm()"
       />
     </q-toolbar>
     <div class="q-pa-xs row q-gutter-xs">
@@ -595,25 +598,7 @@ export default defineComponent({
       }
     },
 
-    startToCreateObject(evt: Event) {
-      if (evt.type === 'org_type') {
-        this.openOrgTypeForm();
-      } else if (evt.type === 'enterprise') {
-        this.openEnterpriseForm();
-      } else if (evt.type === 'department') {
-        this.openDepartmentForm();
-      }
-    },
-
     /** organization type related methods */
-
-    startToManageOrgType(evt: Event, orgType: OrgType) {
-      if (evt.type === 'edit_type') {
-        this.openOrgTypeForm(orgType);
-      } else if (evt.type === 'delete_type') {
-        this.deleteOrgType(orgType);
-      }
-    },
 
     async openOrgTypeForm(orgType?: OrgType) {
       if (orgType) {

@@ -1,6 +1,8 @@
 <template>
   <q-card bordered class="q-pa-md guard-frame">
+    <guard-skeleton v-if="!ready" />
     <q-tab-panels
+      v-else
       ref="panel"
       :model-value="modelValue"
       animated
@@ -9,27 +11,13 @@
       <q-tab-panel :name="GuardMode.signup">
         <guard-header />
         <template v-if="signupEnabled">
-          <q-tabs
+          <guard-tabs
             v-if="(loginSettings.signupModes?.length || 0) > 1"
             :model-value="signupMode"
-            dense
-            class="text-grey q-mt-lg"
-            align="left"
-            narrow-indicator
-            :style="{
-              width: '200px',
-              color: `${loginSettings.guardPrimaryColor} !important`,
-            }"
+            :guard-mode="GuardMode.signup"
+            :color="loginSettings.guardPrimaryColor"
             @update:model-value="(val) => $emit('update:signupMode', val)"
-          >
-            <q-tab
-              v-for="(mode, idx) in [AuthMode.mobile, AuthMode.email]"
-              :key="idx"
-              :name="mode"
-              :label="`${AuthModeLabel[mode]}注册`"
-            />
-          </q-tabs>
-          <q-separator color="grey-4" />
+          />
           <q-tab-panels :model-value="signupMode" animated class="bg-white">
             <!-- 注册框：手机号或邮箱注册 -->
             <q-tab-panel
@@ -67,27 +55,13 @@
       <q-tab-panel :name="GuardMode.signin">
         <guard-header />
         <template v-if="signinEnabled">
-          <q-tabs
+          <guard-tabs
             v-if="codeLoginEnabled && pwdLoginEnabled"
             :model-value="loginMode"
-            dense
-            class="text-grey q-mt-lg"
-            align="left"
-            narrow-indicator
-            :style="{
-              width: '200px',
-              color: `${loginSettings.guardPrimaryColor} !important`,
-            }"
+            :guard-mode="GuardMode.signin"
+            :color="loginSettings.guardPrimaryColor"
             @update:model-value="(val) => $emit('update:loginMode', val)"
-          >
-            <q-tab
-              v-for="(mode, idx) in [LoginMode.code, LoginMode.password]"
-              :key="idx"
-              :name="mode"
-              :label="`${LoginModeLabel[mode]}登录`"
-            />
-          </q-tabs>
-          <q-separator color="grey-4" />
+          />
           <q-tab-panels :model-value="loginMode" animated class="bg-white">
             <!-- 登录框：验证码登录 -->
             <q-tab-panel :name="LoginMode.code" class="q-pt-lg bg-white">
@@ -171,7 +145,10 @@
             </q-tab-panel>
           </q-tab-panels>
         </template>
-        <q-item-label v-else class="flex flex-center q-mt-xl text-grey-6">
+        <q-item-label
+          v-else-if="ready"
+          class="flex flex-center q-mt-xl text-grey-6"
+        >
           系统尚未启用任何登录方式
         </q-item-label>
       </q-tab-panel>
@@ -294,6 +271,12 @@ export default defineComponent({
 .guard-frame {
   width: 380px;
   background-color: white;
+
+  .img-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 3px;
+  }
 
   .frame-panel {
     min-height: 500px;

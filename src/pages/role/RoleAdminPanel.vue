@@ -127,7 +127,7 @@
         >
           <!--the first splitted screen-->
           <template #before>
-            <org-structure-tree
+            <org-tree
               @update:select-node="onNodeUpdated"
               @update:change-org-type="onOrgTypeChanged"
             />
@@ -486,31 +486,23 @@ import { defineComponent, ref } from 'vue';
 import { date, QTableProps, QTreeNode } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import OrgStructureTree from 'components/OrgTree.vue';
-import DataTable from 'components/table/DataTable.vue';
 import {
   DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
 import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Organization,
-  OrgType,
   Role,
   RolePostData,
   RolePostError,
   RoleSet,
   SetRolePostData,
   SetRolePostError,
-  User,
-} from 'pages/type';
+} from 'pages/role/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Department, OrgType } from 'pages/type';
+import { User } from 'pages/user/type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -643,15 +635,7 @@ const filterColumns: FilterColumn[] = [
 ];
 
 export default defineComponent({
-  name: 'IndexPage',
-
-  components: {
-    DataTable,
-    DropdownButton,
-    FormDialog,
-    FieldLabel,
-    OrgStructureTree,
-  },
+  name: 'RoleAdminPanel',
 
   setup() {
     return {

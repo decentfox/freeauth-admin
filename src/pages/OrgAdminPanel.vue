@@ -8,7 +8,7 @@
     >
       <!--the first splitted screen-->
       <template #before>
-        <org-structure-tree
+        <org-tree
           ref="orgStructure"
           editable
           @update:select-node="onNodeUpdated"
@@ -169,7 +169,9 @@
                     label="创建企业"
                     class="q-ml-sm q-px-md primary-btn"
                     @click="
-                      ($refs.orgStructure as OrgTree).openEnterpriseForm()
+                      (
+                        $refs.orgStructure as OrgTreeComponent
+                      ).openEnterpriseForm()
                     "
                   />
                 </template>
@@ -195,15 +197,15 @@
                       ]"
                       @click.stop
                       @edit="
-                        ($refs.orgStructure as OrgTree).openEnterpriseForm(
-                          props.row.id
-                        )
+                        (
+                          $refs.orgStructure as OrgTreeComponent
+                        ).openEnterpriseForm(props.row.id)
                       "
                       @copy="copyInfoToClipboard(props.row)"
                       @delete="
-                        ($refs.orgStructure as OrgTree).deleteOrganization(
-                          props.row.id
-                        )
+                        (
+                          $refs.orgStructure as OrgTreeComponent
+                        ).deleteOrganization(props.row.id)
                       "
                     />
                   </q-td>
@@ -464,18 +466,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
-import { FormDialogComponent } from 'src/components/dialog/type';
-import { DataTableComponent } from 'src/components/table/type';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import TreeSelect from 'components/form/TreeSelect.vue';
-import OrgStructureTree from 'components/OrgTree.vue';
-import DataTable from 'components/table/DataTable.vue';
+import { FormDialogComponent } from 'components/dialog/type';
+import { DataTableComponent } from 'components/table/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
 
+import { User, UserPostData, UserPostError } from './user/type';
 import {
   BindUsersPostData,
   BindUsersPostError,
@@ -483,13 +480,10 @@ import {
   Department,
   Enterprise,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  OrgTree,
+  OrgTreeComponent,
   OrgType,
   TransferPostData,
   TransferPostError,
-  User,
-  UserPostData,
-  UserPostError,
 } from './type';
 
 const userColumns: QTableProps['columns'] = [
@@ -591,15 +585,6 @@ const enterpriseColumns: QTableProps['columns'] = [
 
 export default defineComponent({
   name: 'OrgAdminPanel',
-
-  components: {
-    DataTable,
-    DropdownButton,
-    FieldLabel,
-    FormDialog,
-    OrgStructureTree,
-    TreeSelect,
-  },
 
   mixins: [UserOperationsMixin],
 

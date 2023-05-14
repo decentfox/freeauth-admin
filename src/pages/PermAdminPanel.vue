@@ -175,9 +175,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QInput, QTableProps, QTreeNode } from 'quasar';
-import { Permission } from 'src/pages/type';
 
-import DataTable from 'components/table/DataTable.vue';
+import { Permission } from 'pages/type';
 
 const pageStructure: QTreeNode[] = [
   {
@@ -286,9 +285,7 @@ const permissionColumns: QTableProps['columns'] = [
 ];
 
 export default defineComponent({
-  name: 'IndexPage',
-
-  components: { DataTable },
+  name: 'PermAdminPanel',
 
   setup() {
     return {

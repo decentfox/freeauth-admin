@@ -7,7 +7,7 @@
     :tabs="[
       { name: 'user', label: '基本信息' },
       { name: 'organizations', label: '组织归属' },
-      { name: 'roles', label: '配置角色' },
+      { name: 'roles', label: '角色信息' },
       { name: 'perms', label: '权限信息' },
     ]"
   >
@@ -116,7 +116,32 @@
           hide-pagination
           :rows="user.departments"
           :columns="deptColumns"
-        />
+        >
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <div class="text-grey-8 q-gutter-xs">
+                <dropdown-button
+                  :buttons="[
+                    {
+                      label: '退出组织',
+                      icon: 'logout',
+                      actionType: 'unbind',
+                    },
+                  ]"
+                />
+              </div>
+            </q-td>
+          </template>
+          <template #bottom>
+            <q-space />
+            <q-btn
+              unelevated
+              dense
+              label="变更组织"
+              class="q-mt-sm q-px-md primary-btn"
+            />
+          </template>
+        </q-table>
       </q-tab-panel>
       <q-tab-panel name="roles">
         <q-table
@@ -130,7 +155,6 @@
             <q-td :props="props">
               <q-chip
                 v-if="props.row.org_type"
-                clickable
                 size="12px"
                 square
                 color="secondary"
@@ -153,6 +177,30 @@
               />
             </q-td>
           </template>
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <div class="text-grey-8 q-gutter-xs">
+                <dropdown-button
+                  :buttons="[
+                    {
+                      label: '移除角色',
+                      icon: 'group_remove',
+                      actionType: 'unbind',
+                    },
+                  ]"
+                />
+              </div>
+            </q-td>
+          </template>
+          <template #bottom>
+            <q-space />
+            <q-btn
+              unelevated
+              dense
+              label="配置角色"
+              class="q-mt-sm q-px-md primary-btn"
+            />
+          </template>
         </q-table>
       </q-tab-panel>
       <q-tab-panel name="perms"> TODO </q-tab-panel>
@@ -164,12 +212,10 @@
 import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-import ProfilePage from 'layouts/ProfilePage.vue';
-import { Profile } from 'layouts/type';
-import { User, UserPostData, UserPostError } from 'pages/type';
+import { ProfileComponent } from 'layouts/type';
+
+import { User, UserPostData, UserPostError } from './type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -216,7 +262,7 @@ const roleColumns: QTableProps['columns'] = [
 const deptColumns: QTableProps['columns'] = [
   {
     name: 'name',
-    label: '名称',
+    label: '直属',
     align: 'left',
     field: 'name',
   },
@@ -225,6 +271,18 @@ const deptColumns: QTableProps['columns'] = [
     label: '代码',
     align: 'left',
     field: 'code',
+  },
+  {
+    name: 'line',
+    label: '企业归属',
+    align: 'left',
+    field: 'line',
+  },
+  {
+    name: 'line',
+    label: '组织类型',
+    align: 'left',
+    field: 'line',
   },
   {
     name: 'actions',
@@ -236,8 +294,6 @@ const deptColumns: QTableProps['columns'] = [
 
 export default defineComponent({
   name: 'UserProfile',
-
-  components: { DropdownButton, FieldLabel, ProfilePage },
 
   mixins: [UserOperationsMixin],
 
@@ -284,7 +340,7 @@ export default defineComponent({
       if (['disable', 'disable'].includes(op)) {
         this.loadUserInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as Profile).goBack();
+        (this.$refs.profile as ProfileComponent).goBack();
       }
     },
 

@@ -9,6 +9,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require('quasar/wrappers');
+const { QuasarResolver } = require('unplugin-vue-components/resolvers');
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -75,9 +76,16 @@ module.exports = configure(function (/* ctx */) {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      // vitePlugins: [
-      //   [ 'package-name', { ..options.. } ]
-      // ]
+      vitePlugins: [
+        require('unplugin-vue-components/vite')({
+          // relative paths to the directory to search for components.
+          dirs: ['src/components', 'src/layouts'],
+          extensions: ['vue'],
+          deep: true,
+          resolvers: [QuasarResolver()],
+          dts: 'src/components.d.ts',
+        }),
+      ],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer

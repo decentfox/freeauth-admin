@@ -1,4 +1,4 @@
-import { User } from 'pages/type';
+import { User } from 'pages/user/type';
 
 export interface UserOperationsType {
   methods: {

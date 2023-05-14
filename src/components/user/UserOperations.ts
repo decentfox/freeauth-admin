@@ -2,7 +2,7 @@ import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import { User } from 'pages/type';
+import { User } from 'pages/user/type';
 
 import { UserOperationsType } from './type';
 

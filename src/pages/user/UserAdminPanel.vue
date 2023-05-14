@@ -24,7 +24,7 @@
           dense
           label="创建用户"
           class="q-ml-sm q-px-md primary-btn"
-          @click="createUserForm = true"
+          @click="newUserForm = true"
         />
       </template>
       <template #body-cell-name="props">
@@ -77,12 +77,12 @@
 
     <!--Dialogs-->
     <form-dialog
-      ref="createUserDialog"
-      v-model="createUserForm"
+      ref="newUserDialog"
+      v-model="newUserForm"
       title="创建用户"
       width="450px"
       @confirm="createUser"
-      @close="resetCreateUserForm"
+      @close="resetNewUserForm"
     >
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
@@ -90,56 +90,56 @@
             <field-label name="登录信息" required hint="至少填写一项" />
             <div class="q-gutter-sm">
               <q-input
-                v-model="newUser.username"
+                v-model="newUserFormData.username"
                 filled
                 dense
                 placeholder="请填写用户名"
                 hide-bottom-space
                 class="col"
-                :error="!!createUserFormError.username"
-                :error-message="createUserFormError.username"
+                :error="!!newUserFormError.username"
+                :error-message="newUserFormError.username"
               />
               <q-input
-                v-model="newUser.mobile"
+                v-model="newUserFormData.mobile"
                 filled
                 dense
                 placeholder="请填写手机号"
                 hide-bottom-space
                 class="col"
-                :error="!!createUserFormError.mobile"
-                :error-message="createUserFormError.mobile"
+                :error="!!newUserFormError.mobile"
+                :error-message="newUserFormError.mobile"
               />
               <q-input
-                v-model="newUser.email"
+                v-model="newUserFormData.email"
                 filled
                 dense
                 placeholder="请填写邮箱"
                 hide-bottom-space
                 class="col"
-                :error="!!createUserFormError.email"
-                :error-message="createUserFormError.email"
+                :error="!!newUserFormError.email"
+                :error-message="newUserFormError.email"
                 @update:model-value="
-                  if (!newUser.email) firstLoginNotification = false;
+                  if (!newUserFormData.email) firstLoginNotification = false;
                 "
               />
             </div>
             <div
-              v-if="!!createUserFormError.__root__"
+              v-if="!!newUserFormError.__root__"
               class="error-hint text-negative"
             >
-              {{ createUserFormError.__root__ }}
+              {{ newUserFormError.__root__ }}
             </div>
           </div>
           <div>
             <field-label name="用户姓名" />
             <q-input
-              v-model="newUser.name"
+              v-model="newUserFormData.name"
               filled
               dense
               placeholder="请填写用户姓名"
               hide-bottom-space
-              :error="!!createUserFormError.name"
-              :error-message="createUserFormError.name"
+              :error="!!newUserFormError.name"
+              :error-message="newUserFormError.name"
             />
           </div>
           <div>
@@ -150,10 +150,10 @@
             <q-toggle
               v-model="firstLoginNotification"
               label="通过邮件发送初始默认登录信息"
-              :disable="!newUser.email"
+              :disable="!newUserFormData.email"
             >
               <q-tooltip
-                v-if="!newUser.email"
+                v-if="!newUserFormData.email"
                 anchor="bottom left"
                 self="center start"
               >
@@ -171,18 +171,15 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
-import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import DataTable from 'components/table/DataTable.vue';
 import {
   DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-import { UserPostData, UserPostError } from 'pages/type';
+
+import { UserPostData, UserPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -234,7 +231,7 @@ const columns: QTableProps['columns'] = [
   {
     name: 'is_deleted',
     label: '状态',
-    align: 'center',
+    align: 'left',
     field: 'is_deleted',
     sortable: true,
   },
@@ -328,45 +325,41 @@ const filterColumns: FilterColumn[] = [
 export default defineComponent({
   name: 'UserAdminPanel',
 
-  components: {
-    DataTable,
-    DropdownButton,
-    FieldLabel,
-    FormDialog,
-  },
-
   mixins: [UserOperationsMixin],
 
   setup() {
     return {
+      // user list table
       columns: columns,
       filterColumns: filterColumns,
-      createUserForm: ref(false),
-      createUserFormError: ref<UserPostError>({}),
+
+      // create new user
+      newUserForm: ref(false),
+      newUserFormData: ref<UserPostData>({}),
+      newUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(false),
       passwordChangingRequired: ref(false),
-      newUser: ref<UserPostData>({}),
     };
   },
 
   methods: {
     async createUser() {
       try {
-        this.createUserFormError = {};
-        await this.$api.post('/users', this.newUser, {
+        this.newUserFormError = {};
+        await this.$api.post('/users', this.newUserFormData, {
           successMsg: '用户创建成功',
         });
-        (this.$refs.createUserDialog as FormDialogComponent).hide();
-        (this.$refs.table as DataTableComponent).fetchRows();
-        this.resetCreateUserForm();
+        (this.$refs.newUserDialog as FormDialogComponent).hide();
+        this.resetNewUserForm();
+        this.refreshUserData();
       } catch (e) {
-        this.createUserFormError = (e as Error).cause || {};
+        this.newUserFormError = (e as Error).cause || {};
       }
     },
 
-    resetCreateUserForm() {
-      this.createUserFormError = {};
-      this.newUser = {};
+    resetNewUserForm() {
+      this.newUserFormError = {};
+      this.newUserFormData = {};
     },
 
     refreshUserData() {

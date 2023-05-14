@@ -280,23 +280,19 @@ import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import FormDialog from 'components/dialog/FormDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
-import DropdownButton from 'components/DropdownButton.vue';
-import FieldLabel from 'components/form/FieldLabel.vue';
-import DataTable from 'components/table/DataTable.vue';
 import { DataTableComponent } from 'components/table/type';
-import ProfilePage from 'layouts/ProfilePage.vue';
-import { Profile } from 'layouts/type';
+import { ProfileComponent } from 'layouts/type';
 import {
   BindUsersPostData,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
   Role,
   RolePostData,
   RolePostError,
-  User,
-} from 'pages/type';
+} from 'pages/role/type';
+import { User } from 'pages/user/type';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Department } from '../type';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -346,14 +342,6 @@ const userColumns: QTableProps['columns'] = [
 
 export default defineComponent({
   name: 'RoleProfile',
-
-  components: {
-    DataTable,
-    DropdownButton,
-    FieldLabel,
-    FormDialog,
-    ProfilePage,
-  },
 
   props: {
     roleId: {
@@ -577,7 +565,7 @@ export default defineComponent({
                 data: { ids: roles.map((u: Role) => u.id) },
                 successMsg: '删除角色成功',
               });
-              (this.$refs.profile as Profile).goBack();
+              (this.$refs.profile as ProfileComponent).goBack();
             } catch (e) {
               throw e;
             }

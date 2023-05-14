@@ -170,8 +170,6 @@ const menuLinkList: MainMenuSection[] = [
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {},
-
   setup() {
     const leftDrawerOpen = ref(false);
 

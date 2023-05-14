@@ -236,17 +236,12 @@ import { defineComponent, ref } from 'vue';
 import { mapState } from 'pinia';
 import { QTabPanels } from 'quasar';
 
-import VerificationCodeForm from 'components/login/VerificationCodeForm.vue';
 import { loginSettingsStore } from 'stores/login-settings-store';
 
 import { AuthMode, AuthModeLabel } from './type';
 
 export default defineComponent({
   name: 'SignupAndLoginFrame',
-
-  components: {
-    VerificationCodeForm,
-  },
 
   props: {
     /** 是否为配置过程的预览状态 */

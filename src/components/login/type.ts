@@ -1,11 +1,17 @@
-export interface SignupAndLoginComponent {
-  /** 注册框与登录框间的切换 */
-  switchTo: (panelName: string, emit: boolean) => void;
-  /** 注册方式的切换：手机号注册、邮箱注册 */
-  switchSignupMethodTo: (methodName: string) => void;
-  /** 登录方式的切换：验证码登录、密码登录 */
-  switchLoginMethodTo: (methodName: string) => void;
+export enum GuardMode {
+  signin = 'signin',
+  signup = 'signup',
 }
+
+export enum LoginMode {
+  code = 'code',
+  password = 'password',
+}
+
+export const LoginModeLabel = {
+  [LoginMode.code]: '验证码',
+  [LoginMode.password]: '密码',
+};
 
 export enum AuthMode {
   username = 'username',

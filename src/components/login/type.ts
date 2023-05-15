@@ -3,6 +3,11 @@ export enum GuardMode {
   signup = 'signup',
 }
 
+export const GuardModeLabel = {
+  [GuardMode.signin]: '登录',
+  [GuardMode.signup]: '注册',
+};
+
 export enum LoginMode {
   code = 'code',
   password = 'password',
@@ -81,3 +86,10 @@ export type LoginSetting = {
 
   [key: string]: unknown;
 };
+
+export interface AuthError {
+  account?: string;
+  code?: string;
+  code_type?: string;
+  password?: string;
+}

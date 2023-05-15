@@ -3,7 +3,7 @@
     <q-page-container>
       <q-page class="flex flex-center login-bg">
         <signup-and-login-frame
-          v-model="currentGuardFrame"
+          v-model="currentGuardMode"
           v-model:signup-mode="currentSignupMode"
           v-model:login-mode="currentLoginMode"
         />
@@ -24,7 +24,7 @@ export default defineComponent({
 
   setup() {
     return {
-      currentGuardFrame: ref(GuardMode.signin),
+      currentGuardMode: ref(GuardMode.signin),
       currentSignupMode: ref(AuthMode.mobile),
       currentLoginMode: ref(LoginMode.code),
     };
@@ -50,7 +50,7 @@ export default defineComponent({
 
     async loadLoginSettings() {
       await this.loadSettings();
-      this.currentGuardFrame = this.signinEnabled
+      this.currentGuardMode = this.signinEnabled
         ? GuardMode.signin
         : GuardMode.signup;
       this.currentSignupMode = this.loginSettings.signupModes?.includes(

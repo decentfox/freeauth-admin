@@ -26,13 +26,14 @@
               :name="mode"
               class="q-pt-lg bg-white"
             >
-              <verification-code-form
+              <code-auth-form
                 :is-preview="isPreview"
                 :color="loginSettings.guardPrimaryColor"
-                :placeholder="`请输入${
-                  mode === AuthMode.mobile ? '手机号码' : '邮箱地址'
-                }`"
-                submit-btn="注册"
+                :auth-modes="[mode]"
+                :guard-mode="GuardMode.signup"
+                :policy-checked="
+                  loginSettings.agreementEnabled ? policyChecked : true
+                "
               />
               <div v-if="signinEnabled" class="flex flex-center">
                 <q-btn
@@ -40,7 +41,9 @@
                   unelevated
                   color="primary"
                   label="已有账号，点击前往登录"
-                  :style="`color: ${loginSettings.guardPrimaryColor} !important`"
+                  :style="{
+                    color: `${loginSettings.guardPrimaryColor} !important`,
+                  }"
                   @click="$emit('update:modelValue', GuardMode.signin)"
                 />
               </div>
@@ -63,92 +66,49 @@
             @update:model-value="(val) => $emit('update:loginMode', val)"
           />
           <q-tab-panels :model-value="loginMode" animated class="bg-white">
-            <!-- 登录框：验证码登录 -->
-            <q-tab-panel :name="LoginMode.code" class="q-pt-lg bg-white">
-              <verification-code-form
+            <!-- 登录框：验证码或密码登录 -->
+            <q-tab-panel
+              v-for="(mode, idx) in [LoginMode.code, LoginMode.password]"
+              :key="idx"
+              :name="mode"
+              class="q-pt-lg bg-white"
+            >
+              <code-auth-form
+                v-if="mode === LoginMode.code"
                 :is-preview="isPreview"
                 :color="loginSettings.guardPrimaryColor"
-                :placeholder="codeLoginPlaceholder"
-                submit-btn="登录"
+                :auth-modes="loginSettings.codeSigninModes"
+                :guard-mode="GuardMode.signin"
+                :policy-checked="
+                  loginSettings.agreementEnabled ? policyChecked : true
+                "
               />
-              <div v-if="signupEnabled" class="flex flex-center">
+              <pwd-auth-form
+                v-else
+                :is-preview="isPreview"
+                :color="loginSettings.guardPrimaryColor"
+                :auth-modes="loginSettings.pwdSigninModes"
+                :guard-mode="GuardMode.signin"
+                :policy-checked="
+                  loginSettings.agreementEnabled ? policyChecked : true
+                "
+              />
+              <div v-if="signinEnabled" class="flex flex-center">
                 <q-btn
                   flat
                   unelevated
                   color="primary"
                   label="没有账号，点击前往注册"
-                  :style="`color: ${loginSettings.guardPrimaryColor} !important`"
-                  @click="$emit('update:modelValue', GuardMode.signup)"
-                />
-              </div>
-            </q-tab-panel>
-            <!-- 登录框：密码登录 -->
-            <q-tab-panel :name="LoginMode.password" class="q-pt-lg bg-white">
-              <q-form class="q-gutter-md">
-                <q-input
-                  v-model="passwordForm.identity"
-                  dense
-                  filled
-                  :placeholder="pwdLoginPlaceholder"
-                  hide-bottom-space
-                  bg-color="grey-2"
-                  :disable="isPreview"
-                >
-                  <template #prepend>
-                    <q-icon name="perm_identity" color="grey-7" />
-                  </template>
-                </q-input>
-                <q-input
-                  v-model="passwordForm.password"
-                  dense
-                  filled
-                  placeholder="请输入密码"
-                  :type="!showPwd ? 'password' : 'text'"
-                  hide-bottom-space
-                  minlength="6"
-                  bg-color="grey-2"
-                  :disable="isPreview"
-                >
-                  <template #prepend>
-                    <q-icon name="lock_outline" color="grey-7" />
-                  </template>
-                  <template #append>
-                    <q-icon
-                      :name="showPwd ? 'visibility' : 'visibility_off'"
-                      size="20px"
-                      color="grey-7"
-                      class="cursor-pointer"
-                      @click="showPwd = !showPwd"
-                    />
-                  </template>
-                </q-input>
-                <div class="error-msg"></div>
-                <div class="flex flex-center">
-                  <q-btn
-                    unelevated
-                    label="登录"
-                    class="q-my-sm full-width text-body1 primary-btn"
-                    :style="`background-color: ${loginSettings.guardPrimaryColor} !important`"
-                  />
-                </div>
-              </q-form>
-              <div v-if="signupEnabled" class="flex flex-center">
-                <q-btn
-                  flat
-                  unelevated
-                  color="primary"
-                  label="没有账号，点击前往注册"
-                  :style="`color: ${loginSettings.guardPrimaryColor} !important`"
+                  :style="{
+                    color: `${loginSettings.guardPrimaryColor} !important`,
+                  }"
                   @click="$emit('update:modelValue', GuardMode.signup)"
                 />
               </div>
             </q-tab-panel>
           </q-tab-panels>
         </template>
-        <q-item-label
-          v-else-if="ready"
-          class="flex flex-center q-mt-xl text-grey-6"
-        >
+        <q-item-label v-else class="flex flex-center q-mt-xl text-grey-6">
           系统尚未启用任何登录方式
         </q-item-label>
       </q-tab-panel>
@@ -220,12 +180,6 @@ export default defineComponent({
 
   setup() {
     return {
-      // Password Login
-      passwordForm: ref({
-        identity: ref(''),
-        password: ref(''),
-      }),
-      showPwd: ref(false),
       policyChecked: ref(false),
 
       AuthMode,
@@ -245,18 +199,6 @@ export default defineComponent({
       'codeLoginEnabled',
       'pwdLoginEnabled',
     ]),
-
-    codeLoginPlaceholder() {
-      return `请输入${this.loginSettings.codeSigninModes
-        ?.map((mode) => AuthModeLabel[mode])
-        .join('或')}`;
-    },
-
-    pwdLoginPlaceholder() {
-      return `请输入${this.loginSettings.pwdSigninModes
-        ?.map((mode) => AuthModeLabel[mode])
-        .join('或')}`;
-    },
 
     agreementTitle() {
       return (

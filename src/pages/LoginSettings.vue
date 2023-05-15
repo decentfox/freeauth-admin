@@ -121,15 +121,13 @@
 
             <login-setting-panel
               :model-value="
-                !basicExpanded && currentGuardFrame === GuardMode.signup
+                !basicExpanded && currentGuardMode === GuardMode.signup
               "
               title="注册配置"
               icon="settings_accessibility"
               @update:model-value="
                 (val) =>
-                  (currentGuardFrame = val
-                    ? GuardMode.signup
-                    : currentGuardFrame)
+                  (currentGuardMode = val ? GuardMode.signup : currentGuardMode)
               "
             >
               <q-card-section>
@@ -192,15 +190,13 @@
 
             <login-setting-panel
               :model-value="
-                !basicExpanded && currentGuardFrame === GuardMode.signin
+                !basicExpanded && currentGuardMode === GuardMode.signin
               "
               title="登录配置"
               icon="password"
               @update:model-value="
                 (val) =>
-                  (currentGuardFrame = val
-                    ? GuardMode.signin
-                    : currentGuardFrame)
+                  (currentGuardMode = val ? GuardMode.signin : currentGuardMode)
               "
             >
               <q-card-section>
@@ -305,7 +301,7 @@
       <template #after>
         <div class="q-mx-xl q-my-md">
           <signup-and-login-frame
-            v-model="currentGuardFrame"
+            v-model="currentGuardMode"
             v-model:signup-mode="currentSignupMode"
             v-model:login-mode="currentLoginMode"
             is-preview
@@ -337,7 +333,7 @@ export default defineComponent({
     return {
       splitterModel: 40,
       basicExpanded: ref(true),
-      currentGuardFrame: ref(GuardMode.signup),
+      currentGuardMode: ref(GuardMode.signup),
       currentSignupMode: ref(AuthMode.mobile),
       currentLoginMode: ref(LoginMode.code),
 
@@ -389,7 +385,7 @@ export default defineComponent({
 
     async loadLoginSettings() {
       await this.loadSettings();
-      this.currentGuardFrame = this.signupEnabled
+      this.currentGuardMode = this.signupEnabled
         ? GuardMode.signup
         : GuardMode.signin;
       this.currentSignupMode = this.loginSettings.signupModes?.includes(

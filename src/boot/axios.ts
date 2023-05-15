@@ -26,7 +26,7 @@ declare module 'axios' {
 // for each client)
 const api = axios.create({ baseURL: '/v1' });
 
-export default boot(({ app }) => {
+export default boot(({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
@@ -62,6 +62,10 @@ export default boot(({ app }) => {
     },
     (err) => {
       Loading.hide();
+      if (err.response.status === 401) {
+        router.push('/login');
+        return Promise.reject(err);
+      }
 
       const error = get(err.response, 'data.detail');
       let message = '请求失败';

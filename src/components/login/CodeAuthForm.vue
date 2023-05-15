@@ -41,6 +41,9 @@
         >
           {{ codeSeconds ? '重新发送 (' + codeSeconds + ')' : '获取验证码' }}
         </q-btn>
+        <q-tooltip v-if="!!account && codeSeconds === 0 && !policyChecked">
+          请勾选隐私协议与服务条款
+        </q-tooltip>
       </template>
     </q-input>
     <div class="flex flex-center">
@@ -121,7 +124,9 @@ export default defineComponent({
     },
 
     canSubmit(): boolean {
-      return !!this.account && !!this.code && this.policyChecked;
+      return (
+        this.isPreview || (!!this.account && !!this.code && this.policyChecked)
+      );
     },
 
     codeType(): string | null {
@@ -174,6 +179,9 @@ export default defineComponent({
     },
 
     async submit() {
+      if (this.isPreview) {
+        return;
+      }
       this.submitting = true;
       try {
         await this.$api.post(
@@ -183,6 +191,7 @@ export default defineComponent({
           { account: this.account, code_type: this.codeType, code: this.code }
         );
         this.formError = {};
+        this.$router.replace('/');
       } catch (e) {
         this.formError = (e as Error).cause || {};
       } finally {

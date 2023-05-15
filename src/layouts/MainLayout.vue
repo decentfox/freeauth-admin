@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh Lpr lFf">
+  <q-layout v-if="authenticated" view="hHh Lpr lFf">
     <q-header elevated class="main-header">
       <q-toolbar>
         <q-btn
@@ -50,6 +50,13 @@
             <q-tooltip>
               {{ $q.dark.isActive ? '浅色模式' : '深色模式' }}
             </q-tooltip>
+          </q-btn>
+          <q-btn round flat class="text-black-white" @click="onSignOut">
+            <!-- TODO: render signOut button (leave it to 小🐻) -->
+            <q-avatar size="26px">
+              <q-icon name="admin_panel_settings" />
+            </q-avatar>
+            <q-tooltip>退出登录</q-tooltip>
           </q-btn>
         </div>
       </q-toolbar>
@@ -103,8 +110,10 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { mapActions, mapState } from 'pinia';
 
 import { MainMenuSection } from 'components/type';
+import { authStore } from 'stores/auth-store';
 
 const menuLinkList: MainMenuSection[] = [
   {
@@ -180,6 +189,25 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
     };
+  },
+
+  computed: {
+    ...mapState(authStore, ['authenticated']),
+  },
+
+  async created() {
+    try {
+      await this.fetchProfile();
+    } catch (e) {}
+  },
+
+  methods: {
+    ...mapActions(authStore, ['fetchProfile', 'signOut']),
+
+    async onSignOut() {
+      await this.signOut();
+      this.$router.replace('/login');
+    },
   },
 });
 </script>

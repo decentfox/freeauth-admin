@@ -119,12 +119,18 @@ export default defineComponent({
     },
 
     canSubmit(): boolean {
-      return !!this.account && !!this.password && this.policyChecked;
+      return (
+        this.isPreview ||
+        (!!this.account && !!this.password && this.policyChecked)
+      );
     },
   },
 
   methods: {
     async submit() {
+      if (this.isPreview) {
+        return;
+      }
       this.submitting = true;
       try {
         await this.$api.post(
@@ -132,6 +138,7 @@ export default defineComponent({
           { account: this.account, password: this.password }
         );
         this.formError = {};
+        this.$router.replace('/');
       } catch (e) {
         this.formError = (e as Error).cause || {};
       } finally {

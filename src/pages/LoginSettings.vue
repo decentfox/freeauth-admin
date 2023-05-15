@@ -120,10 +120,15 @@
             <q-separator />
 
             <login-setting-panel
-              v-model="signupExpanded"
+              :model-value="
+                !basicExpanded && currentGuardMode === GuardMode.signup
+              "
               title="注册配置"
               icon="settings_accessibility"
-              @update:model-value="switchPreviewPanel"
+              @update:model-value="
+                (val) =>
+                  (currentGuardMode = val ? GuardMode.signup : currentGuardMode)
+              "
             >
               <q-card-section>
                 <q-item-label class="q-pb-sm text-weight-bold">
@@ -136,10 +141,12 @@
                   dense
                   size="32px"
                   class="q-mt-sm"
-                  @update:model-value="switchSignupMethod"
+                  @update:model-value="
+                    (modes) => (currentSignupMode = modes.slice(-1)[0])
+                  "
                 />
               </q-card-section>
-              <template v-if="loginSettings.signupModes?.length">
+              <template v-if="signupEnabled">
                 <q-card-section>
                   <security-config-item
                     v-model="loginSettings.signupCodeValidatingLimitEnabled"
@@ -166,26 +173,31 @@
                     action-hint="可获取验证码次数"
                   />
                 </q-card-section>
+
+                <q-separator inset spaced="md" />
+
+                <q-card-section>
+                  <security-config-item
+                    v-model="loginSettings.changePwdAfterFirstLoginEnabled"
+                    toggle-label="注册后修改初始密码"
+                    description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
+                  />
+                </q-card-section>
               </template>
-
-              <q-separator inset spaced="md" />
-
-              <q-card-section>
-                <security-config-item
-                  v-model="loginSettings.changePwdAfterFirstLoginEnabled"
-                  toggle-label="注册后修改初始密码"
-                  description="开启后，用户完成注册后会被要求修改自动生成的初始密码"
-                />
-              </q-card-section>
             </login-setting-panel>
 
             <q-separator />
 
             <login-setting-panel
-              v-model="loginExpanded"
+              :model-value="
+                !basicExpanded && currentGuardMode === GuardMode.signin
+              "
               title="登录配置"
               icon="password"
-              @update:model-value="switchPreviewPanel"
+              @update:model-value="
+                (val) =>
+                  (currentGuardMode = val ? GuardMode.signin : currentGuardMode)
+              "
             >
               <q-card-section>
                 <q-item-label class="q-pb-sm text-weight-bold">
@@ -198,10 +210,16 @@
                   dense
                   size="32px"
                   class="q-mt-sm"
-                  @update:model-value="switchLoginMethod('code')"
+                  @update:model-value="
+                    (modes) =>
+                      (currentLoginMode =
+                        !pwdLoginEnabled || modes.length > 0
+                          ? LoginMode.code
+                          : LoginMode.password)
+                  "
                 />
               </q-card-section>
-              <q-card-section v-if="codeLogin">
+              <q-card-section v-if="codeLoginEnabled">
                 <security-config-item
                   v-model="loginSettings.signinCodeValidatingLimitEnabled"
                   v-model:interval="loginSettings.signinCodeValidatingInterval"
@@ -213,7 +231,7 @@
                   action-hint="允许试错次数"
                 />
               </q-card-section>
-              <q-card-section v-if="codeLogin">
+              <q-card-section v-if="codeLoginEnabled">
                 <security-config-item
                   v-model="loginSettings.signinCodeSendingLimitEnabled"
                   v-model:interval="loginSettings.signinCodeSendingInterval"
@@ -239,10 +257,14 @@
                   dense
                   size="32px"
                   class="q-mt-sm"
-                  @update:model-value="switchLoginMethod('password')"
+                  @update:model-value="
+                    (modes) =>
+                      (currentLoginMode =
+                        modes.length > 0 ? LoginMode.password : LoginMode.code)
+                  "
                 />
               </q-card-section>
-              <q-card-section v-if="pwdLogin">
+              <q-card-section v-if="pwdLoginEnabled">
                 <security-config-item
                   v-model="loginSettings.signinPwdValidatingLimitEnabled"
                   v-model:interval="loginSettings.signinPwdValidatingInterval"
@@ -271,14 +293,19 @@
             </login-setting-panel>
             <q-separator />
           </q-list>
+          <q-inner-loading :showing="!ready">
+            <q-spinner-ios size="sm" color="primary" />
+          </q-inner-loading>
         </div>
       </template>
       <template #after>
         <div class="q-mx-xl q-my-md">
           <signup-and-login-frame
-            ref="preview"
+            v-model="currentGuardMode"
+            v-model:signup-mode="currentSignupMode"
+            v-model:login-mode="currentLoginMode"
             is-preview
-            @panel-changed="expandSettings"
+            @update:model-value="basicExpanded = false"
           />
         </div>
       </template>
@@ -294,7 +321,8 @@ import { QFile } from 'quasar';
 import {
   AuthMode,
   AuthModeLabel,
-  SignupAndLoginComponent,
+  GuardMode,
+  LoginMode,
 } from 'components/login/type';
 import { loginSettingsStore } from 'stores/login-settings-store';
 
@@ -304,24 +332,25 @@ export default defineComponent({
   setup() {
     return {
       splitterModel: 40,
-      ready: ref(false),
-
       basicExpanded: ref(true),
-      signupExpanded: ref(false),
-      loginExpanded: ref(false),
+      currentGuardMode: ref(GuardMode.signup),
+      currentSignupMode: ref(AuthMode.mobile),
+      currentLoginMode: ref(LoginMode.code),
+
+      GuardMode,
+      LoginMode,
     };
   },
 
   computed: {
-    ...mapState(loginSettingsStore, ['loginSettings']),
-
-    codeLogin() {
-      return !!this.loginSettings.codeSigninModes?.length;
-    },
-
-    pwdLogin() {
-      return !!this.loginSettings.pwdSigninModes?.length;
-    },
+    ...mapState(loginSettingsStore, [
+      'loginSettings',
+      'ready',
+      'signupEnabled',
+      'signinEnabled',
+      'codeLoginEnabled',
+      'pwdLoginEnabled',
+    ]),
 
     signupModeOptions() {
       return [AuthMode.mobile, AuthMode.email].map((mode) => ({
@@ -356,7 +385,17 @@ export default defineComponent({
 
     async loadLoginSettings() {
       await this.loadSettings();
-      this.ready = true;
+      this.currentGuardMode = this.signupEnabled
+        ? GuardMode.signup
+        : GuardMode.signin;
+      this.currentSignupMode = this.loginSettings.signupModes?.includes(
+        AuthMode.mobile
+      )
+        ? AuthMode.mobile
+        : AuthMode.email;
+      this.currentLoginMode = this.codeLoginEnabled
+        ? LoginMode.code
+        : LoginMode.password;
     },
 
     handleUpload(logo: File) {
@@ -371,45 +410,6 @@ export default defineComponent({
 
     uploadImage() {
       (this.$refs.file as QFile).pickFiles();
-    },
-
-    switchPreviewPanel() {
-      if (this.loginExpanded) {
-        (this.$refs.preview as SignupAndLoginComponent).switchTo(
-          'login',
-          false
-        );
-      }
-      if (this.signupExpanded) {
-        (this.$refs.preview as SignupAndLoginComponent).switchTo(
-          'signup',
-          false
-        );
-      }
-    },
-
-    expandSettings(panelName: string) {
-      this.signupExpanded = panelName === 'signup';
-      this.loginExpanded = panelName === 'login';
-    },
-
-    switchSignupMethod(targets: string[]) {
-      setTimeout(() => {
-        (this.$refs.preview as SignupAndLoginComponent).switchSignupMethodTo(
-          targets.slice(-1)[0]
-        );
-      }, 20);
-    },
-
-    switchLoginMethod(target: string) {
-      if (!this.codeLogin && !this.pwdLogin) return;
-      setTimeout(() => {
-        (this.$refs.preview as SignupAndLoginComponent).switchLoginMethodTo(
-          (target === 'code' && this.codeLogin) || !this.pwdLogin
-            ? 'code'
-            : 'password'
-        );
-      }, 20);
     },
   },
 });

@@ -3,7 +3,7 @@ import { Organization } from '../type';
 
 export interface User {
   /** 用户 ID */
-  id: string;
+  id?: string;
   /** 用户姓名 */
   name?: string;
   /** 用户手机号 */

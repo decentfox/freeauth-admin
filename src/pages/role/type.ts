@@ -39,18 +39,6 @@ export interface RolePostError {
   org_type_id?: string;
 }
 
-export interface SetRolePostData {
-  /** 用户的 ID */
-  user_id?: string;
-  /** 角色的 ID */
-  role_ids?: string[];
-}
-
-export interface SetRolePostError {
-  user_id?: string;
-  role_ids?: string;
-}
-
 export interface BindUsersPostData {
   /** 用户的 ID */
   user_ids?: string[];

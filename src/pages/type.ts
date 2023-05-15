@@ -15,14 +15,12 @@ export interface Organization {
 }
 
 export interface OrgType extends Organization {
-  /** 组织类型 Code */
-  code: string;
   /** 组织类型描述 */
   description?: string;
   /** 组织类型状态：true-停用；false-正常 */
-  is_deleted: boolean;
+  is_deleted?: boolean;
   /** 是否为默认组织类型 */
-  is_protected: boolean;
+  is_protected?: boolean;
 }
 
 export interface OrgTypePostData {

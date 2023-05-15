@@ -75,12 +75,11 @@ export const UserOperationsMixin: UserOperationsType = {
         },
       }).onOk(async ({ type }) => {
         if (type === 'delete') {
-          const userIds: string[] = users.map((u: User) => u.id);
           try {
             await api.request({
               method: 'DELETE',
               url: '/users',
-              data: { user_ids: userIds },
+              data: { user_ids: users.map((u: User) => u.id) },
               successMsg: '删除用户成功',
             });
           } finally {

@@ -29,9 +29,9 @@
             actionType: 'delete',
           },
         ]"
-        @disable="toggleRoles([role], true)"
-        @enable="toggleRoles([role], false)"
-        @delete="deleteRoles([role])"
+        @disable="toggleRolesStatus([role], true, refreshRoleData)"
+        @enable="toggleRolesStatus([role], false, refreshRoleData)"
+        @delete="deleteRoles([role], refreshRoleData)"
       />
     </template>
     <template #panels>
@@ -131,7 +131,6 @@
               <q-chip
                 v-for="(dept, idx) in (props.row.departments as Department[])"
                 :key="idx"
-                clickable
                 size="12px"
                 square
                 color="secondary"
@@ -165,7 +164,7 @@
                   },
                 ]"
                 @click.stop
-                @unbind="unbindUser([props.row])"
+                @unbind="unbindUsers(role, [props.row], refreshRoleData)"
               />
             </q-td>
           </template>
@@ -279,8 +278,8 @@
 import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
+import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import { DataTableComponent } from 'components/table/type';
 import { ProfileComponent } from 'layouts/type';
 import {
@@ -343,10 +342,16 @@ const userColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'RoleProfile',
 
+  mixins: [RoleOperationsMixin],
+
   props: {
     roleId: {
       type: String,
       default: null,
+    },
+    tab: {
+      type: String,
+      default: 'role',
     },
   },
 
@@ -358,19 +363,20 @@ export default defineComponent({
       panelTab: ref('role'),
       userColumns: userColumns,
 
+      roleTypeTab: ref('global'),
+      roleFormData: ref<RolePostData>({}),
+      roleFormError: ref<RolePostError>({}),
+
       bindUsersForm: ref(false),
       userOptions: ref([]),
       selectedUsers: ref<User[]>(),
       bindUsersFormData: ref<BindUsersPostData>({}),
       bindUsersFormError: ref<BindUsersPostData>({}),
-
-      roleTypeTab: ref('global'),
-      roleFormData: ref<RolePostData>({}),
-      roleFormError: ref<RolePostError>({}),
     };
   },
 
   mounted() {
+    this.panelTab = this.tab ? this.tab : this.panelTab;
     this.loadRoleInfo();
   },
 
@@ -390,44 +396,6 @@ export default defineComponent({
           et.fetchRows();
         }, 20);
       }
-    },
-
-    unbindUser(users: User[]) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '移除用户',
-            content: `您正在请求解除用户：${userDesc}与当前角色的关系，该操作不影响用户与其他角色的关联。`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '解除关系',
-                actionType: 'unbind',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'unbind') {
-            const userIds: string[] = users.map((u: User) => u.id);
-            try {
-              await this.$api.request({
-                method: 'POST',
-                url: '/roles/unbind_users',
-                data: { user_ids: userIds, role_ids: [this.role.id] },
-                successMsg: '移除用户成功',
-              });
-            } finally {
-              (this.$refs.userTable as DataTableComponent).fetchRows();
-            }
-          }
-        });
     },
 
     searchUser(
@@ -498,79 +466,14 @@ export default defineComponent({
       }
     },
 
-    toggleRoles(roles: Role[], isDeleted: boolean) {
-      const roleDesc = `${roles[0].name}${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
-      }`;
-      const content = isDeleted
-        ? `您正在请求禁用【${roleDesc}】。操作后，角色主体（关联用户）将不再具有角色关联的资源权限，但不会改变角色与角色主体的关联关系。`
-        : `您正在请求启用【${roleDesc}】。操作后，角色主体（关联用户）将重新获得角色关联的资源权限。`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: isDeleted ? '禁用角色' : '启用角色',
-            content: content,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: isDeleted ? '禁用' : '启用',
-                actionType: 'toggle',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'toggle') {
-            try {
-              await this.$api.put(
-                '/roles/status',
-                { ids: roles.map((r: Role) => r.id), is_deleted: isDeleted },
-                { successMsg: `${isDeleted ? '禁用' : '启用'}角色成功` }
-              );
-            } finally {
-              this.loadRoleInfo();
-            }
-          }
-        });
-    },
-
-    deleteRoles(roles: Role[]) {
-      const roleDesc = `${roles[0].name}${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
-      }`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '删除角色',
-            content: `您正在请求删除【${roleDesc}】。数据删除后将无法进行恢复，您确认要继续删除吗？`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '删除',
-                actionType: 'delete',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'delete') {
-            try {
-              await this.$api.request({
-                method: 'DELETE',
-                url: '/roles',
-                data: { ids: roles.map((u: Role) => u.id) },
-                successMsg: '删除角色成功',
-              });
-              (this.$refs.profile as ProfileComponent).goBack();
-            } catch (e) {
-              throw e;
-            }
-          }
-        });
+    refreshRoleData(op: string) {
+      if (['disable', 'enable'].includes(op)) {
+        this.loadRoleInfo();
+      } else if (op === 'delete') {
+        (this.$refs.profile as ProfileComponent).goBack();
+      } else if (op === 'unbind') {
+        (this.$refs.userTable as DataTableComponent).fetchRows();
+      }
     },
   },
 });

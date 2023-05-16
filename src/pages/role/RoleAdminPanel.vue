@@ -55,7 +55,6 @@
             <q-td :props="props">
               <q-chip
                 v-if="props.row.org_type"
-                clickable
                 size="12px"
                 square
                 color="secondary"
@@ -107,11 +106,15 @@
                     },
                   ]"
                   @click.stop
-                  @disable="toggleRoles([props.row], true)"
-                  @enable="toggleRoles([props.row], false)"
-                  @delete="deleteRoles([props.row])"
-                  @bind-users="goToRoleProfile($event, props.row.id)"
-                  @set-perms="goToRoleProfile($event, props.row.id)"
+                  @disable="
+                    toggleRolesStatus([props.row], true, refreshRoleData)
+                  "
+                  @enable="
+                    toggleRolesStatus([props.row], false, refreshRoleData)
+                  "
+                  @delete="deleteRoles([props.row], refreshRoleData)"
+                  @bind-users="goToRoleProfile($event, props.row.id, 'users')"
+                  @set-perms="goToRoleProfile($event, props.row.id, 'perms')"
                 />
               </div>
             </q-td>
@@ -192,7 +195,7 @@
                             text-color="grey-7"
                             icon="person_add"
                             size="10px"
-                            @click="goToRoleProfile($event, role.id)"
+                            @click="goToRoleProfile($event, role.id, 'users')"
                           >
                           </q-btn>
                         </q-item-section>
@@ -269,7 +272,6 @@
                         <q-chip
                           v-for="(dept, idx) in (props.row.departments as Department[])"
                           :key="idx"
-                          clickable
                           size="12px"
                           square
                           color="secondary"
@@ -284,7 +286,6 @@
                         <q-chip
                           v-for="(role, idx) in (props.row.roles as Role[])"
                           :key="idx"
-                          clickable
                           size="12px"
                           square
                           color="secondary"
@@ -320,7 +321,7 @@
                             },
                           ]"
                           @click.stop
-                          @set-roles="openSetRoleForm(props.row)"
+                          @set-roles="openSetRolesForm(props.row)"
                         />
                       </q-td>
                     </template>
@@ -412,97 +413,26 @@
       </div>
     </template>
   </form-dialog>
-  <form-dialog
-    ref="setRoleDialog"
-    v-model="setRoleForm"
-    title="配置角色"
-    width="450px"
-    @confirm="saveSetRoleForm"
-    @close="resetSetRoleForm"
-  >
-    <template #form-content>
-      <div class="q-gutter-md q-pa-md">
-        <div>
-          <field-label name="关联角色" />
-          <q-select
-            v-model="selectedRoles"
-            :options="availableRoleOptions"
-            dense
-            filled
-            class="full-width"
-            option-label="name"
-            option-value="id"
-            multiple
-            use-chips
-          >
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section avatar>
-                  <q-chip
-                    square
-                    size="12px"
-                    :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                    class="text-weight-bold q-pa-sm"
-                    :class="
-                      !scope.opt.is_deleted
-                        ? 'chip-status-on'
-                        : 'chip-status-off'
-                    "
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>
-                    {{ scope.opt.name }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-chip
-                    square
-                    size="12px"
-                    :label="
-                      !scope.opt.org_type
-                        ? '全局角色'
-                        : scope.opt.org_type.name + '角色'
-                    "
-                    class="q-pa-sm bg-secondary"
-                  />
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-        </div>
-        <div class="text-caption hint-label">
-          提示：仅能选择全局角色或属于当前页所选【{{
-            selectedOrgType.name
-          }}】下的角色。
-        </div>
-      </div>
-    </template>
-  </form-dialog>
+  <set-roles-form ref="setRolesForm" @user-updated="loadUserTable" />
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps, QTreeNode } from 'quasar';
+import { SetRolesComponent } from 'src/components/user/type';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
+import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import {
   DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-import {
-  Role,
-  RolePostData,
-  RolePostError,
-  RoleSet,
-  SetRolePostData,
-  SetRolePostError,
-} from 'pages/role/type';
+import { Role, RolePostData, RolePostError, RoleSet } from 'pages/role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Department, OrgType } from 'pages/type';
-import { User } from 'pages/user/type';
+
+import { User } from '../user/type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -637,6 +567,8 @@ const filterColumns: FilterColumn[] = [
 export default defineComponent({
   name: 'RoleAdminPanel',
 
+  mixins: [RoleOperationsMixin],
+
   setup() {
     return {
       // table mode
@@ -664,30 +596,10 @@ export default defineComponent({
       roleForm: ref(false),
       roleFormData: ref<RolePostData>({}),
       roleFormError: ref<RolePostError>({}),
-
-      selectedRoles: ref<Role[]>([]),
-      availableRoleOptions: ref<Role[]>([]),
-      setRoleForm: ref(false),
-      setRoleFormData: ref<SetRolePostData>({}),
-      setRoleFormError: ref<SetRolePostError>({}),
     };
   },
 
   methods: {
-    operateOneRole(evt: Event, role: Role) {
-      if (evt.type === 'disable') {
-        this.toggleRoles([role], true);
-      } else if (evt.type === 'enable') {
-        this.toggleRoles([role], false);
-      } else if (evt.type === 'delete') {
-        this.deleteRoles([role]);
-      } else if (evt.type === 'bind_users') {
-        this.goToRoleProfile(evt, role.id);
-      } else if (evt.type === 'set_perms') {
-        this.goToRoleProfile(evt, role.id);
-      }
-    },
-
     onNodeUpdated(node: QTreeNode) {
       this.selectedNode.id = node.id;
       this.selectedNode.name = node.name;
@@ -708,7 +620,6 @@ export default defineComponent({
         const resp = await this.$api.post('/roles/query', {
           org_type_id: this.selectedOrgType.id,
         });
-        this.availableRoleOptions = resp.data.rows;
         this.availableRoleSet = [
           {
             label: '组织类型角色',
@@ -769,113 +680,16 @@ export default defineComponent({
       this.roleFormData.org_type_id = this.orgTypeOptions[0].id;
     },
 
-    toggleRoles(roles: Role[], isDeleted: boolean) {
-      const roleDesc = `${roles[0].name}${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
-      }`;
-      const content = isDeleted
-        ? `您正在请求禁用【${roleDesc}】。操作后，角色主体（关联用户）将不再具有角色关联的资源权限，但不会改变角色与角色主体的关联关系。`
-        : `您正在请求启用【${roleDesc}】。操作后，角色主体（关联用户）将重新获得角色关联的资源权限。`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: isDeleted ? '禁用角色' : '启用角色',
-            content: content,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: isDeleted ? '禁用' : '启用',
-                actionType: 'toggle',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'toggle') {
-            try {
-              await this.$api.put(
-                '/roles/status',
-                { ids: roles.map((r: Role) => r.id), is_deleted: isDeleted },
-                { successMsg: `${isDeleted ? '禁用' : '启用'}用户成功` }
-              );
-            } finally {
-              (this.$refs.roleTable as DataTableComponent).fetchRows();
-            }
-          }
-        });
+    openSetRolesForm(user: User) {
+      (this.$refs.setRolesForm as SetRolesComponent).show(user);
     },
 
-    deleteRoles(roles: Role[]) {
-      const roleDesc = `${roles[0].name}${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
-      }`;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '删除角色',
-            content: `您正在请求删除【${roleDesc}】。数据删除后将无法进行恢复，您确认要继续删除吗？`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '删除',
-                actionType: 'delete',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'delete') {
-            try {
-              await this.$api.request({
-                method: 'DELETE',
-                url: '/roles',
-                data: { ids: roles.map((u: Role) => u.id) },
-                successMsg: '删除角色成功',
-              });
-            } finally {
-              (this.$refs.roleTable as DataTableComponent).fetchRows();
-            }
-          }
-        });
+    refreshRoleData() {
+      (this.$refs.roleTable as DataTableComponent).fetchRows();
     },
 
-    openSetRoleForm(user: User) {
-      this.setRoleForm = true;
-      this.setRoleFormData.user_id = user.id;
-      this.selectedRoles = user.roles || [];
-    },
-
-    async saveSetRoleForm() {
-      this.setRoleFormData.role_ids = this.selectedRoles.map((role) => role.id);
-      try {
-        this.setRoleFormError = {};
-        await this.$api.put(
-          `/users/${this.setRoleFormData.user_id}/roles`,
-          this.setRoleFormData,
-          {
-            successMsg: '角色配置成功',
-          }
-        );
-        (this.$refs.setRoleDialog as FormDialogComponent).hide();
-        this.loadUserTable();
-        this.resetSetRoleForm();
-      } catch (e) {
-        this.setRoleFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetSetRoleForm() {
-      this.setRoleFormData = {};
-      this.setRoleFormError = {};
-      this.selectedRoles = [];
-    },
-
-    goToRoleProfile(evt: Event, roleId: string) {
-      this.$router.push(`/role_profile/${roleId}`);
+    goToRoleProfile(evt: Event, roleId: string, target?: string) {
+      this.$router.push(`/role_profile/${roleId}${target ? `/${target}` : ''}`);
     },
   },
 });

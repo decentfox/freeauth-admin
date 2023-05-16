@@ -1,9 +1,9 @@
 import { Role } from '../role/type';
-import { Organization } from '../type';
+import { Organization, OrgType } from '../type';
 
 export interface User {
   /** 用户 ID */
-  id?: string;
+  id: string;
   /** 用户姓名 */
   name?: string;
   /** 用户手机号 */
@@ -16,6 +16,8 @@ export interface User {
   departments?: Organization[];
   /** 用户关联角色 */
   roles?: Role[];
+  /** 用户属于的组织类型 */
+  org_type?: OrgType;
   /** 用户最后登录时间 */
   last_login_at?: Date;
   /** 用户创建时间 */

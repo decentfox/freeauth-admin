@@ -26,7 +26,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/user/UserAdminPanel.vue'),
       },
       {
-        path: '/user_profile/:userId',
+        path: '/user_profile/:userId/:tab?',
         component: () => import('pages/user/UserProfile.vue'),
         props: true,
       },
@@ -39,7 +39,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/role/RoleAdminPanel.vue'),
       },
       {
-        path: '/role_profile/:roleId',
+        path: '/role_profile/:roleId/:tab?',
         component: () => import('pages/role/RoleProfile.vue'),
         props: true,
       },

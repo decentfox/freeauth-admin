@@ -1,6 +1,5 @@
-import { User } from 'src/pages/user/type';
-
 import { Role } from 'pages/role/type';
+import { User } from 'pages/user/type';
 
 export interface RoleOperationsType {
   methods: {

@@ -142,7 +142,7 @@
                       @enable="
                         toggleUsersStatus([props.row], false, loadUserTable)
                       "
-                      @resign="resignUsers([props.row])"
+                      @resign="resignUsers([props.row], loadUserTable)"
                       @transfer="openTransferForm(props.row)"
                     />
                   </q-td>
@@ -229,7 +229,7 @@
           <div>
             <field-label name="直属组织" required />
             <tree-select
-              v-model="bindUsersFormData.organization_ids"
+              v-model="selectedOrganizations"
               :nodes="orgTreeData"
               multi-select
               :initial-selected-items="parentDepartment"
@@ -428,38 +428,10 @@
         </q-tab-panels>
       </template>
     </form-dialog>
-
-    <form-dialog
-      ref="transferDialog"
-      v-model="transferForm"
-      title="变更组织归属"
-      width="450px"
-      @confirm="saveTransferForm"
-      @close="resetTransferForm"
-    >
-      <template #form-content>
-        <div class="q-gutter-md q-pa-md">
-          <div>
-            <field-label name="组织归属变更为" required />
-            <tree-select
-              v-model="transferFormData.organization_ids"
-              :nodes="orgTreeData"
-              multi-select
-              :initial-selected-items="parentDepartment"
-            />
-            <div
-              v-if="!!transferFormError.organization_ids"
-              class="error-hint text-negative"
-            >
-              {{ transferFormError.organization_ids }}
-            </div>
-          </div>
-          <div class="text-caption hint-label">
-            提示：如需彻底移除所属组织，请点击【办理离职】。
-          </div>
-        </div>
-      </template>
-    </form-dialog>
+    <set-organizations-form
+      ref="setOrganizationsForm"
+      @user-updated="loadUserTable"
+    />
   </q-page>
 </template>
 
@@ -467,23 +439,21 @@
 import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, QTreeNode } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import { DataTableComponent } from 'components/table/type';
+import { SetOrganizationsComponent } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
 
 import { User, UserPostData, UserPostError } from './user/type';
 import {
-  BindUsersPostData,
-  BindUsersPostError,
+  BindUsersToOrgsPostData,
+  BindUsersToOrgsPostError,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
   Enterprise,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   OrgTreeComponent,
   OrgType,
-  TransferPostData,
-  TransferPostError,
 } from './type';
 
 const userColumns: QTableProps['columns'] = [
@@ -616,23 +586,19 @@ export default defineComponent({
       addMembersForm: ref(false),
       addMembersTab: ref('existing'),
       parentDepartment: ref<QTreeNode[]>(),
+      selectedOrganizations: ref<string[]>(),
 
       // add new member, existing user
       userOptions: ref([]),
       selectedExistingUsers: ref<User[]>(),
-      bindUsersFormData: ref<BindUsersPostData>({}),
-      bindUsersFormError: ref<BindUsersPostError>({}),
+      bindUsersFormData: ref<BindUsersToOrgsPostData>({}),
+      bindUsersFormError: ref<BindUsersToOrgsPostError>({}),
 
       // add new user
       newUserFormData: ref<UserPostData>({}),
       newUserFormError: ref<UserPostError>({}),
       firstLoginNotification: ref(false),
       passwordChangingRequired: ref(false),
-
-      // transfer user
-      transferForm: ref(false),
-      transferFormData: ref<TransferPostData>({}),
-      transferFormError: ref<TransferPostError>({}),
     };
   },
 
@@ -719,14 +685,15 @@ export default defineComponent({
     },
 
     async openAddMembersForm() {
+      this.addMembersForm = true;
       const resp = await this.$api.get(
         `/org_types/${this.selectedOrgType.id}/organization_tree`
       );
       this.orgTreeData = resp.data;
-      this.parentDepartment = [this.selectedNode];
-      this.newUserFormData.organization_ids = [this.selectedNode.id];
-      this.bindUsersFormData.organization_ids = [this.selectedNode.id];
-      this.addMembersForm = true;
+      if (!!this.selectedNode.id) {
+        this.parentDepartment = [this.selectedNode];
+        this.selectedOrganizations = [this.selectedNode.id];
+      }
     },
 
     async saveAddMembersForm() {
@@ -734,6 +701,7 @@ export default defineComponent({
         this.bindUsersFormData.user_ids = this.selectedExistingUsers.map(
           (user) => user.id
         );
+        this.bindUsersFormData.organization_ids = this.selectedOrganizations;
         try {
           this.bindUsersFormError = {};
           await this.$api.post(
@@ -755,6 +723,7 @@ export default defineComponent({
           this.bindUsersFormError = (e as Error).cause || {};
         }
       } else if (this.addMembersTab == 'new') {
+        this.newUserFormData.organization_ids = this.selectedOrganizations;
         try {
           this.newUserFormError = {};
           await this.$api.post(
@@ -784,97 +753,12 @@ export default defineComponent({
       this.newUserFormData = {};
       this.newUserFormError = {};
       this.selectedExistingUsers = [];
+      this.selectedOrganizations = [];
       this.addMembersTab = 'existing';
     },
 
-    resignUsers(users: User[]) {
-      const userDesc = `${users[0].name || users[0].username}${
-        users[0].mobile ? `（${users[0].mobile}）` : ''
-      }${users.length > 1 ? `等 ${users.length} 人` : ''}`;
-
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: '办理离职',
-            content: `您正在请求为成员：${userDesc}办理离职。操作后，该成员授权、组织部门和角色等关系将被删除，转为普通用户。如需同时禁用该用户，请点击【离职并禁用】。
-`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '离职',
-                actionType: 'resign',
-                class: 'accent-btn',
-              },
-              {
-                label: '离职并禁用',
-                actionType: 'resign_disable',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (['resign', 'resign_disable'].indexOf(type) >= 0) {
-            let postData = {};
-            if (type === 'resign') {
-              postData = { user_ids: users.map((u: User) => u.id) };
-            } else if (type === 'resign_disable') {
-              postData = {
-                user_ids: users.map((u: User) => u.id),
-                is_deleted: true,
-              };
-            }
-            try {
-              await this.$api.request({
-                method: 'POST',
-                url: '/users/resign',
-                data: postData,
-                successMsg: '离职办理成功',
-              });
-            } finally {
-              this.loadUserTable();
-            }
-          }
-        });
-    },
-
-    async openTransferForm(user: User) {
-      const resp = await this.$api.get(
-        `/org_types/${this.selectedOrgType.id}/organization_tree`
-      );
-      this.orgTreeData = resp.data;
-      this.transferFormData.user_id = user.id;
-      this.parentDepartment = user.departments;
-      if (user.departments) {
-        this.transferFormData.organization_ids = user.departments.map(
-          (d) => d.id
-        );
-      }
-      this.transferForm = true;
-    },
-
-    async saveTransferForm() {
-      try {
-        this.transferFormError = {};
-        await this.$api.put(
-          `/users/${this.transferFormData.user_id}/organizations`,
-          this.transferFormData,
-          {
-            successMsg: '组织归属变更成功',
-          }
-        );
-        (this.$refs.transferDialog as FormDialogComponent).hide();
-        this.loadUserTable();
-        this.resetTransferForm();
-      } catch (e) {
-        this.transferFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetTransferForm() {
-      this.transferFormData = {};
-      this.transferFormError = {};
+    openTransferForm(user: User) {
+      (this.$refs.setOrganizationsForm as SetOrganizationsComponent).show(user);
     },
 
     copyInfoToClipboard(row: Enterprise) {

@@ -1,6 +1,6 @@
 <template>
   <q-btn flat dense :class="btnClass" :style="btnStyle">
-    <q-icon v-if="btnIcon" size="18px" :name="btnIcon" />{{ btnLabel }}
+    <q-icon v-if="btnIcon" :size="btnIconSize" :name="btnIcon" />{{ btnLabel }}
     <q-menu class="q-px-xs" anchor="bottom right" self="top right">
       <q-list dense>
         <q-item
@@ -14,7 +14,7 @@
           @click="$emit(button.actionType.replace('_', '-'))"
         >
           <q-item-section v-if="button.icon" avatar class="q-pr-none">
-            <q-icon :name="button.icon" size="16px" />
+            <q-icon :name="button.icon" size="18px" />
           </q-item-section>
           <q-item-section> {{ button.label }} </q-item-section>
           <q-tooltip
@@ -42,6 +42,10 @@ export default defineComponent({
     btnIcon: {
       type: String,
       default: 'more_horiz',
+    },
+    btnIconSize: {
+      type: String,
+      default: '18px',
     },
     btnLabel: {
       type: String,

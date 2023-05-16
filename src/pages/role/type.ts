@@ -39,14 +39,14 @@ export interface RolePostError {
   org_type_id?: string;
 }
 
-export interface BindUsersPostData {
+export interface BindUsersToRolesPostData {
   /** 用户的 ID */
   user_ids?: string[];
   /** 角色的 ID */
   role_ids?: string[];
 }
 
-export interface BindUsersPostError {
+export interface BindUsersToRolesPostError {
   user_ids?: string;
   role_ids?: string;
 }

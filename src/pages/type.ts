@@ -101,7 +101,7 @@ export interface DepartmentPostError {
   parent_id?: string;
 }
 
-export interface BindUsersPostData {
+export interface BindUsersToOrgsPostData {
   /** 多个用户的 ID 集合 */
   user_ids?: string[];
   /** 多个组织的 ID 集合 */
@@ -110,20 +110,8 @@ export interface BindUsersPostData {
   org_type_id?: string;
 }
 
-export interface BindUsersPostError {
+export interface BindUsersToOrgsPostError {
   user_ids?: string;
-  organization_ids?: string;
-}
-
-export interface TransferPostData {
-  /** 用户的 ID */
-  user_id?: string;
-  /** 组织的 ID */
-  organization_ids?: string[];
-}
-
-export interface TransferPostError {
-  user_id?: string;
   organization_ids?: string;
 }
 

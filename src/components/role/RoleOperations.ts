@@ -1,9 +1,9 @@
 import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
-import { User } from 'src/pages/user/type';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { Role } from 'pages/role/type';
+import { User } from 'pages/user/type';
 
 import { RoleOperationsType } from './type';
 

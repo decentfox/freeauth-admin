@@ -283,7 +283,8 @@ import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import { DataTableComponent } from 'components/table/type';
 import { ProfileComponent } from 'layouts/type';
 import {
-  BindUsersPostData,
+  BindUsersToRolesPostData,
+  BindUsersToRolesPostError,
   Role,
   RolePostData,
   RolePostError,
@@ -370,8 +371,8 @@ export default defineComponent({
       bindUsersForm: ref(false),
       userOptions: ref([]),
       selectedUsers: ref<User[]>(),
-      bindUsersFormData: ref<BindUsersPostData>({}),
-      bindUsersFormError: ref<BindUsersPostData>({}),
+      bindUsersFormData: ref<BindUsersToRolesPostData>({}),
+      bindUsersFormError: ref<BindUsersToRolesPostError>({}),
     };
   },
 

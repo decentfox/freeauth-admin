@@ -132,14 +132,12 @@
           </template>
           <template #body-cell-enterprise="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.enterprise"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.enterprise.name }}
+              <q-chip size="12px" square color="secondary" class="q-ml-none">
+                {{
+                  props.row.enterprise
+                    ? props.row.enterprise.name
+                    : props.row.name
+                }}
               </q-chip>
             </q-td>
           </template>
@@ -152,13 +150,25 @@
             </div>
           </template>
         </q-table>
-        <q-toolbar>
-          <q-space />
+        <q-toolbar class="q-my-md q-gutter-sm">
           <q-btn
             unelevated
             dense
-            label="变更组织"
-            class="q-mt-sm q-px-md primary-btn"
+            :label="user.departments?.length !== 0 ? '变更组织' : '加入组织'"
+            class="q-px-sm primary-btn"
+            @click="openSetOrganizationsForm"
+          />
+          <q-btn
+            v-if="user.departments?.length !== 0"
+            unelevated
+            dense
+            label="办理离职"
+            class="q-px-sm primary-btn"
+            @click="resignUsers([user], refreshUserData)"
+          />
+          <set-organizations-form
+            ref="setOrganizationsForm"
+            @user-updated="loadUserInfo"
           />
         </q-toolbar>
       </q-tab-panel>
@@ -172,14 +182,8 @@
         >
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.org_type"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.org_type.name }}
+              <q-chip size="12px" square color="secondary" class="q-ml-none">
+                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
               </q-chip>
             </q-td>
           </template>
@@ -205,13 +209,12 @@
             </div>
           </template>
         </q-table>
-        <q-toolbar>
-          <q-space />
+        <q-toolbar class="q-my-md q-gutter-sm">
           <q-btn
             unelevated
             dense
             label="配置角色"
-            class="q-mt-sm q-px-md primary-btn"
+            class="q-px-sm primary-btn"
             @click="openSetRolesForm"
           />
         </q-toolbar>
@@ -225,8 +228,11 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
-import { SetRolesComponent } from 'src/components/user/type';
 
+import {
+  SetOrganizationsComponent,
+  SetRolesComponent,
+} from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
 import { ProfileComponent } from 'layouts/type';
 
@@ -235,19 +241,19 @@ import { User, UserPostData, UserPostError } from './type';
 const roleColumns: QTableProps['columns'] = [
   {
     name: 'name',
-    label: '名称',
+    label: '角色名称',
     align: 'left',
     field: 'name',
   },
   {
     name: 'code',
-    label: '代码',
+    label: '角色代码',
     align: 'left',
     field: 'code',
   },
   {
     name: 'description',
-    label: '描述',
+    label: '角色描述',
     align: 'left',
     field: 'description',
     style: 'max-width: 400px',
@@ -255,7 +261,7 @@ const roleColumns: QTableProps['columns'] = [
   },
   {
     name: 'org_type',
-    label: '角色归属',
+    label: '组织类型归属',
     align: 'left',
     field: 'org_type',
   },
@@ -271,15 +277,21 @@ const roleColumns: QTableProps['columns'] = [
 const deptColumns: QTableProps['columns'] = [
   {
     name: 'org_type',
-    label: '组织类型',
+    label: '组织类型归属',
     align: 'left',
     field: 'org_type',
   },
   {
     name: 'name',
-    label: '直属组织名称 / 代码',
+    label: '直属组织名称',
     align: 'left',
-    field: (row) => row.name + (row.code ? ' / ' + row.code : ''),
+    field: 'name',
+  },
+  {
+    name: 'code',
+    label: '直属组织代码',
+    align: 'left',
+    field: (row) => (row.code ? row.code : '-'),
   },
   {
     name: 'enterprise',
@@ -339,7 +351,7 @@ export default defineComponent({
     },
 
     refreshUserData(op: string) {
-      if (['disable', 'enable'].includes(op)) {
+      if (['disable', 'enable', 'resign'].includes(op)) {
         this.loadUserInfo();
       } else if (op === 'delete') {
         (this.$refs.profile as ProfileComponent).goBack();
@@ -368,6 +380,12 @@ export default defineComponent({
 
     openSetRolesForm() {
       (this.$refs.setRolesForm as SetRolesComponent).show(this.user);
+    },
+
+    openSetOrganizationsForm() {
+      (this.$refs.setOrganizationsForm as SetOrganizationsComponent).show(
+        this.user
+      );
     },
   },
 });

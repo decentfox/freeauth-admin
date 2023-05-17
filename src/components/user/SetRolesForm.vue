@@ -73,8 +73,9 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { Role } from 'src/pages/role/type';
-import { User } from 'src/pages/user/type';
+
+import { Role } from 'pages/role/type';
+import { User } from 'pages/user/type';
 
 import { FormDialogComponent } from '../dialog/type';
 
@@ -101,25 +102,19 @@ export default defineComponent({
       this.user = user;
       this.loadAvailableRoles();
       this.setRolesForm = true;
-      this.setRolesFormData.user_id = user.id;
       this.selectedRoles = user.roles || [];
     },
 
     async loadAvailableRoles() {
-      if (this.user.org_type?.id) {
-        const resp = await this.$api.post('/roles/query', {
-          org_type_id: this.user.org_type.id,
-        });
-        this.availableRoleOptions = resp.data.rows;
-      } else {
-        const resp = await this.$api.post('/roles/query', {});
-        this.availableRoleOptions = resp.data.rows.filter(
-          (role: Role) => !role.org_type
-        );
-      }
+      const params = this.user.org_type?.id
+        ? { org_type_id: this.user.org_type.id }
+        : { include_org_type_roles: false };
+      const resp = await this.$api.post('/roles/query', params);
+      this.availableRoleOptions = resp.data.rows;
     },
 
     async saveSetRolesForm() {
+      this.setRolesFormData.user_id = this.user.id;
       this.setRolesFormData.role_ids = this.selectedRoles.map(
         (role) => role.id
       );

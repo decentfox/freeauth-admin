@@ -419,7 +419,6 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps, QTreeNode } from 'quasar';
-import { SetRolesComponent } from 'src/components/user/type';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
@@ -428,6 +427,7 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
+import { SetRolesComponent } from 'components/user/type';
 import { Role, RolePostData, RolePostError, RoleSet } from 'pages/role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Department, OrgType } from 'pages/type';

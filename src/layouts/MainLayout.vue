@@ -32,32 +32,39 @@
 
         <div class="q-pl-md q-gutter-xs row no-wrap items-center">
           <q-btn flat label="帮助文档" class="text-black-white" />
-          <q-btn round flat class="text-black-white">
-            <q-avatar size="26px">
-              <q-icon name="admin_panel_settings" />
-            </q-avatar>
-            <q-tooltip>账号</q-tooltip>
-          </q-btn>
           <q-btn
             round
             flat
+            dense
             class="text-black-white"
             @click="$q.dark.isActive ? $q.dark.set(false) : $q.dark.set(true)"
           >
-            <q-avatar size="26px">
-              <q-icon :name="$q.dark.isActive ? 'sunny' : 'dark_mode'" />
-            </q-avatar>
+            <q-icon
+              size="22px"
+              :name="$q.dark.isActive ? 'sunny' : 'dark_mode'"
+            />
             <q-tooltip>
               {{ $q.dark.isActive ? '浅色模式' : '深色模式' }}
             </q-tooltip>
           </q-btn>
-          <q-btn round flat class="text-black-white" @click="onSignOut">
-            <!-- TODO: render signOut button (leave it to 小🐻) -->
-            <q-avatar size="26px">
-              <q-icon name="admin_panel_settings" />
-            </q-avatar>
-            <q-tooltip>退出登录</q-tooltip>
-          </q-btn>
+          <dropdown-button
+            round
+            btn-icon="account_circle"
+            btn-icon-size="22px"
+            :buttons="[
+              {
+                label: '个人信息',
+                icon: 'portrait',
+                actionType: 'profile',
+              },
+              {
+                label: '退出登录',
+                icon: 'exit_to_app',
+                actionType: 'logout',
+              },
+            ]"
+            @logout="onSignOut"
+          />
         </div>
       </q-toolbar>
     </q-header>

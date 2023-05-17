@@ -89,23 +89,43 @@ export default defineComponent({
     return {
       selected: ref(null),
       ticked: ref<string[]>([]),
-      selectedNode: ref<QTreeNode>(),
+      selectedNode: ref<QTreeNode>({}),
       tickedNodes: ref<QTreeNode>([]),
     };
   },
 
-  mounted() {
-    if (!this.multiSelect && this.initialSelectedItems.length) {
-      this.selectedNode = this.initialSelectedItems[0];
-      this.selected = this.selectedNode ? this.selectedNode.id : null;
-    }
-    if (this.multiSelect && this.initialSelectedItems.length) {
-      this.tickedNodes = this.initialSelectedItems;
-      this.ticked = this.initialSelectedItems.map((item: QTreeNode) => item.id);
-    }
+  watch: {
+    nodes() {
+      this.resetTree();
+      this.initTree();
+    },
+  },
+
+  unmounted() {
+    this.resetTree();
   },
 
   methods: {
+    resetTree() {
+      this.selected = null;
+      this.ticked = [];
+      this.selectedNode = {};
+      this.tickedNodes = [];
+    },
+
+    initTree() {
+      if (!this.multiSelect && this.initialSelectedItems.length) {
+        this.selectedNode = this.initialSelectedItems[0];
+        this.selected = this.selectedNode ? this.selectedNode.id : null;
+      }
+      if (this.multiSelect && this.initialSelectedItems.length) {
+        this.tickedNodes = this.initialSelectedItems;
+        this.ticked = this.initialSelectedItems.map(
+          (item: QTreeNode) => item.id
+        );
+      }
+    },
+
     nodeSelected() {
       this.selectedNode = (this.$refs.popupTree as QTree).getNodeByKey(
         this.selected

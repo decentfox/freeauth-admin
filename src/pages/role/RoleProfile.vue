@@ -73,7 +73,7 @@
               <div>
                 <field-label
                   name="角色 Code"
-                  hint="角色的唯一标识符，可用户获取角色信息"
+                  hint="角色的唯一标识符，可用于获取角色信息"
                 />
                 <q-input
                   v-model="roleFormData.code"

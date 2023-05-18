@@ -41,7 +41,7 @@ export const RoleOperationsMixin: RoleOperationsType = {
             await api.put(
               '/roles/status',
               { ids: roles.map((r: Role) => r.id), is_deleted: isDeleted },
-              { successMsg: `${isDeleted ? '禁用' : '启用'}用户成功` }
+              { successMsg: `${isDeleted ? '禁用' : '启用'}角色成功` }
             );
           } finally {
             if (handler) {

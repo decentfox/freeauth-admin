@@ -6,7 +6,7 @@
     :status="!role.is_deleted"
     :tabs="[
       { name: 'role', label: '基本信息' },
-      { name: 'users', label: '管理主体' },
+      { name: 'users', label: '关联主体' },
       { name: 'perms', label: '配置权限' },
     ]"
     @update:tab-value="switchPanelTab"

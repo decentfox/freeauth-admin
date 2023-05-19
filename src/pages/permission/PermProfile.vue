@@ -195,6 +195,31 @@
               </q-item-label>
             </q-td>
           </template>
+          <template #body-cell-roles="props">
+            <q-td :props="props">
+              <q-chip
+                v-for="(role, idx) in (props.row.roles as Role[])"
+                :key="idx"
+                size="12px"
+                square
+                :color="
+                  permission.roles?.map((r) => r.id).includes(role.id)
+                    ? 'info'
+                    : 'secondary'
+                "
+                class="q-ml-none"
+              >
+                {{ role.name }}
+                <q-tooltip
+                  v-if="permission.roles?.map((r) => r.id).includes(role.id)"
+                  anchor="bottom middle"
+                  self="top middle"
+                >
+                  与当前权限相关
+                </q-tooltip>
+              </q-chip>
+            </q-td>
+          </template>
           <template #body-cell-departments="props">
             <q-td :props="props">
               <q-chip
@@ -206,20 +231,6 @@
                 class="q-ml-none"
               >
                 {{ dept.name }}
-              </q-chip>
-            </q-td>
-          </template>
-          <template #body-cell-roles="props">
-            <q-td :props="props">
-              <q-chip
-                v-for="(role, idx) in (props.row.roles as Role[])"
-                :key="idx"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ role.name }}
               </q-chip>
             </q-td>
           </template>

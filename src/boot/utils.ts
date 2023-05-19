@@ -34,8 +34,7 @@ export default boot(({ app }) => {
           await navigator.clipboard.writeText(text);
           Notify.create({
             message: '复制成功',
-            color: 'info',
-            textColor: 'primary',
+            color: 'grey-8',
             position: 'top',
             classes: 'text-caption',
             timeout: 1000,

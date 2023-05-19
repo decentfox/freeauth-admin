@@ -61,14 +61,8 @@
           </template>
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.org_type"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.org_type.name }}
+              <q-chip size="12px" square color="secondary" class="q-ml-none">
+                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
               </q-chip>
             </q-td>
           </template>

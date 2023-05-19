@@ -25,7 +25,7 @@
 
       <!--the second splitted screen-->
       <template #after>
-        <div class="q-px-md">
+        <div class="q-px-md q-py-sm">
           <q-toolbar class="q-pa-none">
             <q-tabs
               v-model="leftPanelTab"

@@ -26,3 +26,15 @@ export interface PermissionPostError {
   name?: string;
   code?: string;
 }
+
+export interface BindRolesToPermsPostData {
+  /** 权限的 ID 列表 */
+  permission_ids?: string[];
+  /** 角色的 ID 列表 */
+  role_ids?: string[];
+}
+
+export interface BindRolesToPermsPostError {
+  permission_ids?: string;
+  role_ids?: string;
+}

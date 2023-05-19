@@ -1,4 +1,5 @@
 import { Permission } from 'pages/permission/type';
+import { Role } from 'pages/role/type';
 
 export interface PermOperationsType {
   methods: {
@@ -9,6 +10,11 @@ export interface PermOperationsType {
     ) => void;
     deletePermissions: (
       permissions: Permission[],
+      handler?: (...args: [string]) => void
+    ) => void;
+    unbindRoles: (
+      permission: Permission,
+      roles: Role[],
       handler?: (...args: [string]) => void
     ) => void;
   };

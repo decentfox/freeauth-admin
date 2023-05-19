@@ -2,6 +2,14 @@
   <q-page class="full-width">
     <q-tab-panels v-model="viewMode">
       <q-tab-panel name="table" class="q-pa-md">
+        <q-btn
+          unelevated
+          dense
+          class="no-hover-btn hint-label"
+          @click="$utils.refreshPage"
+        >
+          <q-icon size="18px" class="q-pr-xs" name="subject" />角色管理
+        </q-btn>
         <data-table
           ref="roleTable"
           :columns="columns"

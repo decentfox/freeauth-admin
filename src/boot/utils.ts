@@ -5,6 +5,7 @@ declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $utils: {
       copyToClipboard: (text: string | undefined) => void;
+      refreshPage: () => void;
     };
   }
 }
@@ -43,6 +44,10 @@ export default boot(({ app }) => {
       } catch (e) {
         throw e;
       }
+    },
+
+    refreshPage() {
+      window.location.reload();
     },
   };
 });

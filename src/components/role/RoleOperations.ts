@@ -15,7 +15,7 @@ export const RoleOperationsMixin: RoleOperationsType = {
       handler?: (...args: [string]) => void
     ) {
       const roleDesc = `【${roles[0].name}】${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
+        roles.length > 1 ? `等 ${roles.length} 个角色` : ''
       }`;
       const content = isDeleted
         ? `您正在请求禁用${roleDesc}。操作后，角色主体（关联用户）将不再具有角色关联的资源权限，但不会改变角色与角色主体的关联关系。`
@@ -54,7 +54,7 @@ export const RoleOperationsMixin: RoleOperationsType = {
 
     deleteRoles(roles: Role[], handler?: (...args: [string]) => void) {
       const roleDesc = `【${roles[0].name}】${
-        roles.length > 1 ? `等 ${roles.length} 角色` : ''
+        roles.length > 1 ? `等 ${roles.length} 个角色` : ''
       }`;
 
       Dialog.create({
@@ -102,7 +102,7 @@ export const RoleOperationsMixin: RoleOperationsType = {
         component: ConfirmDialog,
         componentProps: {
           title: '移除用户',
-          content: `您正在请求解除用户${userDesc}与当前角色的关系，该操作不会影响用户与其他角色的关联。`,
+          content: `您正在请求解除用户${userDesc}与当前角色的关联，该操作不会影响用户与其他角色的关联。`,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
             {

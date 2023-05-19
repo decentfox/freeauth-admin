@@ -166,10 +166,6 @@
             class="q-px-sm primary-btn"
             @click="resignUsers([user], refreshUserData)"
           />
-          <set-organizations-form
-            ref="setOrganizationsForm"
-            @user-updated="loadUserInfo"
-          />
         </q-toolbar>
       </q-tab-panel>
       <q-tab-panel name="roles">
@@ -218,9 +214,15 @@
             @click="openSetRolesForm"
           />
         </q-toolbar>
-        <set-roles-form ref="setRolesForm" @user-updated="loadUserInfo" />
       </q-tab-panel>
       <q-tab-panel name="perms"> TODO </q-tab-panel>
+    </template>
+    <template #dialog>
+      <set-organizations-form
+        ref="setOrganizationsForm"
+        @user-updated="loadUserInfo"
+      />
+      <set-roles-form ref="setRolesForm" @user-updated="loadUserInfo" />
     </template>
   </profile-page>
 </template>

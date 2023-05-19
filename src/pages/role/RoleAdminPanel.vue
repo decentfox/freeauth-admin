@@ -45,7 +45,7 @@
               {{ props.col.label }}
               <q-icon name="error_outline" size="14px">
                 <q-tooltip anchor="center right" self="center start">
-                  只有该角色所属组织下的用户才可关联使用该角色
+                  只有该角色所属组织类型下的用户才可关联使用该角色
                 </q-tooltip>
               </q-icon>
             </q-th>

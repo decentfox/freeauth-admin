@@ -15,6 +15,7 @@
       api-method="POST"
       :filter-columns="filterColumns"
       search-placeholder="搜索权限信息"
+      wrap-cells
       hide-import
       hide-export
     >

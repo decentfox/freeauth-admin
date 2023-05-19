@@ -116,6 +116,7 @@
           search-placeholder="搜索用户信息"
           hide-filter
           hide-import
+          hide-export
         >
           <template #table-action>
             <q-btn

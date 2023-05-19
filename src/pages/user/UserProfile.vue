@@ -10,6 +10,7 @@
       { name: 'roles', label: '角色信息' },
       { name: 'perms', label: '权限信息' },
     ]"
+    @update:tab-value="switchPanelTab"
   >
     <template #toolbar-right>
       <dropdown-button
@@ -141,6 +142,21 @@
               </q-chip>
             </q-td>
           </template>
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <dropdown-button
+                :buttons="[
+                  {
+                    label: '移出组织',
+                    icon: 'person_remove',
+                    actionType: 'unbind',
+                  },
+                ]"
+                @click.stop
+                @unbind="unbindOrgs(user, [props.row], refreshUserData)"
+              />
+            </q-td>
+          </template>
           <template #no-data="{ icon, message }">
             <div class="full-width row flex-center q-gutter-sm text-grey-6">
               <q-icon :name="icon" />
@@ -196,6 +212,21 @@
               />
             </q-td>
           </template>
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <dropdown-button
+                :buttons="[
+                  {
+                    label: '移除角色',
+                    icon: 'person_remove',
+                    actionType: 'unbind',
+                  },
+                ]"
+                @click.stop
+                @unbind="unbindRoles(user, [props.row], refreshUserData)"
+              />
+            </q-td>
+          </template>
           <template #no-data="{ icon, message }">
             <div class="full-width row flex-center q-gutter-sm text-grey-6">
               <q-icon :name="icon" />
@@ -215,7 +246,63 @@
           />
         </q-toolbar>
       </q-tab-panel>
-      <q-tab-panel name="perms"> TODO </q-tab-panel>
+      <q-tab-panel name="perms">
+        <data-table
+          ref="permTable"
+          :columns="permColumns"
+          sticky-action-column
+          search-placeholder="搜索权限信息"
+          wrap-cells
+          hide-filter
+          hide-import
+          hide-export
+        >
+          <template #body-cell-roles="props">
+            <q-td :props="props">
+              <div class="row">
+                <div
+                  v-for="(role, idx) in (props.row.roles as Role[])"
+                  :key="idx"
+                >
+                  <q-chip
+                    v-if="
+                      user.roles &&
+                      user.roles.map((r) => r.id).includes(role.id)
+                    "
+                    size="12px"
+                    square
+                    color="secondary"
+                    class="q-ml-none"
+                  >
+                    {{ role.name }}
+                  </q-chip>
+                </div>
+              </div>
+            </q-td>
+          </template>
+          <template #body-cell-is_deleted="props">
+            <q-td :props="props">
+              <q-chip
+                square
+                size="12px"
+                :label="!props.row.is_deleted ? '正常' : '禁用'"
+                class="text-weight-bold q-pa-sm q-ml-none"
+                :class="
+                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
+                "
+              />
+            </q-td>
+          </template>
+          <template #no-data="{ icon, message }">
+            <div class="full-width row flex-center q-gutter-sm text-grey-6">
+              <q-icon :name="icon" />
+              <span>
+                {{ message }}
+              </span>
+            </div>
+          </template>
+        </data-table>
+      </q-tab-panel>
     </template>
     <template #dialog>
       <set-organizations-form
@@ -231,12 +318,16 @@
 import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
+import { DataTableComponent } from 'components/table/type';
 import {
   SetOrganizationsComponent,
   SetRolesComponent,
 } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
 import { ProfileComponent } from 'layouts/type';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Role } from '../role/type';
 
 import { User, UserPostData, UserPostError } from './type';
 
@@ -274,6 +365,12 @@ const roleColumns: QTableProps['columns'] = [
     field: 'is_deleted',
     sortable: true,
   },
+  {
+    name: 'actions',
+    label: '操作',
+    align: 'center',
+    field: 'actions',
+  },
 ];
 
 const deptColumns: QTableProps['columns'] = [
@@ -282,6 +379,12 @@ const deptColumns: QTableProps['columns'] = [
     label: '组织类型归属',
     align: 'left',
     field: 'org_type',
+  },
+  {
+    name: 'enterprise',
+    label: '企业归属',
+    align: 'left',
+    field: 'enterprise',
   },
   {
     name: 'name',
@@ -296,10 +399,46 @@ const deptColumns: QTableProps['columns'] = [
     field: (row) => (row.code ? row.code : '-'),
   },
   {
-    name: 'enterprise',
-    label: '所属企业',
+    name: 'actions',
+    label: '操作',
+    align: 'center',
+    field: 'actions',
+  },
+];
+
+const permColumns: QTableProps['columns'] = [
+  {
+    name: 'name',
+    label: '权限名称',
     align: 'left',
-    field: 'enterprise',
+    field: 'name',
+  },
+  {
+    name: 'code',
+    label: '权限代码',
+    align: 'left',
+    field: 'code',
+  },
+  {
+    name: 'description',
+    label: '描述',
+    align: 'left',
+    field: 'description',
+    style: 'max-width: 400px',
+    headerStyle: 'max-width: 400px',
+  },
+  {
+    name: 'roles',
+    label: '权限来源角色',
+    align: 'left',
+    field: 'roles',
+  },
+  {
+    name: 'is_deleted',
+    label: '状态',
+    align: 'center',
+    field: 'is_deleted',
+    sortable: true,
   },
 ];
 
@@ -327,6 +466,7 @@ export default defineComponent({
       panelTab: ref('user'),
       roleColumns: roleColumns,
       deptColumns: deptColumns,
+      permColumns: permColumns,
 
       userForm: ref(false),
       userFormData: ref<UserPostData>({}),
@@ -348,12 +488,16 @@ export default defineComponent({
 
     switchPanelTab(val: string) {
       if (val === 'perms') {
-        // TODO
+        setTimeout(() => {
+          const et = this.$refs.permTable as DataTableComponent;
+          et.setApiInfo(`/users/${this.user.id}/permissions`, 'POST');
+          et.fetchRows();
+        }, 20);
       }
     },
 
     refreshUserData(op: string) {
-      if (['disable', 'enable', 'resign'].includes(op)) {
+      if (['disable', 'enable', 'resign', 'unbind'].includes(op)) {
         this.loadUserInfo();
       } else if (op === 'delete') {
         (this.$refs.profile as ProfileComponent).goBack();

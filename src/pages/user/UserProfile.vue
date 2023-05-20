@@ -280,6 +280,13 @@
               </div>
             </q-td>
           </template>
+          <template #body-cell-application="props">
+            <q-td :props="props">
+              <q-chip size="12px" square color="secondary" class="q-ml-none">
+                {{ props.row.application.name }}
+              </q-chip>
+            </q-td>
+          </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
               <q-chip
@@ -432,6 +439,12 @@ const permColumns: QTableProps['columns'] = [
     label: '权限来源角色',
     align: 'left',
     field: 'roles',
+  },
+  {
+    name: 'application',
+    label: '所属应用',
+    align: 'left',
+    field: 'application',
   },
   {
     name: 'is_deleted',

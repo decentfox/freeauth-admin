@@ -44,6 +44,16 @@
           <q-form>
             <div class="q-col-gutter-md q-pa-sm">
               <div>
+                <field-label name="所属应用（不支持变更）" required />
+                <q-input
+                  :model-value="permission.application?.name"
+                  filled
+                  dense
+                  hide-bottom-space
+                  disable
+                />
+              </div>
+              <div>
                 <field-label name="权限名称" required />
                 <q-input
                   v-model="permissionFormData.name"
@@ -536,6 +546,7 @@ export default defineComponent({
       } else if (op === 'delete') {
         (this.$refs.profile as ProfileComponent).goBack();
       } else if (op === 'unbind') {
+        this.loadPermInfo();
         (this.$refs.rolesTable as DataTableComponent).fetchRows();
       }
     },
@@ -578,6 +589,7 @@ export default defineComponent({
         );
         (this.$refs.bindRolesDialog as FormDialogComponent).hide();
         (this.$refs.rolesTable as DataTableComponent).fetchRows();
+        this.loadPermInfo();
         this.resetBindRolesForm();
       } catch (e) {
         this.bindRolesFormError = (e as Error).cause || {};

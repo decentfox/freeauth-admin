@@ -436,6 +436,7 @@ export default defineComponent({
         });
         (this.$refs.bindUsersDialog as FormDialogComponent).hide();
         (this.$refs.userTable as DataTableComponent).fetchRows();
+        this.loadRoleInfo();
         this.resetBindUsersForm();
       } catch (e) {
         this.bindUsersFormError = (e as Error).cause || {};
@@ -474,6 +475,7 @@ export default defineComponent({
       } else if (op === 'delete') {
         (this.$refs.profile as ProfileComponent).goBack();
       } else if (op === 'unbind') {
+        this.loadRoleInfo();
         (this.$refs.userTable as DataTableComponent).fetchRows();
       }
     },

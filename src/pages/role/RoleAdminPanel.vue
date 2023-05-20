@@ -6,7 +6,7 @@
           unelevated
           dense
           class="no-hover-btn hint-label"
-          @click="$utils.refreshPage"
+          @click="$router.go(0)"
         >
           <q-icon size="18px" class="q-pr-xs" name="subject" />角色管理
         </q-btn>

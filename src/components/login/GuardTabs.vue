@@ -6,7 +6,7 @@
     align="left"
     narrow-indicator
     :style="{
-      width: '200px',
+      width: options.length * 102 + 'px',
       color: !!color ? `${color} !important` : null,
     }"
     @update:model-value="(val) => $emit('update:modelValue', val)"
@@ -51,6 +51,12 @@ export default defineComponent({
       type: String,
       default: null,
     },
+    options: {
+      type: Array as PropType<AuthMode[] | LoginMode[]>,
+      default: () => {
+        return [];
+      },
+    },
   },
 
   emits: ['update:modelValue'],
@@ -58,14 +64,14 @@ export default defineComponent({
   computed: {
     tabOptions() {
       if (this.guardMode === GuardMode.signup) {
-        return [AuthMode.mobile, AuthMode.email].map((mode) => ({
+        return this.options.map((mode) => ({
           name: mode,
-          label: `${AuthModeLabel[mode]}注册`,
+          label: `${AuthModeLabel[mode as AuthMode]}注册`,
         }));
       } else {
-        return [LoginMode.code, LoginMode.password].map((mode) => ({
+        return this.options.map((mode) => ({
           name: mode,
-          label: `${LoginModeLabel[mode]}登录`,
+          label: `${LoginModeLabel[mode as LoginMode]}登录`,
         }));
       }
     },

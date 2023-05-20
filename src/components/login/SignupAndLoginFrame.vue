@@ -12,10 +12,10 @@
         <guard-header />
         <template v-if="signupEnabled">
           <guard-tabs
-            v-if="(loginSettings.signupModes?.length || 0) > 1"
             :model-value="signupMode"
             :guard-mode="GuardMode.signup"
             :color="loginSettings.guardPrimaryColor"
+            :options="loginSettings.signupModes"
             @update:model-value="(val) => $emit('update:signupMode', val)"
           />
           <q-tab-panels :model-value="signupMode" animated class="bg-white">
@@ -59,10 +59,10 @@
         <guard-header />
         <template v-if="signinEnabled">
           <guard-tabs
-            v-if="codeLoginEnabled && pwdLoginEnabled"
             :model-value="loginMode"
             :guard-mode="GuardMode.signin"
             :color="loginSettings.guardPrimaryColor"
+            :options="loginModeOptions"
             @update:model-value="(val) => $emit('update:loginMode', val)"
           />
           <q-tab-panels :model-value="loginMode" animated class="bg-white">
@@ -204,6 +204,17 @@ export default defineComponent({
       return (
         this.loginSettings.agreementTitle || '我已阅读并同意隐私协议与服务条款'
       );
+    },
+
+    loginModeOptions() {
+      let options = [];
+      if (this.codeLoginEnabled) {
+        options.push(LoginMode.code);
+      }
+      if (this.pwdLoginEnabled) {
+        options.push(LoginMode.password);
+      }
+      return options;
     },
   },
 });

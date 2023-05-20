@@ -1,3 +1,5 @@
+import { Role } from 'pages/role/type';
+import { Organization } from 'pages/type';
 import { User } from 'pages/user/type';
 
 export interface UserOperationsType {
@@ -9,6 +11,16 @@ export interface UserOperationsType {
     ) => void;
     deleteUsers: (users: User[], handler?: (...args: [string]) => void) => void;
     resignUsers: (users: User[], handler?: (...args: [string]) => void) => void;
+    unbindRoles: (
+      user: User,
+      roles: Role[],
+      handler?: (...args: [string]) => void
+    ) => void;
+    unbindOrgs: (
+      user: User,
+      organizations: Organization[],
+      handler?: (...args: [string]) => void
+    ) => void;
   };
 }
 

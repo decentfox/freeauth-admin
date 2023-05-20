@@ -2,6 +2,8 @@ import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import { Role } from 'pages/role/type';
+import { Organization } from 'pages/type';
 import { User } from 'pages/user/type';
 
 import { UserOperationsType } from './type';
@@ -137,6 +139,94 @@ export const UserOperationsMixin: UserOperationsType = {
           } finally {
             if (handler) {
               handler('resign');
+            }
+          }
+        }
+      });
+    },
+
+    unbindRoles(
+      user: User,
+      roles: Role[],
+      handler?: (...args: [string]) => void
+    ) {
+      const roleDesc = `【${roles[0].name}】${
+        roles.length > 1 ? `等 ${roles.length} 个角色` : '角色'
+      }`;
+
+      Dialog.create({
+        component: ConfirmDialog,
+        componentProps: {
+          title: '移除用户',
+          content: `您正在请求对该用户移除${roleDesc}。操作后，用户不在拥有角色关联的权限，但若权限仍然被该用户关联的其他角色所涵盖，该用户仍然具有对应权限。`,
+          buttons: [
+            { label: '取消', class: 'secondary-btn' },
+            {
+              label: '解除关系',
+              actionType: 'unbind',
+              class: 'accent-btn',
+            },
+          ],
+        },
+      }).onOk(async ({ type }) => {
+        if (type === 'unbind') {
+          try {
+            await api.request({
+              method: 'POST',
+              url: '/roles/unbind_users',
+              data: {
+                user_ids: [user.id],
+                role_ids: roles.map((r: Role) => r.id),
+              },
+              successMsg: '移除角色成功',
+            });
+          } finally {
+            if (handler) {
+              handler('unbind');
+            }
+          }
+        }
+      });
+    },
+
+    unbindOrgs(
+      user: User,
+      organizations: Organization[],
+      handler?: (...args: [string]) => void
+    ) {
+      const orgDesc = `【${organizations[0].name}】${
+        organizations.length > 1 ? `等 ${organizations.length} 个组织` : ''
+      }`;
+
+      Dialog.create({
+        component: ConfirmDialog,
+        componentProps: {
+          title: '移除用户',
+          content: `您正在请求将该用户从${orgDesc}中移除。操作后，若该用户不再归属原组织类型下的任何企业或部门，则原组织类型下与该用户绑定的角色也会自动解绑。`,
+          buttons: [
+            { label: '取消', class: 'secondary-btn' },
+            {
+              label: '解除关系',
+              actionType: 'unbind',
+              class: 'accent-btn',
+            },
+          ],
+        },
+      }).onOk(async ({ type }) => {
+        if (type === 'unbind') {
+          try {
+            await api.request({
+              method: 'POST',
+              url: '/organizations/unbind_users',
+              data: {
+                user_ids: [user.id],
+                organization_ids: organizations.map((o: Organization) => o.id),
+              },
+              successMsg: '成功移出组织',
+            });
+          } finally {
+            if (handler) {
+              handler('unbind');
             }
           }
         }

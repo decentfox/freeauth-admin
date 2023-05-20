@@ -2,6 +2,14 @@
   <q-page class="full-width">
     <q-tab-panels v-model="viewMode">
       <q-tab-panel name="table" class="q-pa-md">
+        <q-btn
+          unelevated
+          dense
+          class="no-hover-btn hint-label"
+          @click="$router.go(0)"
+        >
+          <q-icon size="18px" class="q-pr-xs" name="subject" />角色管理
+        </q-btn>
         <data-table
           ref="roleTable"
           :columns="columns"
@@ -37,7 +45,7 @@
               {{ props.col.label }}
               <q-icon name="error_outline" size="14px">
                 <q-tooltip anchor="center right" self="center start">
-                  只有该角色所属组织下的用户才可关联使用该角色
+                  只有该角色所属组织类型下的用户才可关联使用该角色
                 </q-tooltip>
               </q-icon>
             </q-th>
@@ -53,14 +61,8 @@
           </template>
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.org_type"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.org_type.name }}
+              <q-chip size="12px" square color="secondary" class="q-ml-none">
+                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
               </q-chip>
             </q-td>
           </template>
@@ -387,7 +389,7 @@
         <div>
           <field-label
             name="角色 Code"
-            hint="角色的唯一标识符，可用户获取角色信息"
+            hint="角色的唯一标识符，可用于获取角色信息"
           />
           <q-input
             v-model="roleFormData.code"
@@ -661,7 +663,7 @@ export default defineComponent({
           successMsg: '角色创建成功',
         });
         (this.$refs.roleDialog as FormDialogComponent).hide();
-        (this.$refs.roleTable as DataTableComponent).fetchRows();
+        this.refreshRoleData();
         this.resetRoleForm();
       } catch (e) {
         this.roleFormError = (e as Error).cause || {};

@@ -40,9 +40,9 @@ export interface RolePostError {
 }
 
 export interface BindUsersToRolesPostData {
-  /** 用户的 ID */
+  /** 用户的 ID 列表 */
   user_ids?: string[];
-  /** 角色的 ID */
+  /** 角色的 ID 列表 */
   role_ids?: string[];
 }
 

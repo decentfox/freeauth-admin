@@ -45,7 +45,12 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/perm_admin_panel',
-        component: () => import('pages/PermAdminPanel.vue'),
+        component: () => import('pages/permission/PermAdminPanel.vue'),
+      },
+      {
+        path: '/perm_profile/:permId',
+        component: () => import('pages/permission/PermProfile.vue'),
+        props: true,
       },
       {
         path: '/org_admin_panel',

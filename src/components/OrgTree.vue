@@ -436,7 +436,7 @@
         <div>
           <field-label
             name="部门 Code"
-            hint="部门分支的唯一标识符，同一企业机构下唯一，可用户获取部门信息"
+            hint="部门分支的唯一标识符，同一企业机构下唯一，可用于获取部门信息"
           />
           <q-input
             v-model="departmentFormData.code"

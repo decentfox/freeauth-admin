@@ -2,7 +2,6 @@
   <q-page class="full-width q-pa-md">
     <q-splitter
       v-model="splitterModel"
-      class="q-py-sm"
       disable
       style="height: calc(100vh - 82px)"
     >

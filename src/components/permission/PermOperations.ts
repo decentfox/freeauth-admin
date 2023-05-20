@@ -2,29 +2,29 @@ import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import { Permission } from 'pages/permission/type';
 import { Role } from 'pages/role/type';
-import { User } from 'pages/user/type';
 
-import { RoleOperationsType } from './type';
+import { PermOperationsType } from './type';
 
-export const RoleOperationsMixin: RoleOperationsType = {
+export const PermOperationsMixin: PermOperationsType = {
   methods: {
-    toggleRolesStatus(
-      roles: Role[],
+    togglePermissionsStatus(
+      permissions: Permission[],
       isDeleted: boolean,
       handler?: (...args: [string]) => void
     ) {
-      const roleDesc = `【${roles[0].name}】${
-        roles.length > 1 ? `等 ${roles.length} 个角色` : ''
+      const permissionDesc = `【${permissions[0].name}】${
+        permissions.length > 1 ? `等 ${permissions.length} 个权限` : ''
       }`;
       const content = isDeleted
-        ? `您正在请求禁用${roleDesc}。操作后，角色主体（关联用户）将不再具有角色关联的资源权限，但不会改变角色与角色主体的关联关系。`
-        : `您正在请求启用${roleDesc}。操作后，角色主体（关联用户）将重新获得角色关联的资源权限。`;
+        ? `您正在请求禁用${permissionDesc}。操作后，该权限对应资源将无法被外界所获取，即使是已经关联了该权限的主体。`
+        : `您正在请求启用${permissionDesc}。操作后，拥有该权限的主体将重新获取该权限所对应的资源。`;
 
       Dialog.create({
         component: ConfirmDialog,
         componentProps: {
-          title: isDeleted ? '禁用角色' : '启用角色',
+          title: isDeleted ? '禁用权限' : '启用权限',
           content: content,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
@@ -39,9 +39,12 @@ export const RoleOperationsMixin: RoleOperationsType = {
         if (type === 'toggle') {
           try {
             await api.put(
-              '/roles/status',
-              { ids: roles.map((r: Role) => r.id), is_deleted: isDeleted },
-              { successMsg: `${isDeleted ? '禁用' : '启用'}角色成功` }
+              '/permissions/status',
+              {
+                ids: permissions.map((p: Permission) => p.id),
+                is_deleted: isDeleted,
+              },
+              { successMsg: `${isDeleted ? '禁用' : '启用'}权限成功` }
             );
           } finally {
             if (handler) {
@@ -52,16 +55,19 @@ export const RoleOperationsMixin: RoleOperationsType = {
       });
     },
 
-    deleteRoles(roles: Role[], handler?: (...args: [string]) => void) {
-      const roleDesc = `【${roles[0].name}】${
-        roles.length > 1 ? `等 ${roles.length} 个角色` : ''
+    deletePermissions(
+      permissions: Permission[],
+      handler?: (...args: [string]) => void
+    ) {
+      const permissionDesc = `【${permissions[0].name}】${
+        permissions.length > 1 ? `等 ${permissions.length} 个权限` : ''
       }`;
 
       Dialog.create({
         component: ConfirmDialog,
         componentProps: {
-          title: '删除角色',
-          content: `您正在请求删除${roleDesc}。数据删除后将无法进行恢复，您确认要继续删除吗？`,
+          title: '删除权限',
+          content: `您正在请求删除${permissionDesc}。数据删除后将无法进行恢复，您确认要继续删除吗？`,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
             {
@@ -76,9 +82,9 @@ export const RoleOperationsMixin: RoleOperationsType = {
           try {
             await api.request({
               method: 'DELETE',
-              url: '/roles',
-              data: { ids: roles.map((u: Role) => u.id) },
-              successMsg: '删除角色成功',
+              url: '/permissions',
+              data: { ids: permissions.map((u: Permission) => u.id) },
+              successMsg: '删除权限成功',
             });
           } finally {
             if (handler) {
@@ -89,20 +95,20 @@ export const RoleOperationsMixin: RoleOperationsType = {
       });
     },
 
-    unbindUsers(
-      role: Role,
-      users: User[],
+    unbindRoles(
+      permission: Permission,
+      roles: Role[],
       handler?: (...args: [string]) => void
     ) {
-      const userDesc = `【${users[0].name}】${
-        users.length > 1 ? `等 ${users.length} 人` : ''
+      const roleDesc = `【${roles[0].name}】${
+        roles.length > 1 ? `等 ${roles.length} 个角色` : ''
       }`;
 
       Dialog.create({
         component: ConfirmDialog,
         componentProps: {
-          title: '移除用户',
-          content: `您正在请求解除用户${userDesc}与当前角色的关联，该操作不会影响用户与其他角色的关联。`,
+          title: '移除角色',
+          content: `您正在请求解除角色${roleDesc}与当前权限的关联，该操作不会影响角色与其他权限的关联。`,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
             {
@@ -117,12 +123,12 @@ export const RoleOperationsMixin: RoleOperationsType = {
           try {
             await api.request({
               method: 'POST',
-              url: '/roles/unbind_users',
+              url: '/permissions/unbind_roles',
               data: {
-                user_ids: users.map((u: User) => u.id),
-                role_ids: [role.id],
+                role_ids: roles.map((r: Role) => r.id),
+                permission_ids: [permission.id],
               },
-              successMsg: '移除用户成功',
+              successMsg: '移除角色成功',
             });
           } finally {
             if (handler) {

@@ -705,7 +705,7 @@ export default defineComponent({
         try {
           this.bindUsersFormError = {};
           await this.$api.post(
-            '/organizations/members',
+            '/organizations/bind_users',
             Object.assign(
               {
                 org_type_id: this.selectedOrgType.id,

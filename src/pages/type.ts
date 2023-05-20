@@ -114,10 +114,3 @@ export interface BindUsersToOrgsPostError {
   user_ids?: string;
   organization_ids?: string;
 }
-
-export interface Permission {
-  name: string;
-  desc?: string;
-  code: string;
-  path?: string;
-}

@@ -6,7 +6,7 @@
     :status="!role.is_deleted"
     :tabs="[
       { name: 'role', label: '基本信息' },
-      { name: 'users', label: '管理主体' },
+      { name: 'users', label: '关联主体' },
       { name: 'perms', label: '配置权限' },
     ]"
     @update:tab-value="switchPanelTab"
@@ -73,7 +73,7 @@
               <div>
                 <field-label
                   name="角色 Code"
-                  hint="角色的唯一标识符，可用户获取角色信息"
+                  hint="角色的唯一标识符，可用于获取角色信息"
                 />
                 <q-input
                   v-model="roleFormData.code"
@@ -116,6 +116,7 @@
           search-placeholder="搜索用户信息"
           hide-filter
           hide-import
+          hide-export
         >
           <template #table-action>
             <q-btn

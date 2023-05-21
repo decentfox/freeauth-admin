@@ -15,6 +15,7 @@
     @request="onRequest"
   >
     <template #top>
+      <slot name="type-select"></slot>
       <q-input
         v-model="keyword"
         dense

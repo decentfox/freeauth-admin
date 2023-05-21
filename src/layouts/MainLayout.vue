@@ -174,6 +174,7 @@ const menuLinkList: MainMenuSection[] = [
       {
         title: '应用管理',
         icon: 'apps',
+        link: '/app_admin_panel',
       },
       {
         title: '单点登录',

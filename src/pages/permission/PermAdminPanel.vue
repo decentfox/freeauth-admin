@@ -11,14 +11,28 @@
     <data-table
       ref="permissionTable"
       :columns="columns"
-      api-url="/permissions/query"
-      api-method="POST"
       :filter-columns="filterColumns"
       search-placeholder="搜索权限信息"
       wrap-cells
       hide-import
       hide-export
     >
+      <template #type-select>
+        <q-select
+          v-model="selectedAppId"
+          :options="appOptions"
+          dense
+          filled
+          class="full-width q-pr-sm"
+          option-label="name"
+          option-value="id"
+          emit-value
+          map-options
+          style="max-width: 250px"
+          prefix="应用："
+          @update:model-value="loadPermissionsbyApp"
+        />
+      </template>
       <template #table-action>
         <q-btn
           unelevated
@@ -35,6 +49,13 @@
           @click="goToPermissionProfile($event, props.row.id)"
         >
           {{ props.row.name }}
+        </q-td>
+      </template>
+      <template #body-cell-application="props">
+        <q-td :props="props">
+          <q-chip size="12px" square color="secondary" class="q-ml-none">
+            {{ props.row.application.name }}
+          </q-chip>
         </q-td>
       </template>
       <template #body-cell-is_deleted="props">
@@ -101,6 +122,28 @@
     <template #form-content>
       <div class="q-col-gutter-md q-pa-md">
         <div>
+          <field-label
+            name="所属应用"
+            required
+            hint="如需切换，请关闭对话框，对表格左上方选择器进行操作"
+          />
+          <q-select
+            v-model="selectedAppId"
+            :options="appOptions"
+            dense
+            filled
+            class="full-width"
+            option-label="name"
+            option-value="id"
+            emit-value
+            map-options
+            disable
+            hide-bottom-space
+            :error="!!permissionFormError.application_id"
+            :error-message="permissionFormError.application_id"
+          />
+        </div>
+        <div>
           <field-label name="权限名称" required />
           <q-input
             v-model="permissionFormData.name"
@@ -156,6 +199,8 @@ import {
   FilterOperator,
 } from 'components/table/type';
 
+import { Application } from '../type';
+
 import { PermissionPostData, PermissionPostError } from './type';
 
 const columns: QTableProps['columns'] = [
@@ -178,6 +223,12 @@ const columns: QTableProps['columns'] = [
     field: 'description',
     style: 'max-width: 400px',
     headerStyle: 'max-width: 400px',
+  },
+  {
+    name: 'application',
+    label: '所属应用',
+    align: 'left',
+    field: 'application',
   },
   {
     name: 'created_at',
@@ -261,13 +312,36 @@ export default defineComponent({
       permissionForm: ref(false),
       permissionFormData: ref<PermissionPostData>({}),
       permissionFormError: ref<PermissionPostError>({}),
+
+      selectedAppId: ref(''),
+      appOptions: ref<Application[]>([]),
     };
   },
 
+  mounted() {
+    this.loadApplicationOptions();
+  },
+
   methods: {
+    async loadApplicationOptions() {
+      const resp = await this.$api.post('/applications/query', {});
+      this.appOptions = resp.data.rows;
+      this.selectedAppId = this.appOptions[0].id;
+      this.loadPermissionsbyApp();
+    },
+
+    async loadPermissionsbyApp() {
+      setTimeout(() => {
+        const et = this.$refs.permissionTable as DataTableComponent;
+        et.setApiInfo('/permissions/query', 'POST');
+        et.onExternalFiltered('application_id', this.selectedAppId);
+      }, 20);
+    },
+
     async savePermissionForm() {
       try {
         this.permissionFormError = {};
+        this.permissionFormData.application_id = this.selectedAppId;
         await this.$api.post('/permissions', this.permissionFormData, {
           successMsg: '权限创建成功',
         });

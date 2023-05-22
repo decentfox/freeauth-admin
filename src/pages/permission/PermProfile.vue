@@ -51,6 +51,8 @@
                   dense
                   hide-bottom-space
                   disable
+                  :error="!!permissionFormError.application_id"
+                  :error-message="permissionFormError.application_id"
                 />
               </div>
               <div>
@@ -79,6 +81,26 @@
                   hide-bottom-space
                   :error="!!permissionFormError.code"
                   :error-message="permissionFormError.code"
+                />
+              </div>
+              <div>
+                <field-label name="权限标签" />
+                <q-select
+                  ref="tags"
+                  v-model="selectedTags"
+                  filled
+                  dense
+                  use-input
+                  use-chips
+                  option-label="name"
+                  option-value="id"
+                  emit-value
+                  map-options
+                  multiple
+                  input-debounce="0"
+                  :options="tagOptions"
+                  @new-value="createValue"
+                  @filter="filterFn"
                 />
               </div>
               <div>
@@ -369,7 +391,7 @@ import { ProfileComponent } from 'layouts/type';
 
 import { Role } from '../role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department } from '../type';
+import { Department, Tag } from '../type';
 
 import {
   BindRolesToPermsPostData,
@@ -487,11 +509,16 @@ export default defineComponent({
       selectedRoles: ref<Role[]>(),
       bindRolesFormData: ref<BindRolesToPermsPostData>({}),
       bindRolesFormError: ref<BindRolesToPermsPostError>({}),
+
+      initialTagOptions: ref<Tag[]>([]),
+      tagOptions: ref<Tag[]>([]),
+      selectedTags: ref<string[]>([]),
     };
   },
 
   mounted() {
     this.loadPermInfo();
+    this.loadTagOptions();
   },
 
   methods: {
@@ -499,6 +526,15 @@ export default defineComponent({
       const resp = await this.$api.get(`/permissions/${this.permId}`);
       this.permission = resp.data;
       this.permissionFormData = Object.assign({}, resp.data);
+      this.selectedTags = this.permission.tags
+        ? this.permission.tags.map((p) => p.id)
+        : [];
+    },
+
+    async loadTagOptions() {
+      const resp = await this.$api.get('/permission_tags');
+      this.initialTagOptions = resp.data.permission_tags;
+      this.tagOptions = resp.data.permission_tags;
     },
 
     switchPanelTab(val: string) {
@@ -514,10 +550,18 @@ export default defineComponent({
           et.setApiInfo(`/permissions/${this.permission.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
+      } else if (val === 'perm') {
+        this.loadTagOptions();
       }
     },
 
     async savePermissionForm() {
+      this.permissionFormData.existing_tag_ids = this.selectedTags.filter(
+        (tag) => this.initialTagOptions.map((t) => t.id).includes(tag)
+      );
+      this.permissionFormData.new_tags = this.selectedTags.filter(
+        (tag) => !this.initialTagOptions.map((t) => t.id).includes(tag)
+      );
       if (
         JSON.stringify(this.permission) ===
         JSON.stringify(this.permissionFormData)
@@ -525,6 +569,8 @@ export default defineComponent({
         return;
       try {
         this.permissionFormError = {};
+        this.permissionFormData.application_id =
+          this.permission.application?.id;
         const resp = await this.$api.put(
           `/permissions/${this.permission.id}`,
           this.permissionFormData,
@@ -600,6 +646,30 @@ export default defineComponent({
       this.bindRolesFormData = {};
       this.bindRolesFormError = {};
       this.selectedRoles = [];
+    },
+
+    createValue(
+      val: string,
+      done: (item?: string, mode?: 'add' | 'add-unique' | 'toggle') => void
+    ) {
+      if (val.length > 0) {
+        if (!this.initialTagOptions.map((tag) => tag.name).includes(val)) {
+          done(val, 'add-unique');
+        }
+      }
+    },
+
+    filterFn(val: string, update: (fn: () => void) => void) {
+      update(() => {
+        if (val === '') {
+          this.tagOptions = this.initialTagOptions;
+        } else {
+          const needle = val.toLowerCase();
+          this.tagOptions = this.initialTagOptions.filter(
+            (v) => v.name.toLowerCase().indexOf(needle) > -1
+          );
+        }
+      });
     },
   },
 });

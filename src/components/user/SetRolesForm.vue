@@ -10,7 +10,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div>
-          <field-label name="关联角色" />
+          <field-label text="关联角色" />
           <q-select
             v-model="selectedRoles"
             :options="availableRoleOptions"

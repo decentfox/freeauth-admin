@@ -343,7 +343,7 @@
           ]"
         />
         <div v-if="roleTypeTab === 'org_type'">
-          <field-label name="所属组织类型" required />
+          <field-label text="所属组织类型" required />
           <q-select
             v-model="roleFormData.org_type_id"
             :options="orgTypeOptions"
@@ -362,7 +362,7 @@
       <q-separator inset />
       <div class="q-col-gutter-md q-pa-md">
         <div>
-          <field-label name="角色名称" required />
+          <field-label text="角色名称" required />
           <q-input
             v-model="roleFormData.name"
             filled
@@ -375,7 +375,7 @@
         </div>
         <div>
           <field-label
-            name="角色 Code"
+            text="角色 Code"
             hint="角色的唯一标识符，可用于获取角色信息"
           />
           <q-input
@@ -389,7 +389,7 @@
           />
         </div>
         <div>
-          <field-label name="角色描述" />
+          <field-label text="角色描述" />
           <q-input
             v-model="roleFormData.description"
             filled

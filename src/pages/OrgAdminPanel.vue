@@ -222,7 +222,7 @@
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
-            <field-label name="直属组织" required />
+            <field-label text="直属组织" required />
             <tree-select
               v-model="selectedOrganizations"
               :nodes="orgTreeData"
@@ -251,7 +251,7 @@
           <q-tab-panel name="existing">
             <div class="q-gutter-md">
               <div>
-                <field-label name="关联用户" required />
+                <field-label text="关联用户" required />
                 <q-select
                   ref="select"
                   v-model="selectedExistingUsers"
@@ -343,7 +343,7 @@
           <q-tab-panel name="new">
             <div class="q-gutter-md">
               <div>
-                <field-label name="登录信息" required hint="至少填写一项" />
+                <field-label text="登录信息" required hint="至少填写一项" />
                 <div class="q-gutter-sm">
                   <q-input
                     v-model="newUserFormData.username"
@@ -388,7 +388,7 @@
                 </div>
               </div>
               <div>
-                <field-label name="用户姓名" />
+                <field-label text="用户姓名" />
                 <q-input
                   v-model="newUserFormData.name"
                   filled

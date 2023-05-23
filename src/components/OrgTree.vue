@@ -245,7 +245,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div>
-          <field-label name="组织类型名称" required />
+          <field-label text="组织类型名称" required />
           <q-input
             v-model="orgTypeFormData.name"
             filled
@@ -258,7 +258,7 @@
         </div>
         <div>
           <field-label
-            name="组织类型 Code"
+            text="组织类型 Code"
             required
             hint="组织类型的唯一标识符，可用于获取组织类型信息"
           />
@@ -273,7 +273,7 @@
           />
         </div>
         <div>
-          <field-label name="组织类型描述" />
+          <field-label text="组织类型描述" />
           <q-input
             v-model="orgTypeFormData.description"
             filled
@@ -312,7 +312,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div>
-          <field-label name="企业机构名称" required />
+          <field-label text="企业机构名称" required />
           <q-input
             v-model="enterpriseFormData.name"
             filled
@@ -325,7 +325,7 @@
         </div>
         <div>
           <field-label
-            name="企业机构 Code"
+            text="企业机构 Code"
             hint="企业机构的唯一标识符，同一组织类型下唯一，可用于获取企业信息"
           />
           <q-input
@@ -339,7 +339,7 @@
           />
         </div>
         <div>
-          <field-label name="企业税务信息" />
+          <field-label text="企业税务信息" />
           <q-input
             v-model="enterpriseFormData.tax_id"
             filled
@@ -352,7 +352,7 @@
         </div>
 
         <div>
-          <field-label name="企业银行信息" />
+          <field-label text="企业银行信息" />
           <div class="q-gutter-sm">
             <q-input
               v-model="enterpriseFormData.issuing_bank"
@@ -374,7 +374,7 @@
         </div>
 
         <div>
-          <field-label name="企业办公信息" />
+          <field-label text="企业办公信息" />
           <div class="q-gutter-sm">
             <q-input
               v-model="enterpriseFormData.contact_address"
@@ -408,7 +408,7 @@
     <template #form-content>
       <div class="q-col-gutter-md q-pa-md">
         <div>
-          <field-label name="所属上级部门" required />
+          <field-label text="所属上级部门" required />
           <tree-select
             v-model="departmentFormData.parent_id"
             :nodes="orgTreeData"
@@ -422,7 +422,7 @@
           </div>
         </div>
         <div>
-          <field-label name="部门名称" required />
+          <field-label text="部门名称" required />
           <q-input
             v-model="departmentFormData.name"
             filled
@@ -435,7 +435,7 @@
         </div>
         <div>
           <field-label
-            name="部门 Code"
+            text="部门 Code"
             hint="部门分支的唯一标识符，同一企业机构下唯一，可用于获取部门信息"
           />
           <q-input
@@ -449,7 +449,7 @@
           />
         </div>
         <div>
-          <field-label name="部门描述" />
+          <field-label text="部门描述" />
           <q-input
             v-model="departmentFormData.description"
             filled

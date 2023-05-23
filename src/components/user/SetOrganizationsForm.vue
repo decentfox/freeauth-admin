@@ -10,7 +10,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div v-if="!user.org_type">
-          <field-label name="组织类型" required />
+          <field-label text="组织类型" required />
           <q-select
             v-model="selectedOrgTypeId"
             :options="orgTypeOptions"
@@ -27,7 +27,7 @@
           />
         </div>
         <div>
-          <field-label name="组织归属" required />
+          <field-label text="组织归属" required />
           <tree-select
             v-model="transferFormData.organization_ids"
             :nodes="orgTreeData"

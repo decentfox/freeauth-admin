@@ -87,7 +87,7 @@
       <template #form-content>
         <div class="q-gutter-md q-pa-md">
           <div>
-            <field-label name="登录信息" required hint="至少填写一项" />
+            <field-label text="登录信息" required hint="至少填写一项" />
             <div class="q-gutter-sm">
               <q-input
                 v-model="newUserFormData.username"
@@ -131,7 +131,7 @@
             </div>
           </div>
           <div>
-            <field-label name="用户姓名" />
+            <field-label text="用户姓名" />
             <q-input
               v-model="newUserFormData.name"
               filled

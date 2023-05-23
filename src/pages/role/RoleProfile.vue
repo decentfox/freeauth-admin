@@ -40,7 +40,7 @@
           <q-form>
             <div class="q-col-gutter-md q-pa-sm">
               <div>
-                <field-label name="角色归属（不支持变更）" required />
+                <field-label text="角色归属（不支持变更）" required />
                 <div class="row items-center">
                   <q-option-group
                     v-model="roleTypeTab"
@@ -59,7 +59,7 @@
                 </div>
               </div>
               <div>
-                <field-label name="角色名称" required />
+                <field-label text="角色名称" required />
                 <q-input
                   v-model="roleFormData.name"
                   filled
@@ -72,7 +72,7 @@
               </div>
               <div>
                 <field-label
-                  name="角色 Code"
+                  text="角色 Code"
                   hint="角色的唯一标识符，可用于获取角色信息"
                 />
                 <q-input
@@ -86,7 +86,7 @@
                 />
               </div>
               <div>
-                <field-label name="角色描述" />
+                <field-label text="角色描述" />
                 <q-input
                   v-model="roleFormData.description"
                   filled
@@ -305,7 +305,7 @@
         <template #form-content>
           <div class="q-gutter-md q-pa-md">
             <div>
-              <field-label name="关联主体" required />
+              <field-label text="关联主体" required />
               <q-select
                 ref="select"
                 v-model="selectedUsers"

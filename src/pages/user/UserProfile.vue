@@ -45,7 +45,7 @@
           <q-form>
             <div class="q-col-gutter-md q-pa-sm">
               <div>
-                <field-label name="姓名（昵称）" required />
+                <field-label text="姓名（昵称）" required />
                 <q-input
                   v-model="userFormData.name"
                   filled
@@ -58,7 +58,7 @@
               </div>
               <div>
                 <field-label
-                  name="用户名"
+                  text="用户名"
                   required
                   hint="可用于用户名密码登录"
                 />
@@ -73,7 +73,7 @@
                 />
               </div>
               <div>
-                <field-label name="手机号码" hint="可用于手机号验证码登录" />
+                <field-label text="手机号码" hint="可用于手机号验证码登录" />
                 <q-input
                   v-model="userFormData.mobile"
                   filled
@@ -86,7 +86,7 @@
                 />
               </div>
               <div>
-                <field-label name="邮箱地址" hint="可用于邮箱验证码登录" />
+                <field-label text="邮箱地址" hint="可用于邮箱验证码登录" />
                 <q-input
                   v-model="userFormData.email"
                   filled

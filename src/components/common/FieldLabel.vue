@@ -1,19 +1,18 @@
 <template>
   <q-item-label class="text-caption hint-label">
-    {{ name }}
+    {{ text }}
     <q-icon
       v-if="required"
       name="emergency"
       size="8px"
       color="negative"
-      style="vertical-align: top"
+      class="assistant-icon"
     />
     <q-icon
       v-if="hint"
       name="error_outline"
       size="14px"
-      class="q-ml-xs"
-      style="vertical-align: top"
+      class="q-ml-xs assistant-icon"
     >
       <q-tooltip anchor="center right" self="center start">
         {{ hint }}
@@ -29,7 +28,7 @@ export default defineComponent({
   name: 'FieldLabel',
 
   props: {
-    name: {
+    text: {
       type: String,
       default: '',
     },
@@ -45,4 +44,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.assistant-icon {
+  vertical-align: top;
+}
+</style>

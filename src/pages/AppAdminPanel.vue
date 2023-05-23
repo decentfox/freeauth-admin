@@ -75,7 +75,7 @@
       <template #form-content>
         <div class="q-col-gutter-md q-pa-md">
           <div>
-            <field-label name="应用名称" required />
+            <field-label text="应用名称" required />
             <q-input
               v-model="applicationFormData.name"
               filled
@@ -87,7 +87,7 @@
             />
           </div>
           <div>
-            <field-label name="应用描述" />
+            <field-label text="应用描述" />
             <q-input
               v-model="applicationFormData.description"
               filled

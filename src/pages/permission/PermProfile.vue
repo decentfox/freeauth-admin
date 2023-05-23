@@ -44,7 +44,7 @@
           <q-form>
             <div class="q-col-gutter-md q-pa-sm">
               <div>
-                <field-label name="所属应用（不支持变更）" required />
+                <field-label text="所属应用（不支持变更）" required />
                 <q-input
                   :model-value="permission.application?.name"
                   filled
@@ -56,7 +56,7 @@
                 />
               </div>
               <div>
-                <field-label name="权限名称" required />
+                <field-label text="权限名称" required />
                 <q-input
                   v-model="permissionFormData.name"
                   filled
@@ -69,7 +69,7 @@
               </div>
               <div>
                 <field-label
-                  name="权限 Code"
+                  text="权限 Code"
                   required
                   hint="权限的唯一标识符，可用于获取权限信息"
                 />
@@ -84,7 +84,7 @@
                 />
               </div>
               <div>
-                <field-label name="权限标签" />
+                <field-label text="权限标签" />
                 <q-select
                   ref="tags"
                   v-model="selectedTags"
@@ -104,7 +104,7 @@
                 />
               </div>
               <div>
-                <field-label name="权限描述" />
+                <field-label text="权限描述" />
                 <q-input
                   v-model="permissionFormData.description"
                   filled
@@ -294,7 +294,7 @@
         <template #form-content>
           <div class="q-gutter-md q-pa-md">
             <div>
-              <field-label name="关联角色" required />
+              <field-label text="关联角色" required />
               <q-select
                 ref="select"
                 v-model="selectedRoles"

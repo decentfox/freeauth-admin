@@ -137,7 +137,7 @@
         <div class="q-col-gutter-md q-pa-md">
           <div>
             <field-label
-              name="所属应用"
+              text="所属应用"
               required
               hint="如需切换，请关闭对话框，对表格左上方选择器进行操作"
             />
@@ -158,7 +158,7 @@
             />
           </div>
           <div>
-            <field-label name="权限名称" required />
+            <field-label text="权限名称" required />
             <q-input
               v-model="permissionFormData.name"
               filled
@@ -171,7 +171,7 @@
           </div>
           <div>
             <field-label
-              name="权限 Code"
+              text="权限 Code"
               required
               hint="权限的唯一标识符，可用于获取权限信息"
             />
@@ -186,7 +186,7 @@
             />
           </div>
           <div>
-            <field-label name="权限标签" />
+            <field-label text="权限标签" />
             <q-select
               ref="tags"
               v-model="selectedTags"
@@ -206,7 +206,7 @@
             />
           </div>
           <div>
-            <field-label name="权限描述" />
+            <field-label text="权限描述" />
             <q-input
               v-model="permissionFormData.description"
               filled

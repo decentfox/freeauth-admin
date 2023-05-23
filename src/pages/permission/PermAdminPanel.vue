@@ -36,6 +36,12 @@
         <q-btn
           unelevated
           dense
+          label="管理标签"
+          class="q-ml-sm q-px-md secondary-btn"
+        />
+        <q-btn
+          unelevated
+          dense
           label="创建权限"
           class="q-ml-sm q-px-md primary-btn"
           @click="openPermissionForm"
@@ -394,7 +400,6 @@ export default defineComponent({
         this.permissionFormData.new_tags = this.selectedTags.filter(
           (tag) => !this.initialTagOptions.map((t) => t.id).includes(tag)
         );
-        this.permissionFormData.new_tags.push('订单管理');
         await this.$api.post('/permissions', this.permissionFormData, {
           successMsg: '权限创建成功',
         });

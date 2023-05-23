@@ -582,15 +582,15 @@ export default defineComponent({
       directDeptCheck: ref(false),
 
       // form dialog
-      orgTreeData: ref<QTreeNode[]>(),
+      orgTreeData: ref<QTreeNode[]>([]),
       addMembersForm: ref(false),
       addMembersTab: ref('existing'),
-      parentDepartment: ref<QTreeNode[]>(),
-      selectedOrganizations: ref<string[]>(),
+      parentDepartment: ref<QTreeNode[]>([]),
+      selectedOrganizations: ref<string[]>([]),
 
       // add new member, existing user
       userOptions: ref([]),
-      selectedExistingUsers: ref<User[]>(),
+      selectedExistingUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToOrgsPostData>({}),
       bindUsersFormError: ref<BindUsersToOrgsPostError>({}),
 

@@ -506,7 +506,7 @@ export default defineComponent({
 
       bindRolesForm: ref(false),
       roleOptions: ref([]),
-      selectedRoles: ref<Role[]>(),
+      selectedRoles: ref<Role[]>([]),
       bindRolesFormData: ref<BindRolesToPermsPostData>({}),
       bindRolesFormError: ref<BindRolesToPermsPostError>({}),
 

@@ -172,40 +172,45 @@
         </data-table>
       </q-tab-panel>
       <q-tab-panel name="perms">
-        <q-scroll-area
-          :thumb-style="thumbStyle"
-          class="q-pa-sm"
-          style="height: 50px"
-        >
-          <div class="row no-wrap q-gutter-xs">
-            <q-chip
-              v-for="item in applicationChips"
-              :key="item.id"
-              clickable
-              square
-              :color="selectedApplication.id === item.id ? 'info' : 'secondary'"
-              @click="clickApplicationChip(item)"
-            >
-              <q-avatar
+        <div class="q-pa-sm row items-center">
+          <div class="text-caption">应用：</div>
+          <q-scroll-area
+            :thumb-style="thumbStyle"
+            style="height: 36px; width: calc(100% - 40px)"
+          >
+            <div class="row no-wrap q-gutter-col-xs">
+              <q-chip
+                v-for="item in applicationChips"
+                :key="item.id"
+                clickable
+                square
                 :color="
-                  selectedApplication.id === item.id ? 'primary' : 'secondary'
+                  selectedApplication.id === item.id ? 'info' : 'secondary'
                 "
-                :text-color="
-                  selectedApplication.id === item.id
-                    ? 'white'
-                    : $q.dark.isActive
-                    ? 'grey-1'
-                    : 'grey-10'
-                "
+                @click="clickApplicationChip(item)"
               >
-                12
-              </q-avatar>
-              {{ item.name }}
-            </q-chip>
-          </div>
-        </q-scroll-area>
-        <div class="q-pa-sm q-pb-md">
-          <div class="q-gutter-xs">
+                <q-avatar
+                  :color="
+                    selectedApplication.id === item.id ? 'primary' : 'secondary'
+                  "
+                  :text-color="
+                    selectedApplication.id === item.id
+                      ? 'white'
+                      : $q.dark.isActive
+                      ? 'grey-1'
+                      : 'grey-10'
+                  "
+                >
+                  12
+                </q-avatar>
+                {{ item.name }}
+              </q-chip>
+            </div>
+          </q-scroll-area>
+        </div>
+        <div class="q-pa-sm q-pb-md row items-center">
+          <div class="text-caption">标签：</div>
+          <div class="q-gutter-col-xs">
             <q-chip
               v-for="item in tagChips"
               :key="item.id"
@@ -213,7 +218,6 @@
               size="12px"
               :color="selectedTags.includes(item.id) ? 'primary' : 'secondary'"
               :text-color="selectedTags.includes(item.id) ? 'white' : ''"
-              class="q-ml-none"
               @click="clickTagChip(item)"
             >
               <span class="material-icons-outlined q-pr-xs"> local_offer </span>

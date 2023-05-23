@@ -21,7 +21,7 @@
           <q-item v-bind="scope.itemProps">
             <q-item-section>
               <div
-                class="row no-wrap"
+                class="row no-wrap items-center"
                 :style="`width: ${selectWidth * 0.8}px;`"
               >
                 <q-item-label
@@ -30,18 +30,17 @@
                       ? `text-weight-bold`
                       : ``
                   "
+                  class="q-mr-xs"
                   lines="1"
                 >
                   {{ scope.opt.name }}
                 </q-item-label>
-                <q-badge
+                <boolean-chip
                   v-if="scope.opt.is_deleted"
-                  align="top"
-                  :label="!scope.opt.is_deleted ? '正常' : '停用'"
-                  :class="
-                    !scope.opt.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                  "
-                  class="q-ml-xs"
+                  :value="!scope.opt.is_deleted"
+                  dense
+                  true-label="正常"
+                  false-label="禁用"
                 />
               </div>
               <q-item-label
@@ -104,24 +103,22 @@
         @department="openDepartmentForm()"
       />
     </q-toolbar>
-    <div class="q-pa-xs row q-gutter-xs">
-      <q-badge
-        align="middle"
-        :label="!selectedOrgType.is_deleted ? '正常' : '停用'"
-        :class="
-          !selectedOrgType.is_deleted ? 'chip-status-on' : 'chip-status-off'
-        "
-        class="q-pa-sm"
+    <div class="q-pa-xs row q-gutter-xs items-center">
+      <boolean-chip
+        :value="!selectedOrgType.is_deleted"
+        true-label="正常"
+        false-label="禁用"
       />
-      <q-badge
+      <q-chip
         :label="`代码：${selectedOrgType.code}`"
+        square
         class="q-pa-sm q-ml-xs bg-secondary text-black-white cursor-pointer"
         @click="$utils.copyToClipboard(selectedOrgType.code)"
       >
         <q-tooltip anchor="bottom left" self="top start">
           组织类型的唯一标识符，可用于获取组织类型信息
         </q-tooltip>
-      </q-badge>
+      </q-chip>
     </div>
     <q-separator spaced="sm" />
     <q-toolbar class="q-pa-none">
@@ -482,7 +479,7 @@ import {
   OrgTypePostError,
 } from 'pages/type';
 
-import { FormDialogComponent } from './dialog/type';
+import { FormDialogComponent } from '../dialog/type';
 
 export default defineComponent({
   name: 'OrgTree',
@@ -843,4 +840,19 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.tree-item {
+  .more-icon {
+    visibility: hidden;
+    right: 2px;
+    top: 2px;
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  &:hover {
+    .more-icon {
+      visibility: visible;
+    }
+  }
+}
+</style>

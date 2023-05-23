@@ -11,12 +11,10 @@
     >
       <template #body-cell-is_succeed="props">
         <q-td :props="props">
-          <q-chip
-            square
-            size="12px"
-            :label="props.row.is_succeed ? '成功' : '失败'"
-            class="text-weight-bold q-pa-sm q-ml-none"
-            :class="props.row.is_succeed ? 'chip-status-on' : 'chip-status-off'"
+          <boolean-chip
+            :value="props.row.is_succeed"
+            true-label="成功"
+            false-label="失败"
           />
         </q-td>
       </template>

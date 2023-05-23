@@ -155,14 +155,10 @@
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -268,14 +264,10 @@
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -332,16 +324,10 @@
                 <template #option="scope">
                   <q-item v-bind="scope.itemProps">
                     <q-item-section avatar>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                        class="text-weight-bold q-pa-sm"
-                        :class="
-                          !scope.opt.is_deleted
-                            ? 'chip-status-on'
-                            : 'chip-status-off'
-                        "
+                      <boolean-chip
+                        :value="!scope.opt.is_deleted"
+                        true-label="正常"
+                        false-label="禁用"
                       />
                     </q-item-section>
                     <q-item-section>

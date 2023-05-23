@@ -5,14 +5,8 @@
     </q-btn>
     <q-toolbar class="q-my-xs">
       <slot name="toolbar-left">
-        <q-chip
-          square
-          size="12px"
-          :label="status ? '正常' : '禁用'"
-          class="text-weight-bold q-pa-sm q-mr-md"
-          :class="status ? 'chip-status-on' : 'chip-status-off'"
-        />
-        <div class="text-h6">{{ name }}</div>
+        <boolean-chip :value="status" true-label="正常" false-label="禁用" />
+        <div class="text-h6 q-ml-md">{{ name }}</div>
       </slot>
       <q-space />
       <slot name="toolbar-right"></slot>

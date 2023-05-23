@@ -68,8 +68,8 @@ export default defineComponent({
   setup() {
     return {
       user: ref<User>({ id: '' }),
-      orgTreeData: ref<QTreeNode[]>(),
-      parentDepartment: ref<QTreeNode[]>(),
+      orgTreeData: ref<QTreeNode[]>([]),
+      parentDepartment: ref<QTreeNode[]>([]),
       orgTypeOptions: ref<OrgType[]>([]),
       selectedOrgTypeId: ref(''),
 
@@ -85,7 +85,7 @@ export default defineComponent({
       this.transferForm = true;
       this.loadOrgTypes();
       if (user.departments?.length !== 0) {
-        this.parentDepartment = user.departments;
+        this.parentDepartment = user.departments as QTreeNode[];
         this.transferFormData.organization_ids = user.departments?.map(
           (d) => d.id
         );

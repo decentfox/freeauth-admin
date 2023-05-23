@@ -309,6 +309,11 @@ export default defineComponent({
       this.fetchRows();
     },
 
+    removeExternalFilter(key: string) {
+      delete this.queryData[key];
+      this.fetchRows();
+    },
+
     setApiInfo(apiUrl: string, apiMethod: string) {
       this.url = apiUrl;
       this.method = apiMethod;

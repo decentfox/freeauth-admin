@@ -127,6 +127,10 @@
   color: $red-8;
 }
 
+.q-chip--clickable:focus {
+  box-shadow: none !important;
+}
+
 // Dark Mode
 .body--dark {
   --q-primary: #3c6fef;

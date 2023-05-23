@@ -171,7 +171,127 @@
           </template>
         </data-table>
       </q-tab-panel>
-      <q-tab-panel name="perms"> TODO </q-tab-panel>
+      <q-tab-panel name="perms">
+        <div class="q-pa-sm row items-center">
+          <div class="text-caption">应用：</div>
+          <q-scroll-area
+            :thumb-style="thumbStyle"
+            style="height: 36px; width: calc(100% - 40px)"
+          >
+            <div class="row no-wrap q-gutter-col-xs">
+              <q-chip
+                v-for="item in applicationChips"
+                :key="item.id"
+                clickable
+                square
+                :color="
+                  selectedApplication.id === item.id ? 'info' : 'secondary'
+                "
+                @click="clickApplicationChip(item)"
+              >
+                <q-avatar
+                  :color="
+                    selectedApplication.id === item.id ? 'primary' : 'secondary'
+                  "
+                  :text-color="
+                    selectedApplication.id === item.id
+                      ? 'white'
+                      : $q.dark.isActive
+                      ? 'grey-1'
+                      : 'grey-10'
+                  "
+                >
+                  12
+                </q-avatar>
+                {{ item.name }}
+              </q-chip>
+            </div>
+          </q-scroll-area>
+        </div>
+        <div class="q-pa-sm q-pb-md row items-center">
+          <div class="text-caption">标签：</div>
+          <div class="q-gutter-col-xs">
+            <q-chip
+              v-for="item in tagChips"
+              :key="item.id"
+              clickable
+              size="12px"
+              :color="selectedTags.includes(item.id) ? 'primary' : 'secondary'"
+              :text-color="selectedTags.includes(item.id) ? 'white' : ''"
+              @click="clickTagChip(item)"
+            >
+              <span class="material-icons-outlined q-pr-xs"> local_offer </span>
+              {{ item.name }}
+            </q-chip>
+          </div>
+        </div>
+
+        <data-table
+          ref="permissionTable"
+          api-method="POST"
+          api-url="/permissions/query"
+          :columns="permColumns"
+          search-placeholder="搜索权限信息"
+          hide-import
+          hide-export
+        >
+          <template #extra-filters>
+            <q-checkbox
+              v-model="linkedPermCheck"
+              label="仅展示已关联该角色的权限"
+              @update:model-value="filterLinkedPerms"
+            />
+          </template>
+          <template #body-cell-linked="props">
+            <q-td :props="props">
+              <q-checkbox
+                v-model="props.row.linked"
+                @update:model-value="(val) => toggleLinked(val, props.row.id)"
+              />
+            </q-td>
+          </template>
+          <template #body-cell-tags="props">
+            <q-td :props="props">
+              <q-chip
+                v-for="(tag, idx) in props.row.tags"
+                :key="idx"
+                size="12px"
+                color="secondary"
+                class="q-ml-none"
+              >
+                <span class="material-icons-outlined q-pr-xs">
+                  local_offer
+                </span>
+                {{ tag.name }}
+              </q-chip>
+            </q-td>
+          </template>
+          <template #body-cell-application="props">
+            <q-td :props="props">
+              <q-chip
+                size="12px"
+                square
+                color="secondary"
+                class="q-ml-none"
+                :label="props.row.application.name"
+              />
+            </q-td>
+          </template>
+          <template #body-cell-is_deleted="props">
+            <q-td :props="props">
+              <q-chip
+                square
+                size="12px"
+                :label="!props.row.is_deleted ? '正常' : '禁用'"
+                class="text-weight-bold q-pa-sm q-ml-none"
+                :class="
+                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
+                "
+              />
+            </q-td>
+          </template>
+        </data-table>
+      </q-tab-panel>
     </template>
     <template #dialog>
       <form-dialog
@@ -277,7 +397,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps } from 'quasar';
+import { QSelect, QTableProps, VueStyleObjectProp } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
@@ -293,7 +413,7 @@ import {
 import { User } from 'pages/user/type';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department } from '../type';
+import { Application, Department, Tag } from '../type';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -341,6 +461,45 @@ const userColumns: QTableProps['columns'] = [
   },
 ];
 
+const permColumns: QTableProps['columns'] = [
+  {
+    name: 'linked',
+    label: '关联',
+    align: 'left',
+    field: 'linked',
+  },
+  {
+    name: 'name',
+    label: '权限名称',
+    align: 'left',
+    field: 'name',
+  },
+  {
+    name: 'code',
+    label: '权限代码',
+    align: 'left',
+    field: 'code',
+  },
+  {
+    name: 'tags',
+    label: '标签',
+    align: 'left',
+    field: 'tags',
+  },
+  {
+    name: 'application',
+    label: '所属应用',
+    align: 'left',
+    field: 'application',
+  },
+  {
+    name: 'is_deleted',
+    label: '状态',
+    align: 'left',
+    field: 'is_deleted',
+  },
+];
+
 export default defineComponent({
   name: 'RoleProfile',
 
@@ -364,6 +523,7 @@ export default defineComponent({
       }),
       panelTab: ref('role'),
       userColumns: userColumns,
+      permColumns: permColumns,
 
       roleTypeTab: ref('global'),
       roleFormData: ref<RolePostData>({}),
@@ -371,9 +531,23 @@ export default defineComponent({
 
       bindUsersForm: ref(false),
       userOptions: ref([]),
-      selectedUsers: ref<User[]>(),
+      selectedUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToRolesPostData>({}),
       bindUsersFormError: ref<BindUsersToRolesPostError>({}),
+
+      linkedPermCheck: ref(false),
+      applicationChips: ref<Application[]>([]),
+      selectedApplication: ref<Application>({ id: '' }),
+      tagChips: ref<Tag[]>([]),
+      selectedTags: ref<string[]>([]),
+
+      thumbStyle: ref<VueStyleObjectProp>({
+        right: '2px',
+        borderRadius: '2px',
+        backgroundColor: '#f2f2f2',
+        height: '2px',
+        opacity: '0.75',
+      }),
     };
   },
 
@@ -397,7 +571,22 @@ export default defineComponent({
           et.setApiInfo(`/roles/${this.role.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
+      } else if (val === 'perms') {
+        this.loadApplicationOptions();
+        this.loadTagOptions();
       }
+    },
+
+    async loadApplicationOptions() {
+      this.selectedApplication = { id: '' };
+      const resp = await this.$api.post('/applications/query', {});
+      this.applicationChips = resp.data.rows;
+    },
+
+    async loadTagOptions() {
+      this.selectedTags = [];
+      const resp = await this.$api.get('/permission_tags');
+      this.tagChips = resp.data.permission_tags;
     },
 
     searchUser(
@@ -479,6 +668,45 @@ export default defineComponent({
         (this.$refs.userTable as DataTableComponent).fetchRows();
       }
     },
+
+    filterLinkedPerms() {
+      console.error('TODO');
+    },
+
+    clickApplicationChip(app: Application) {
+      this.selectedApplication =
+        this.selectedApplication.id === app.id ? { id: '' } : app;
+      this.loadPermissionsbyApp();
+    },
+
+    clickTagChip(tag: Tag) {
+      if (this.selectedTags.includes(tag.id)) {
+        this.selectedTags = this.selectedTags.filter((tid) => tid != tag.id);
+      } else {
+        this.selectedTags.push(tag.id);
+      }
+    },
+
+    async loadPermissionsbyApp() {
+      const pt = this.$refs.permissionTable as DataTableComponent;
+      if (!!this.selectedApplication.id) {
+        pt.onExternalFiltered('application_id', this.selectedApplication.id);
+      } else {
+        pt.removeExternalFilter('application_id');
+      }
+    },
+
+    async toggleLinked(ticked: boolean, permission_id: string) {
+      await this.$api.post(
+        ticked ? '/permissions/bind_roles' : '/permissions/unbind_roles',
+        { role_ids: [this.role.id], permission_ids: [permission_id] },
+        {
+          successMsg: ticked ? '关联成功' : '移除成功',
+        }
+      );
+    },
   },
 });
 </script>
+
+<style lang="scss" scoped></style>

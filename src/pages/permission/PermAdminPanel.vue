@@ -13,7 +13,6 @@
       :columns="columns"
       :filter-columns="filterColumns"
       search-placeholder="搜索权限信息"
-      wrap-cells
       hide-import
       hide-export
     >
@@ -37,9 +36,15 @@
         <q-btn
           unelevated
           dense
+          label="管理标签"
+          class="q-ml-sm q-px-md secondary-btn"
+        />
+        <q-btn
+          unelevated
+          dense
           label="创建权限"
           class="q-ml-sm q-px-md primary-btn"
-          @click="permissionForm = true"
+          @click="openPermissionForm"
         />
       </template>
       <template #body-cell-name="props">
@@ -51,11 +56,29 @@
           {{ props.row.name }}
         </q-td>
       </template>
+      <template #body-cell-tags="props">
+        <q-td :props="props">
+          <q-chip
+            v-for="(tag, idx) in props.row.tags"
+            :key="idx"
+            size="12px"
+            color="secondary"
+            class="q-ml-none"
+          >
+            <span class="material-icons-outlined q-pr-xs"> local_offer </span>
+            {{ tag.name }}
+          </q-chip>
+        </q-td>
+      </template>
       <template #body-cell-application="props">
         <q-td :props="props">
-          <q-chip size="12px" square color="secondary" class="q-ml-none">
-            {{ props.row.application.name }}
-          </q-chip>
+          <q-chip
+            size="12px"
+            square
+            color="secondary"
+            class="q-ml-none"
+            :label="props.row.application.name"
+          />
         </q-td>
       </template>
       <template #body-cell-is_deleted="props">
@@ -172,6 +195,26 @@
           />
         </div>
         <div>
+          <field-label name="权限标签" />
+          <q-select
+            ref="tags"
+            v-model="selectedTags"
+            filled
+            dense
+            use-input
+            use-chips
+            option-label="name"
+            option-value="id"
+            emit-value
+            map-options
+            multiple
+            input-debounce="0"
+            :options="tagOptions"
+            @new-value="createValue"
+            @filter="filterFn"
+          />
+        </div>
+        <div>
           <field-label name="权限描述" />
           <q-input
             v-model="permissionFormData.description"
@@ -199,7 +242,7 @@ import {
   FilterOperator,
 } from 'components/table/type';
 
-import { Application } from '../type';
+import { Application, Tag } from '../type';
 
 import { PermissionPostData, PermissionPostError } from './type';
 
@@ -217,12 +260,10 @@ const columns: QTableProps['columns'] = [
     field: 'code',
   },
   {
-    name: 'description',
-    label: '描述',
+    name: 'tags',
+    label: '标签',
     align: 'left',
-    field: 'description',
-    style: 'max-width: 400px',
-    headerStyle: 'max-width: 400px',
+    field: 'tags',
   },
   {
     name: 'application',
@@ -315,6 +356,10 @@ export default defineComponent({
 
       selectedAppId: ref(''),
       appOptions: ref<Application[]>([]),
+
+      initialTagOptions: ref<Tag[]>([]),
+      tagOptions: ref<Tag[]>([]),
+      selectedTags: ref<string[]>([]),
     };
   },
 
@@ -338,10 +383,23 @@ export default defineComponent({
       }, 20);
     },
 
+    async openPermissionForm() {
+      this.permissionForm = true;
+      const resp = await this.$api.get('/permission_tags');
+      this.initialTagOptions = resp.data.permission_tags;
+      this.tagOptions = resp.data.permission_tags;
+    },
+
     async savePermissionForm() {
       try {
         this.permissionFormError = {};
         this.permissionFormData.application_id = this.selectedAppId;
+        this.permissionFormData.existing_tag_ids = this.selectedTags.filter(
+          (tag) => this.initialTagOptions.map((t) => t.id).includes(tag)
+        );
+        this.permissionFormData.new_tags = this.selectedTags.filter(
+          (tag) => !this.initialTagOptions.map((t) => t.id).includes(tag)
+        );
         await this.$api.post('/permissions', this.permissionFormData, {
           successMsg: '权限创建成功',
         });
@@ -356,6 +414,7 @@ export default defineComponent({
     resetPermissionForm() {
       this.permissionFormData = {};
       this.permissionFormError = {};
+      this.selectedTags = [];
     },
 
     refreshPermissionData() {
@@ -364,6 +423,30 @@ export default defineComponent({
 
     goToPermissionProfile(evt: Event, permId: string) {
       this.$router.push(`/perm_profile/${permId}`);
+    },
+
+    createValue(
+      val: string,
+      done: (item?: string, mode?: 'add' | 'add-unique' | 'toggle') => void
+    ) {
+      if (val.length > 0) {
+        if (!this.initialTagOptions.map((tag) => tag.name).includes(val)) {
+          done(val, 'add-unique');
+        }
+      }
+    },
+
+    filterFn(val: string, update: (fn: () => void) => void) {
+      update(() => {
+        if (val === '') {
+          this.tagOptions = this.initialTagOptions;
+        } else {
+          const needle = val.toLowerCase();
+          this.tagOptions = this.initialTagOptions.filter(
+            (v) => v.name.toLowerCase().indexOf(needle) > -1
+          );
+        }
+      });
     },
   },
 });

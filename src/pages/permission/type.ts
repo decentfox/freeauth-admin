@@ -1,5 +1,5 @@
 import { Role } from '../role/type';
-import { Application } from '../type';
+import { Application, Tag } from '../type';
 
 export interface Permission {
   /** 权限 ID */
@@ -14,6 +14,8 @@ export interface Permission {
   roles?: Role[];
   /** 权限所属应用 */
   application?: Application;
+  /** 权限关联标签列表 */
+  tags?: Tag[];
   /** 权限创建时间 */
   created_at?: Date;
   /** 权限状态：true-禁用；false-正常 */
@@ -29,6 +31,10 @@ export interface PermissionPostData {
   description?: string;
   /** 所属应用 ID */
   application_id?: string;
+  /** 已有标签 ID 列表 */
+  existing_tag_ids?: string[];
+  /** 新建标签名称列表 */
+  new_tags?: string[];
 }
 
 export interface PermissionPostError {

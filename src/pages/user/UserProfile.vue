@@ -252,11 +252,26 @@
           :columns="permColumns"
           sticky-action-column
           search-placeholder="搜索权限信息"
-          wrap-cells
           hide-filter
           hide-import
           hide-export
         >
+          <template #body-cell-tags="props">
+            <q-td :props="props">
+              <q-chip
+                v-for="(tag, idx) in props.row.tags"
+                :key="idx"
+                size="12px"
+                color="secondary"
+                class="q-ml-none"
+              >
+                <span class="material-icons-outlined q-pr-xs">
+                  local_offer
+                </span>
+                {{ tag.name }}
+              </q-chip>
+            </q-td>
+          </template>
           <template #body-cell-roles="props">
             <q-td :props="props">
               <div class="row">
@@ -427,12 +442,10 @@ const permColumns: QTableProps['columns'] = [
     field: 'code',
   },
   {
-    name: 'description',
-    label: '描述',
+    name: 'tags',
+    label: '标签',
     align: 'left',
-    field: 'description',
-    style: 'max-width: 400px',
-    headerStyle: 'max-width: 400px',
+    field: 'tags',
   },
   {
     name: 'roles',

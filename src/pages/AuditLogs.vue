@@ -1,13 +1,5 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn
-      unelevated
-      dense
-      class="no-hover-btn hint-label"
-      @click="$router.go(0)"
-    >
-      <q-icon size="18px" class="q-pr-xs" name="subject" />审计日志
-    </q-btn>
+  <page-wrapper page-title="审计日志">
     <data-table
       ref="table"
       :columns="columns"
@@ -29,7 +21,7 @@
         </q-td>
       </template>
     </data-table>
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">
@@ -205,8 +197,6 @@ export default defineComponent({
       filterColumns: filterColumns,
     };
   },
-
-  methods: {},
 });
 </script>
 

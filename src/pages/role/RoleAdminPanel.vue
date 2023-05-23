@@ -1,15 +1,7 @@
 <template>
-  <q-page class="full-width">
+  <page-wrapper page-title="角色管理">
     <q-tab-panels v-model="viewMode">
-      <q-tab-panel name="table" class="q-pa-md">
-        <q-btn
-          unelevated
-          dense
-          class="no-hover-btn hint-label"
-          @click="$router.go(0)"
-        >
-          <q-icon size="18px" class="q-pr-xs" name="subject" />角色管理
-        </q-btn>
+      <q-tab-panel name="table" class="q-pa-none">
         <data-table
           ref="roleTable"
           :columns="columns"
@@ -124,12 +116,7 @@
         </data-table>
       </q-tab-panel>
       <q-tab-panel name="structure" class="q-pa-none">
-        <q-splitter
-          v-model="splitterModel"
-          class="q-py-sm"
-          unit="px"
-          :limits="[250, 400]"
-        >
+        <q-splitter v-model="splitterModel" unit="px" :limits="[250, 400]">
           <!--the first splitted screen-->
           <template #before>
             <org-tree
@@ -335,7 +322,7 @@
         </q-splitter>
       </q-tab-panel>
     </q-tab-panels>
-  </q-page>
+  </page-wrapper>
   <form-dialog
     ref="roleDialog"
     v-model="roleForm"

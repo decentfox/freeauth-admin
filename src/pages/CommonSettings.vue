@@ -1,7 +1,7 @@
 <template>
-  <q-page class="full-width">
+  <page-wrapper page-title="参数设置">
     <q-item-label header>你好，小熊</q-item-label>
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">

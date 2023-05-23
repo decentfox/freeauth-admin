@@ -1,11 +1,6 @@
 <template>
-  <q-page class="full-width">
-    <q-splitter
-      v-model="splitterModel"
-      class="q-py-sm"
-      unit="px"
-      :limits="[250, 400]"
-    >
+  <page-wrapper>
+    <q-splitter v-model="splitterModel" unit="px" :limits="[250, 400]">
       <!--the first splitted screen-->
       <template #before>
         <org-tree
@@ -432,7 +427,7 @@
       ref="setOrganizationsForm"
       @user-updated="loadUserTable"
     />
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">

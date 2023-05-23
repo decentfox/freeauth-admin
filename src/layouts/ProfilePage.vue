@@ -1,5 +1,5 @@
 <template>
-  <q-page class="full-width q-pa-md">
+  <page-wrapper>
     <q-btn unelevated dense class="no-hover-btn hint-label" @click="goBack">
       <q-icon size="18px" name="arrow_back_ios_new" />返回
     </q-btn>
@@ -41,7 +41,7 @@
       <slot name="panels"></slot>
     </q-tab-panels>
     <slot name="dialog"></slot>
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">
@@ -72,10 +72,6 @@ export default defineComponent({
   },
 
   emits: ['update:tabValue'],
-
-  setup() {
-    return {};
-  },
 
   methods: {
     goBack() {

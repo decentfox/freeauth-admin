@@ -1,5 +1,5 @@
 <template>
-  <q-page class="full-width q-pa-md">
+  <page-wrapper page-title="定制登录">
     <q-splitter
       v-model="splitterModel"
       disable
@@ -309,7 +309,7 @@
         </div>
       </template>
     </q-splitter>
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">

@@ -1,13 +1,5 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn
-      unelevated
-      dense
-      class="no-hover-btn hint-label"
-      @click="$router.go(0)"
-    >
-      <q-icon size="18px" class="q-pr-xs" name="subject" />权限管理
-    </q-btn>
+  <page-wrapper page-title="权限管理">
     <data-table
       ref="permissionTable"
       :columns="columns"
@@ -133,101 +125,101 @@
         </q-td>
       </template>
     </data-table>
-  </q-page>
-  <form-dialog
-    ref="permissionDialog"
-    v-model="permissionForm"
-    title="创建权限"
-    width="450px"
-    @confirm="savePermissionForm"
-    @close="resetPermissionForm"
-  >
-    <template #form-content>
-      <div class="q-col-gutter-md q-pa-md">
-        <div>
-          <field-label
-            name="所属应用"
-            required
-            hint="如需切换，请关闭对话框，对表格左上方选择器进行操作"
-          />
-          <q-select
-            v-model="selectedAppId"
-            :options="appOptions"
-            dense
-            filled
-            class="full-width"
-            option-label="name"
-            option-value="id"
-            emit-value
-            map-options
-            disable
-            hide-bottom-space
-            :error="!!permissionFormError.application_id"
-            :error-message="permissionFormError.application_id"
-          />
+    <form-dialog
+      ref="permissionDialog"
+      v-model="permissionForm"
+      title="创建权限"
+      width="450px"
+      @confirm="savePermissionForm"
+      @close="resetPermissionForm"
+    >
+      <template #form-content>
+        <div class="q-col-gutter-md q-pa-md">
+          <div>
+            <field-label
+              name="所属应用"
+              required
+              hint="如需切换，请关闭对话框，对表格左上方选择器进行操作"
+            />
+            <q-select
+              v-model="selectedAppId"
+              :options="appOptions"
+              dense
+              filled
+              class="full-width"
+              option-label="name"
+              option-value="id"
+              emit-value
+              map-options
+              disable
+              hide-bottom-space
+              :error="!!permissionFormError.application_id"
+              :error-message="permissionFormError.application_id"
+            />
+          </div>
+          <div>
+            <field-label name="权限名称" required />
+            <q-input
+              v-model="permissionFormData.name"
+              filled
+              dense
+              placeholder="请填写权限名称"
+              hide-bottom-space
+              :error="!!permissionFormError.name"
+              :error-message="permissionFormError.name"
+            />
+          </div>
+          <div>
+            <field-label
+              name="权限 Code"
+              required
+              hint="权限的唯一标识符，可用于获取权限信息"
+            />
+            <q-input
+              v-model="permissionFormData.code"
+              filled
+              dense
+              placeholder="请填写权限代码"
+              hide-bottom-space
+              :error="!!permissionFormError.code"
+              :error-message="permissionFormError.code"
+            />
+          </div>
+          <div>
+            <field-label name="权限标签" />
+            <q-select
+              ref="tags"
+              v-model="selectedTags"
+              filled
+              dense
+              use-input
+              use-chips
+              option-label="name"
+              option-value="id"
+              emit-value
+              map-options
+              multiple
+              input-debounce="0"
+              :options="tagOptions"
+              @new-value="createValue"
+              @filter="filterFn"
+            />
+          </div>
+          <div>
+            <field-label name="权限描述" />
+            <q-input
+              v-model="permissionFormData.description"
+              filled
+              dense
+              type="textarea"
+              placeholder="请填写权限描述"
+              hide-bottom-space
+            />
+          </div>
         </div>
-        <div>
-          <field-label name="权限名称" required />
-          <q-input
-            v-model="permissionFormData.name"
-            filled
-            dense
-            placeholder="请填写权限名称"
-            hide-bottom-space
-            :error="!!permissionFormError.name"
-            :error-message="permissionFormError.name"
-          />
-        </div>
-        <div>
-          <field-label
-            name="权限 Code"
-            required
-            hint="权限的唯一标识符，可用于获取权限信息"
-          />
-          <q-input
-            v-model="permissionFormData.code"
-            filled
-            dense
-            placeholder="请填写权限代码"
-            hide-bottom-space
-            :error="!!permissionFormError.code"
-            :error-message="permissionFormError.code"
-          />
-        </div>
-        <div>
-          <field-label name="权限标签" />
-          <q-select
-            ref="tags"
-            v-model="selectedTags"
-            filled
-            dense
-            use-input
-            use-chips
-            option-label="name"
-            option-value="id"
-            emit-value
-            map-options
-            multiple
-            input-debounce="0"
-            :options="tagOptions"
-            @new-value="createValue"
-            @filter="filterFn"
-          />
-        </div>
-        <div>
-          <field-label name="权限描述" />
-          <q-input
-            v-model="permissionFormData.description"
-            filled
-            dense
-            type="textarea"
-            placeholder="请填写权限描述"
-            hide-bottom-space
-          />
-        </div>
-      </div>
-    </template>
-  </form-dialog>
+      </template>
+    </form-dialog>
+  </page-wrapper>
 </template>
 
 <script lang="ts">

@@ -1,13 +1,5 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn
-      unelevated
-      dense
-      class="no-hover-btn hint-label"
-      @click="$router.go(0)"
-    >
-      <q-icon size="18px" class="q-pr-xs" name="subject" />用户管理
-    </q-btn>
+  <page-wrapper page-title="用户管理">
     <data-table
       ref="table"
       :columns="columns"
@@ -172,7 +164,7 @@
         </div>
       </template>
     </form-dialog>
-  </q-page>
+  </page-wrapper>
 </template>
 
 <script lang="ts">

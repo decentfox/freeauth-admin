@@ -1,5 +1,5 @@
 <template>
-  <div class="q-px-md q-py-sm">
+  <div class="q-pr-md q-py-sm">
     <q-toolbar class="q-pa-none">
       <q-select
         ref="orgTypeSelect"
@@ -544,7 +544,7 @@ export default defineComponent({
         parent_id: '',
       }),
 
-      parentDepartment: ref<QTreeNode[]>(),
+      parentDepartment: ref<QTreeNode[]>([]),
     };
   },
 

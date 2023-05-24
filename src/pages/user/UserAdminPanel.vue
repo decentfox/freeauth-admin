@@ -1,14 +1,14 @@
 <template>
   <page-wrapper page-title="用户管理">
     <data-table
-      ref="table"
-      :columns="columns"
+      ref="userTable"
       api-url="/users/query"
       api-method="POST"
+      :columns="columns"
+      :filter-columns="filterColumns"
       sticky-action-column
       search-placeholder="搜索用户信息"
       selection="multiple"
-      :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="
         (selected) => toggleUsersStatus(selected, true, refreshUserData)
@@ -46,7 +46,7 @@
         </q-td>
       </template>
       <template #body-cell-actions="props">
-        <q-td :props="props" @click.stop>
+        <q-td :props="props">
           <dropdown-button
             :buttons="[
               {
@@ -62,7 +62,6 @@
                 actionType: 'delete',
               },
             ]"
-            @click.stop
             @disable="toggleUsersStatus([props.row], true, refreshUserData)"
             @enable="toggleUsersStatus([props.row], false, refreshUserData)"
             @delete="deleteUsers([props.row], refreshUserData)"
@@ -359,7 +358,7 @@ export default defineComponent({
     },
 
     refreshUserData() {
-      (this.$refs.table as DataTableComponent).fetchRows();
+      (this.$refs.userTable as DataTableComponent).fetchRows();
     },
 
     goToUserProfile(evt: Event, userId: string) {

@@ -19,3 +19,8 @@ export interface PermOperationsType {
     ) => void;
   };
 }
+
+export enum FormAction {
+  create = 'create',
+  update = 'update',
+}

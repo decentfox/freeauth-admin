@@ -31,10 +31,8 @@ export interface PermissionPostData {
   description?: string;
   /** 所属应用 ID */
   application_id?: string;
-  /** 已有标签 ID 列表 */
-  existing_tag_ids?: string[];
-  /** 新建标签名称列表 */
-  new_tags?: string[];
+  /** 关联标签 ID 列表 */
+  tags?: string[];
 }
 
 export interface PermissionPostError {

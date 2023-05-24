@@ -40,91 +40,13 @@
     </template>
     <template #panels>
       <q-tab-panel name="perm">
-        <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label text="所属应用（不支持变更）" required />
-                <q-input
-                  :model-value="permission.application?.name"
-                  filled
-                  dense
-                  hide-bottom-space
-                  disable
-                  :error="!!permissionFormError.application_id"
-                  :error-message="permissionFormError.application_id"
-                />
-              </div>
-              <div>
-                <field-label text="权限名称" required />
-                <q-input
-                  v-model="permissionFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写权限名称"
-                  hide-bottom-space
-                  :error="!!permissionFormError.name"
-                  :error-message="permissionFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  text="权限 Code"
-                  required
-                  hint="权限的唯一标识符，可用于获取权限信息"
-                />
-                <q-input
-                  v-model="permissionFormData.code"
-                  filled
-                  dense
-                  placeholder="请填写权限代码"
-                  hide-bottom-space
-                  :error="!!permissionFormError.code"
-                  :error-message="permissionFormError.code"
-                />
-              </div>
-              <div>
-                <field-label text="权限标签" />
-                <q-select
-                  ref="tags"
-                  v-model="selectedTags"
-                  filled
-                  dense
-                  use-input
-                  use-chips
-                  option-label="name"
-                  option-value="id"
-                  emit-value
-                  map-options
-                  multiple
-                  input-debounce="0"
-                  :options="tagOptions"
-                  @new-value="createValue"
-                  @filter="filterFn"
-                />
-              </div>
-              <div>
-                <field-label text="权限描述" />
-                <q-input
-                  v-model="permissionFormData.description"
-                  filled
-                  dense
-                  type="textarea"
-                  placeholder="请填写权限描述"
-                  hide-bottom-space
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="savePermissionForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+        <perm-form
+          ref="updatePermForm"
+          :app-id="permission.application?.id"
+          :permission="permission"
+          :action="FormAction.update"
+          @refresh="loadPermInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="roles">
         <data-table
@@ -372,19 +294,18 @@ import { date, QSelect, QTableProps } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
+import { FormAction } from 'components/permission/type';
 import { DataTableComponent } from 'components/table/type';
 import { ProfileComponent } from 'layouts/type';
 
 import { Role } from '../role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department, Tag } from '../type';
+import { Department } from '../type';
 
 import {
   BindRolesToPermsPostData,
   BindRolesToPermsPostError,
   Permission,
-  PermissionPostData,
-  PermissionPostError,
 } from './type';
 
 const roleColumns: QTableProps['columns'] = [
@@ -484,9 +405,6 @@ export default defineComponent({
       }),
       panelTab: ref('perm'),
 
-      permissionFormData: ref<PermissionPostData>({}),
-      permissionFormError: ref<PermissionPostError>({}),
-
       roleColumns: roleColumns,
       userColumns: userColumns,
 
@@ -496,31 +414,18 @@ export default defineComponent({
       bindRolesFormData: ref<BindRolesToPermsPostData>({}),
       bindRolesFormError: ref<BindRolesToPermsPostError>({}),
 
-      initialTagOptions: ref<Tag[]>([]),
-      tagOptions: ref<Tag[]>([]),
-      selectedTags: ref<string[]>([]),
+      FormAction,
     };
   },
 
   mounted() {
     this.loadPermInfo();
-    this.loadTagOptions();
   },
 
   methods: {
     async loadPermInfo() {
       const resp = await this.$api.get(`/permissions/${this.permId}`);
       this.permission = resp.data;
-      this.permissionFormData = Object.assign({}, resp.data);
-      this.selectedTags = this.permission.tags
-        ? this.permission.tags.map((p) => p.id)
-        : [];
-    },
-
-    async loadTagOptions() {
-      const resp = await this.$api.get('/permission_tags');
-      this.initialTagOptions = resp.data.permission_tags;
-      this.tagOptions = resp.data.permission_tags;
     },
 
     switchPanelTab(val: string) {
@@ -536,39 +441,6 @@ export default defineComponent({
           et.setApiInfo(`/permissions/${this.permission.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
-      } else if (val === 'perm') {
-        this.loadTagOptions();
-      }
-    },
-
-    async savePermissionForm() {
-      this.permissionFormData.existing_tag_ids = this.selectedTags.filter(
-        (tag) => this.initialTagOptions.map((t) => t.id).includes(tag)
-      );
-      this.permissionFormData.new_tags = this.selectedTags.filter(
-        (tag) => !this.initialTagOptions.map((t) => t.id).includes(tag)
-      );
-      if (
-        JSON.stringify(this.permission) ===
-        JSON.stringify(this.permissionFormData)
-      )
-        return;
-      try {
-        this.permissionFormError = {};
-        this.permissionFormData.application_id =
-          this.permission.application?.id;
-        const resp = await this.$api.put(
-          `/permissions/${this.permission.id}`,
-          this.permissionFormData,
-          {
-            successMsg: '权限更新成功',
-          }
-        );
-        this.permission = resp.data;
-        this.permissionFormData = Object.assign({}, resp.data);
-        this.permissionFormError = {};
-      } catch (e) {
-        this.permissionFormError = (e as Error).cause || {};
       }
     },
 
@@ -632,30 +504,6 @@ export default defineComponent({
       this.bindRolesFormData = {};
       this.bindRolesFormError = {};
       this.selectedRoles = [];
-    },
-
-    createValue(
-      val: string,
-      done: (item?: string, mode?: 'add' | 'add-unique' | 'toggle') => void
-    ) {
-      if (val.length > 0) {
-        if (!this.initialTagOptions.map((tag) => tag.name).includes(val)) {
-          done(val, 'add-unique');
-        }
-      }
-    },
-
-    filterFn(val: string, update: (fn: () => void) => void) {
-      update(() => {
-        if (val === '') {
-          this.tagOptions = this.initialTagOptions;
-        } else {
-          const needle = val.toLowerCase();
-          this.tagOptions = this.initialTagOptions.filter(
-            (v) => v.name.toLowerCase().indexOf(needle) > -1
-          );
-        }
-      });
     },
   },
 });

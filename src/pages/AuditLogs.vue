@@ -1,14 +1,24 @@
 <template>
   <page-wrapper page-title="审计日志">
     <data-table
-      ref="table"
-      :columns="columns"
       api-url="/audit_logs/query"
       api-method="POST"
+      :columns="columns"
       :filter-columns="filterColumns"
       search-placeholder="搜索用户信息、IP地址"
       hide-import
     >
+      <template #body-cell-user_info="props">
+        <q-td :props="props">
+          <q-item-label>
+            {{ props.row.user.name }}（{{ props.row.user.username }}）
+          </q-item-label>
+          <q-item-label caption class="text-grey-6">
+            {{ props.row.user.mobile }}
+            {{ props.row.user.email }}
+          </q-item-label>
+        </q-td>
+      </template>
       <template #body-cell-is_succeed="props">
         <q-td :props="props">
           <boolean-chip
@@ -49,22 +59,10 @@ const columns: QTableProps['columns'] = [
     sortable: true,
   },
   {
-    name: 'username',
-    label: '用户名',
+    name: 'user_info',
+    label: '用户信息',
     align: 'left',
-    field: (row) => row.user.username,
-  },
-  {
-    name: 'mobile',
-    label: '手机号',
-    align: 'left',
-    field: (row) => row.user.mobile,
-  },
-  {
-    name: 'email',
-    label: '邮箱',
-    align: 'left',
-    field: (row) => row.user.email,
+    field: 'user_info',
   },
   {
     name: 'client_ip',
@@ -74,7 +72,7 @@ const columns: QTableProps['columns'] = [
   },
   {
     name: 'device_info',
-    label: '设备信息',
+    label: '设备 · 操作系统 · 浏览器',
     align: 'left',
     field: (row) => [row.device, row.os, row.browser].join(' / '),
   },

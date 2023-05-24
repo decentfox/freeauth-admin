@@ -1,8 +1,5 @@
 <template>
-  <page-wrapper>
-    <q-btn unelevated dense class="no-hover-btn hint-label" @click="goBack">
-      <q-icon size="18px" name="arrow_back_ios_new" />返回
-    </q-btn>
+  <page-wrapper can-go-back>
     <q-toolbar class="q-my-xs">
       <slot name="toolbar-left">
         <boolean-chip :value="status" true-label="正常" false-label="禁用" />
@@ -31,7 +28,7 @@
       </q-tabs>
     </slot>
     <q-separator inset />
-    <q-tab-panels :model-value="tabValue" animated>
+    <q-tab-panels :model-value="tabValue" animated keep-alive>
       <slot name="panels"></slot>
     </q-tab-panels>
     <slot name="dialog"></slot>
@@ -66,11 +63,5 @@ export default defineComponent({
   },
 
   emits: ['update:tabValue'],
-
-  methods: {
-    goBack() {
-      this.$router.back();
-    },
-  },
 });
 </script>

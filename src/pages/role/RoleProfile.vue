@@ -324,7 +324,6 @@ import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import { DataTableComponent } from 'components/table/type';
-import { ProfileComponent } from 'layouts/type';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Application, Department, Tag } from '../type';
@@ -559,7 +558,7 @@ export default defineComponent({
       if (['disable', 'enable'].includes(op)) {
         this.loadRoleInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
+        this.$router.back();
       } else if (op === 'unbind') {
         this.loadRoleInfo();
         (this.$refs.userTable as DataTableComponent).fetchRows();

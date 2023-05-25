@@ -41,74 +41,12 @@
     </template>
     <template #panels>
       <q-tab-panel name="user">
-        <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label text="姓名（昵称）" required />
-                <q-input
-                  v-model="userFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!userFormError.name"
-                  :error-message="userFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  text="用户名"
-                  required
-                  hint="可用于用户名密码登录"
-                />
-                <q-input
-                  v-model="userFormData.username"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!userFormError.username"
-                  :error-message="userFormError.username"
-                />
-              </div>
-              <div>
-                <field-label text="手机号码" hint="可用于手机号验证码登录" />
-                <q-input
-                  v-model="userFormData.mobile"
-                  filled
-                  dense
-                  placeholder="请填写手机号"
-                  hide-bottom-space
-                  class="col"
-                  :error="!!userFormError.mobile"
-                  :error-message="userFormError.mobile"
-                />
-              </div>
-              <div>
-                <field-label text="邮箱地址" hint="可用于邮箱验证码登录" />
-                <q-input
-                  v-model="userFormData.email"
-                  filled
-                  dense
-                  placeholder="请填写邮箱"
-                  hide-bottom-space
-                  class="col"
-                  :error="!!userFormError.email"
-                  :error-message="userFormError.email"
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="saveUserForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+        <user-form
+          ref="updateUserForm"
+          :user="user"
+          :action="FormAction.update"
+          @refresh="loadUserInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="organizations">
         <q-table
@@ -278,7 +216,7 @@
                   <q-chip
                     v-if="
                       user.roles &&
-                      user.roles.map((r) => r.id).includes(role.id)
+                      user.roles.map((r: Role) => r.id).includes(role.id)
                     "
                     size="12px"
                     square
@@ -332,18 +270,18 @@
 import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
+import { FormAction } from 'components/form/type';
 import { DataTableComponent } from 'components/table/type';
 import {
   SetOrganizationsComponent,
   SetRolesComponent,
 } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-import { ProfileComponent } from 'layouts/type';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Role } from '../role/type';
 
-import { User, UserPostData, UserPostError } from './type';
+import { User } from './type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -485,10 +423,7 @@ export default defineComponent({
       roleColumns: roleColumns,
       deptColumns: deptColumns,
       permColumns: permColumns,
-
-      userForm: ref(false),
-      userFormData: ref<UserPostData>({}),
-      userFormError: ref<UserPostError>({}),
+      FormAction,
     };
   },
 
@@ -501,7 +436,6 @@ export default defineComponent({
     async loadUserInfo() {
       const resp = await this.$api.get(`/users/${this.userId}`);
       this.user = resp.data;
-      this.userFormData = Object.assign({}, resp.data);
     },
 
     switchPanelTab(val: string) {
@@ -518,27 +452,7 @@ export default defineComponent({
       if (['disable', 'enable', 'resign', 'unbind'].includes(op)) {
         this.loadUserInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
-      }
-    },
-
-    async saveUserForm() {
-      if (JSON.stringify(this.user) === JSON.stringify(this.userFormData))
-        return;
-      try {
-        this.userFormError = {};
-        const resp = await this.$api.put(
-          `/users/${this.user.id}`,
-          this.userFormData,
-          {
-            successMsg: '角色更新成功',
-          }
-        );
-        this.user = resp.data;
-        this.userFormData = Object.assign({}, resp.data);
-        this.userFormError = {};
-      } catch (e) {
-        this.userFormError = (e as Error).cause || {};
+        this.$router.back();
       }
     },
 

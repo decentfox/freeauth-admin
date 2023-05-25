@@ -295,7 +295,6 @@ import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
 import { DataTableComponent } from 'components/table/type';
-import { ProfileComponent } from 'layouts/type';
 
 import { Role } from '../role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -447,7 +446,7 @@ export default defineComponent({
       if (['disable', 'enable'].includes(op)) {
         this.loadPermInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
+        this.$router.back();
       } else if (op === 'unbind') {
         this.loadPermInfo();
         (this.$refs.rolesTable as DataTableComponent).fetchRows();

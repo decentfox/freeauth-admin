@@ -1,9 +1,10 @@
 import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { Permission } from 'pages/permission/type';
 import { Role } from 'pages/role/type';
+
+import ConfirmDialog from '../dialog/ConfirmDialog.vue';
 
 import { PermOperationsType } from './type';
 

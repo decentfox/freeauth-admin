@@ -12,7 +12,7 @@
         option-value="id"
         emit-value
         map-options
-        :disable="!!appId"
+        :disable="action === FormAction.update || !!appId"
         hide-bottom-space
         :error="!!formError.application_id"
         :error-message="formError.application_id"
@@ -112,10 +112,17 @@ import { defineComponent, PropType, ref } from 'vue';
 import { PermissionPostData, PermissionPostError } from 'pages/permission/type';
 import { Application, Tag } from 'pages/type';
 
+import { FormAction } from '../form/type';
+
 export default defineComponent({
   name: 'PermFormContent',
 
   props: {
+    /** 权限表单操作类型：创建或更新 */
+    action: {
+      type: String as PropType<FormAction>,
+      default: FormAction.create,
+    },
     /** 指定权限所属应用 */
     appId: {
       type: String,
@@ -138,15 +145,16 @@ export default defineComponent({
   },
 
   emits: [
+    'update:application_id',
     'update:name',
     'update:code',
     'update:tags',
     'update:description',
-    'update:application_id',
   ],
 
   setup() {
     return {
+      FormAction,
       appOptions: ref<Application[]>([]),
       initialTagOptions: ref<Tag[]>([]),
       tagOptions: ref<Tag[]>([]),

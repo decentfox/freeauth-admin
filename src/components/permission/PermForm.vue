@@ -32,7 +32,7 @@
         v-model:tags="permissionFormData.tags"
         v-model:description="permissionFormData.description"
         v-model:application_id="permissionFormData.application_id"
-        :app-id="appId"
+        :action="FormAction.update"
         :form-data="permissionFormData"
         :form-error="permissionFormError"
       />
@@ -69,7 +69,7 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    /** 权限表单操作类型：创建权限或更新权限 */
+    /** 权限表单操作类型：创建或更新 */
     action: {
       type: String as PropType<FormAction>,
       default: FormAction.create,

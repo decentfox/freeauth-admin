@@ -29,6 +29,7 @@
         v-model:name="roleFormData.name"
         v-model:code="roleFormData.code"
         v-model:description="roleFormData.description"
+        :action="FormAction.update"
         :form-data="roleFormData"
         :form-error="roleFormError"
       />
@@ -56,7 +57,7 @@ export default defineComponent({
   name: 'RoleForm',
 
   props: {
-    /** 权限表单操作类型：创建权限或更新权限 */
+    /** 角色表单操作类型：创建或更新 */
     action: {
       type: String as PropType<FormAction>,
       default: FormAction.create,
@@ -118,16 +119,17 @@ export default defineComponent({
         JSON.stringify(this.rolePreviousData) ===
         JSON.stringify(this.roleFormData)
       )
-        try {
-          this.roleFormError = {};
-          await this.$api.put(`/roles/${this.role.id}`, this.roleFormData, {
-            successMsg: '角色更新成功',
-          });
-          this.$emit('refresh');
-          this.roleFormError = {};
-        } catch (e) {
-          this.roleFormError = (e as Error).cause || {};
-        }
+        return;
+      try {
+        this.roleFormError = {};
+        await this.$api.put(`/roles/${this.role.id}`, this.roleFormData, {
+          successMsg: '角色更新成功',
+        });
+        this.$emit('refresh');
+        this.roleFormError = {};
+      } catch (e) {
+        this.roleFormError = (e as Error).cause || {};
+      }
     },
 
     resetRoleForm() {

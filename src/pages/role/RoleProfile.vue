@@ -36,77 +36,6 @@
     </template>
     <template #panels>
       <q-tab-panel name="role">
-        <!-- <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label text="角色归属（不支持变更）" required />
-                <div class="row items-center">
-                  <q-option-group
-                    v-model="roleTypeTab"
-                    inline
-                    :options="[
-                      { label: '全局可选角色', value: 'global' },
-                      { label: '指定组织类型下可选角色', value: 'org_type' },
-                    ]"
-                    disable
-                  />
-                  <div v-if="!!role.org_type">
-                    <q-chip size="12px" square color="secondary">
-                      {{ role.org_type.name }}
-                    </q-chip>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <field-label text="角色名称" required />
-                <q-input
-                  v-model="roleFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写角色名称"
-                  hide-bottom-space
-                  :error="!!roleFormError.name"
-                  :error-message="roleFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  text="角色 Code"
-                  hint="角色的唯一标识符，可用于获取角色信息"
-                />
-                <q-input
-                  v-model="roleFormData.code"
-                  filled
-                  dense
-                  placeholder="请填写角色代码"
-                  hide-bottom-space
-                  :error="!!roleFormError.code"
-                  :error-message="roleFormError.code"
-                />
-              </div>
-              <div>
-                <field-label text="角色描述" />
-                <q-input
-                  v-model="roleFormData.description"
-                  filled
-                  dense
-                  type="textarea"
-                  placeholder="请填写角色描述"
-                  hide-bottom-space
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="saveRoleForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card> -->
         <role-form
           ref="updateRoleForm"
           :role="role"
@@ -405,8 +334,6 @@ import {
   BindUsersToRolesPostData,
   BindUsersToRolesPostError,
   Role,
-  RolePostData,
-  RolePostError,
 } from './type';
 
 const userColumns: QTableProps['columns'] = [
@@ -519,10 +446,6 @@ export default defineComponent({
       userColumns: userColumns,
       permColumns: permColumns,
 
-      roleTypeTab: ref('global'),
-      roleFormData: ref<RolePostData>({}),
-      roleFormError: ref<RolePostError>({}),
-
       bindUsersForm: ref(false),
       userOptions: ref([]),
       selectedUsers: ref<User[]>([]),
@@ -556,8 +479,6 @@ export default defineComponent({
     async loadRoleInfo() {
       const resp = await this.$api.get(`/roles/${this.roleId}`);
       this.role = resp.data;
-      this.roleFormData = Object.assign({}, resp.data);
-      this.roleTypeTab = !!this.role.org_type ? 'org_type' : 'global';
     },
 
     switchPanelTab(val: string) {

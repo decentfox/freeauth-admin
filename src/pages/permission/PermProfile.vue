@@ -42,7 +42,6 @@
       <q-tab-panel name="perm">
         <perm-form
           ref="updatePermForm"
-          :app-id="permission.application?.id"
           :permission="permission"
           :action="FormAction.update"
           @refresh="loadPermInfo"

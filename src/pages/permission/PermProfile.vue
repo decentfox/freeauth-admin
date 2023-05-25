@@ -208,68 +208,11 @@
           <div class="q-gutter-md q-pa-md">
             <div>
               <field-label text="关联角色" required />
-              <q-select
-                ref="select"
+              <searchable-multiple-select
                 v-model="selectedRoles"
-                :options="roleOptions"
                 placeholder="输入角色名称进行搜索"
-                filled
-                dense
-                use-input
-                hide-dropdown-icon
-                multiple
-                map-options
-                virtual-scroll-slice-size="5"
-                @filter="searchRole"
-                @update:model-value="clearFilter"
-              >
-                <template #no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      找不到任何匹配项
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template #selected-item="scope">
-                  <q-chip
-                    removable
-                    dense
-                    :tabindex="scope.tabindex"
-                    color="primary"
-                    text-color="white"
-                    class="q-pa-sm"
-                    :label="scope.opt.name"
-                    @remove="scope.removeAtIndex(scope.index)"
-                  />
-                </template>
-                <template #option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <boolean-chip
-                        :value="!scope.opt.is_deleted"
-                        true-label="正常"
-                        false-label="禁用"
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ scope.opt.name }}（{{ scope.opt.name }}）
-                      </q-item-label>
-                      <q-item-label caption>
-                        {{ scope.opt.mobile }} {{ scope.opt.email }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section v-if="!!scope.opt.org_type" side>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="scope.opt.org_type.name"
-                        class="q-pa-sm bg-secondary"
-                      />
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                option-api-url="/roles/query"
+              />
               <div
                 v-if="!!bindRolesFormError.role_ids"
                 class="error-hint text-negative"
@@ -289,7 +232,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { date, QSelect, QTableProps } from 'quasar';
+import { date, QTableProps } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
@@ -402,17 +345,14 @@ export default defineComponent({
         id: '',
       }),
       panelTab: ref('perm'),
-
       roleColumns: roleColumns,
       userColumns: userColumns,
+      FormAction,
 
       bindRolesForm: ref(false),
-      roleOptions: ref([]),
       selectedRoles: ref<Role[]>([]),
       bindRolesFormData: ref<BindRolesToPermsPostData>({}),
       bindRolesFormError: ref<BindRolesToPermsPostError>({}),
-
-      FormAction,
     };
   },
 
@@ -451,28 +391,6 @@ export default defineComponent({
         this.loadPermInfo();
         (this.$refs.rolesTable as DataTableComponent).fetchRows();
       }
-    },
-
-    searchRole(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/roles/query', {
-          q: kw,
-        });
-        this.roleOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async saveBindRolesForm() {

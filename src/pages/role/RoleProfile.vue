@@ -139,9 +139,9 @@
             </div>
           </q-scroll-area>
         </div>
-        <div class="q-pa-sm q-pb-md row items-center">
-          <div class="text-caption">标签：</div>
-          <div class="q-gutter-col-xs">
+        <div class="q-pa-sm q-pb-md row">
+          <div class="text-caption q-py-xs">标签：</div>
+          <div class="q-gutter-col-xs" style="width: calc(100% - 40px)">
             <q-chip
               v-for="item in tagChips"
               :key="item.id"
@@ -233,68 +233,15 @@
           <div class="q-gutter-md q-pa-md">
             <div>
               <field-label text="关联主体" required />
-              <q-select
-                ref="select"
+              <searchable-multiple-select
                 v-model="selectedUsers"
-                :options="userOptions"
-                placeholder="输入用户姓名进行搜索"
-                filled
-                dense
-                use-input
-                hide-dropdown-icon
-                multiple
-                map-options
-                virtual-scroll-slice-size="5"
-                @filter="searchUser"
-                @update:model-value="clearFilter"
-              >
-                <template #no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      找不到任何匹配项
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template #selected-item="scope">
-                  <q-chip
-                    removable
-                    dense
-                    :tabindex="scope.tabindex"
-                    color="primary"
-                    text-color="white"
-                    class="q-pa-sm"
-                    :label="scope.opt.name"
-                    @remove="scope.removeAtIndex(scope.index)"
-                  />
-                </template>
-                <template #option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <boolean-chip
-                        :value="!scope.opt.is_deleted"
-                        true-label="正常"
-                        false-label="禁用"
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ scope.opt.name }}（{{ scope.opt.username }}）
-                      </q-item-label>
-                      <q-item-label caption>
-                        {{ scope.opt.mobile }} {{ scope.opt.email }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section v-if="!!scope.opt.org_type" side>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="scope.opt.org_type.name"
-                        class="q-pa-sm bg-secondary"
-                      />
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                placeholder="输入用户信息进行搜索"
+                option-api-url="/users/query"
+                :option-api-params="{
+                  org_type_id: role.org_type?.id,
+                  include_unassigned_users: !!role.org_type ? false : true,
+                }"
+              />
               <div
                 v-if="!!bindUsersFormError.user_ids"
                 class="error-hint text-negative"
@@ -318,7 +265,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps, VueStyleObjectProp } from 'quasar';
+import { QTableProps, VueStyleObjectProp } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
@@ -444,9 +391,9 @@ export default defineComponent({
       panelTab: ref('role'),
       userColumns: userColumns,
       permColumns: permColumns,
+      FormAction,
 
       bindUsersForm: ref(false),
-      userOptions: ref([]),
       selectedUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToRolesPostData>({}),
       bindUsersFormError: ref<BindUsersToRolesPostError>({}),
@@ -464,8 +411,6 @@ export default defineComponent({
         height: '2px',
         opacity: '0.75',
       }),
-
-      FormAction,
     };
   },
 
@@ -503,30 +448,6 @@ export default defineComponent({
       this.selectedTags = [];
       const resp = await this.$api.get('/permission_tags');
       this.tagChips = resp.data.permission_tags;
-    },
-
-    searchUser(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/users/query', {
-          q: kw,
-          org_type_id: this.role.org_type?.id,
-          include_unassigned_users: !!this.role.org_type ? false : true,
-        });
-        this.userOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async saveBindUsersForm() {

@@ -246,74 +246,15 @@
             <div class="q-gutter-md">
               <div>
                 <field-label text="关联用户" required />
-                <q-select
-                  ref="select"
+                <searchable-multiple-select
                   v-model="selectedExistingUsers"
-                  :options="userOptions"
-                  placeholder="输入用户姓名进行搜索"
-                  filled
-                  dense
-                  use-input
-                  hide-dropdown-icon
-                  multiple
-                  map-options
-                  virtual-scroll-slice-size="5"
-                  @filter="searchUser"
-                  @update:model-value="clearFilter"
-                >
-                  <template #no-option>
-                    <q-item>
-                      <q-item-section class="text-grey">
-                        找不到任何匹配项
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                  <template #selected-item="scope">
-                    <q-chip
-                      removable
-                      dense
-                      :tabindex="scope.tabindex"
-                      color="primary"
-                      text-color="white"
-                      class="q-pa-sm"
-                      :label="scope.opt.name"
-                      @remove="scope.removeAtIndex(scope.index)"
-                    />
-                  </template>
-                  <template #option="scope">
-                    <q-item
-                      v-bind="scope.itemProps"
-                      :disable="
-                        !!scope.opt.org_type &&
-                        scope.opt.org_type.id !== selectedOrgType.id
-                      "
-                    >
-                      <q-item-section avatar>
-                        <boolean-chip
-                          :value="!scope.opt.is_deleted"
-                          true-label="正常"
-                          false-label="禁用"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>
-                          {{ scope.opt.name }}（{{ scope.opt.username }}）
-                        </q-item-label>
-                        <q-item-label caption>
-                          {{ scope.opt.mobile }} {{ scope.opt.email }}
-                        </q-item-label>
-                      </q-item-section>
-                      <q-item-section v-if="!!scope.opt.org_type" side>
-                        <q-chip
-                          square
-                          size="12px"
-                          :label="scope.opt.org_type.name"
-                          class="q-pa-sm bg-secondary"
-                        />
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                </q-select>
+                  placeholder="输入用户信息进行搜索"
+                  option-api-url="/users/query"
+                  :option-api-params="{
+                    org_type_id: selectedOrgType.id,
+                    include_unassigned_users: true,
+                  }"
+                />
                 <div
                   v-if="!!bindUsersFormError.user_ids"
                   class="error-hint text-negative"
@@ -420,7 +361,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps, QTreeNode } from 'quasar';
+import { QTableProps, QTreeNode } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { DataTableComponent } from 'components/table/type';
@@ -572,7 +513,6 @@ export default defineComponent({
       selectedOrganizations: ref<string[]>([]),
 
       // add new member, existing user
-      userOptions: ref([]),
       selectedExistingUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToOrgsPostData>({}),
       bindUsersFormError: ref<BindUsersToOrgsPostError>({}),
@@ -642,29 +582,6 @@ export default defineComponent({
     filterDirectUsers(val: boolean) {
       const ut = this.$refs.userTable as DataTableComponent;
       ut.onExternalFiltered('include_sub_members', !val);
-    },
-
-    searchUser(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/users/query', {
-          q: kw,
-          include_unassigned_users: true,
-        });
-        this.userOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async openAddMembersForm() {

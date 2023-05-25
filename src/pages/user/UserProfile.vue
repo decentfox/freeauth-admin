@@ -257,10 +257,7 @@
       </q-tab-panel>
     </template>
     <template #dialog>
-      <set-organizations-form
-        ref="setOrganizationsForm"
-        @user-updated="loadUserInfo"
-      />
+      <set-orgs-form ref="setOrganizationsForm" @user-updated="loadUserInfo" />
       <set-roles-form ref="setRolesForm" @user-updated="loadUserInfo" />
     </template>
   </profile-page>

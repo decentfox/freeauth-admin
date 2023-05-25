@@ -1,5 +1,5 @@
 <template>
-  <div class="q-gutter-md q-pa-md">
+  <div class="q-gutter-md">
     <div>
       <field-label
         v-if="action === FormAction.create"

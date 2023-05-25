@@ -116,8 +116,9 @@
           <!--the first splitted screen-->
           <template #before>
             <org-tree
+              :editable="false"
               @update:select-node="onNodeUpdated"
-              @update:change-org-type="onOrgTypeChanged"
+              @update:org-type="onOrgTypeChanged"
             />
           </template>
 
@@ -137,7 +138,7 @@
               <template #before>
                 <div class="q-px-md">
                   <q-item-section>
-                    <q-item-label header class="q-pt-lg q-pb-none">
+                    <q-item-label header class="q-pt-md q-pb-none">
                       可用角色
                       <q-icon name="error_outline" size="14px">
                         <q-tooltip anchor="center right" self="center start">
@@ -194,7 +195,7 @@
 
               <template #after>
                 <div
-                  class="q-px-md q-py-sm scroll frame-table"
+                  class="q-px-md scroll frame-table"
                   style="height: calc(100vh - 70px)"
                 >
                   <data-table

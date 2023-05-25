@@ -61,7 +61,7 @@ import { FormDialogComponent } from '../dialog/type';
 import { SetOrganizationsPostData, SetOrganizationsPostError } from './type';
 
 export default defineComponent({
-  name: 'SetOrganizationsForm',
+  name: 'SetOrgsForm',
 
   emits: ['userUpdated'],
 

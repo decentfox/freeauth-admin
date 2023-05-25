@@ -17,6 +17,7 @@
         v-model:email="userFormData.email"
         :form-data="userFormData"
         :form-error="userFormError"
+        class="q-pa-md"
       />
     </template>
   </form-dialog>
@@ -32,6 +33,7 @@
         :action="FormAction.update"
         :form-data="userFormData"
         :form-error="userFormError"
+        class="q-pa-md"
       />
       <q-card-actions class="q-px-md">
         <q-btn

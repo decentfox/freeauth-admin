@@ -7,7 +7,7 @@
           ref="orgStructure"
           editable
           @update:select-node="onNodeUpdated"
-          @update:change-org-type="onOrgTypeChanged"
+          @update:org-type="onOrgTypeChanged"
           @refresh="refresh($event)"
         />
       </template>
@@ -20,7 +20,7 @@
 
       <!--the second splitted screen-->
       <template #after>
-        <div class="q-px-md q-py-sm">
+        <div class="q-px-md">
           <q-toolbar class="q-pa-none">
             <q-tabs
               v-model="leftPanelTab"
@@ -270,92 +270,19 @@
             </div>
           </q-tab-panel>
           <q-tab-panel name="new">
-            <div class="q-gutter-md">
-              <div>
-                <field-label text="登录信息" required hint="至少填写一项" />
-                <div class="q-gutter-sm">
-                  <q-input
-                    v-model="newUserFormData.username"
-                    filled
-                    dense
-                    placeholder="请填写用户名"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.username"
-                    :error-message="newUserFormError.username"
-                  />
-                  <q-input
-                    v-model="newUserFormData.mobile"
-                    filled
-                    dense
-                    placeholder="请填写手机号"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.mobile"
-                    :error-message="newUserFormError.mobile"
-                  />
-                  <q-input
-                    v-model="newUserFormData.email"
-                    filled
-                    dense
-                    placeholder="请填写邮箱"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.email"
-                    :error-message="newUserFormError.email"
-                    @update:model-value="
-                      if (!newUserFormData.email)
-                        firstLoginNotification = false;
-                    "
-                  />
-                </div>
-                <div
-                  v-if="!!newUserFormError.__root__"
-                  class="error-hint text-negative"
-                >
-                  {{ newUserFormError.__root__ }}
-                </div>
-              </div>
-              <div>
-                <field-label text="用户姓名" />
-                <q-input
-                  v-model="newUserFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!newUserFormError.name"
-                  :error-message="newUserFormError.name"
-                />
-              </div>
-              <div>
-                <q-toggle
-                  v-model="passwordChangingRequired"
-                  label="强制用户在首次登录时修改密码"
-                />
-                <q-toggle
-                  v-model="firstLoginNotification"
-                  label="通过邮件发送初始默认登录信息"
-                  :disable="!newUserFormData.email"
-                >
-                  <q-tooltip
-                    v-if="!newUserFormData.email"
-                    anchor="bottom middle"
-                    self="center end"
-                  >
-                    填写有效邮箱后才可启用
-                  </q-tooltip>
-                </q-toggle>
-              </div>
-            </div>
+            <user-form-content
+              v-model:username="newUserFormData.username"
+              v-model:name="newUserFormData.name"
+              v-model:mobile="newUserFormData.mobile"
+              v-model:email="newUserFormData.email"
+              :form-data="newUserFormData"
+              :form-error="newUserFormError"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </template>
     </form-dialog>
-    <set-organizations-form
-      ref="setOrganizationsForm"
-      @user-updated="loadUserTable"
-    />
+    <set-orgs-form ref="setOrganizationsForm" @user-updated="loadUserTable" />
   </page-wrapper>
 </template>
 
@@ -520,8 +447,6 @@ export default defineComponent({
       // add new user
       newUserFormData: ref<UserPostData>({}),
       newUserFormError: ref<UserPostError>({}),
-      firstLoginNotification: ref(false),
-      passwordChangingRequired: ref(false),
     };
   },
 
@@ -597,6 +522,7 @@ export default defineComponent({
     },
 
     async saveAddMembersForm() {
+      const postParams = { org_type_id: this.selectedOrgType.id };
       if (this.addMembersTab === 'existing' && this.selectedExistingUsers) {
         this.bindUsersFormData.user_ids = this.selectedExistingUsers.map(
           (user) => user.id
@@ -606,19 +532,12 @@ export default defineComponent({
           this.bindUsersFormError = {};
           await this.$api.post(
             '/organizations/bind_users',
-            Object.assign(
-              {
-                org_type_id: this.selectedOrgType.id,
-              },
-              this.bindUsersFormData
-            ),
+            Object.assign(postParams, this.bindUsersFormData),
             {
               successMsg: '成员添加成功',
             }
           );
-          (this.$refs.addMembersDialog as FormDialogComponent).hide();
-          this.loadUserTable();
-          this.resetAddMembersForm();
+          this.afterSaveAddMembers();
         } catch (e) {
           this.bindUsersFormError = (e as Error).cause || {};
         }
@@ -628,23 +547,22 @@ export default defineComponent({
           this.newUserFormError = {};
           await this.$api.post(
             '/users',
-            Object.assign(
-              {
-                org_type_id: this.selectedOrgType.id,
-              },
-              this.newUserFormData
-            ),
+            Object.assign(postParams, this.newUserFormData),
             {
               successMsg: '成员创建成功',
             }
           );
-          (this.$refs.addMembersDialog as FormDialogComponent).hide();
-          this.loadUserTable();
-          this.resetAddMembersForm();
+          this.afterSaveAddMembers();
         } catch (e) {
           this.newUserFormError = (e as Error).cause || {};
         }
       }
+    },
+
+    afterSaveAddMembers() {
+      (this.$refs.addMembersDialog as FormDialogComponent).hide();
+      this.loadUserTable();
+      this.resetAddMembersForm();
     },
 
     resetAddMembersForm() {

@@ -14,3 +14,8 @@ export type CascadeOption = {
 export interface FormComponent {
   show: () => void;
 }
+
+export enum FormAction {
+  create = 'create',
+  update = 'update',
+}

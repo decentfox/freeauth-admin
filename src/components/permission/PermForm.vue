@@ -58,13 +58,10 @@ import {
 } from 'pages/permission/type';
 
 import { FormDialogComponent } from '../dialog/type';
-import BaseForm from '../form/BaseForm.vue';
-
-import { FormAction } from './type';
+import { FormAction } from '../form/type';
 
 export default defineComponent({
-  name: 'CreatePermForm',
-  extends: BaseForm,
+  name: 'PermForm',
 
   props: {
     /** 指定权限所属应用 */
@@ -99,10 +96,6 @@ export default defineComponent({
   },
 
   watch: {
-    appId() {
-      this.permissionFormData.application_id = this.appId ? this.appId : '';
-    },
-
     permission() {
       this.permissionFormData = {
         application_id: this.permission.application?.id,
@@ -116,8 +109,9 @@ export default defineComponent({
   },
 
   methods: {
-    async show() {
+    show() {
       this.permissionFormDialog = true;
+      this.permissionFormData.application_id = this.appId ? this.appId : '';
     },
 
     async createPermission() {

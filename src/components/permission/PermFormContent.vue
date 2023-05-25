@@ -1,11 +1,7 @@
 <template>
   <div class="q-col-gutter-md q-pa-md">
     <div>
-      <field-label
-        text="所属应用"
-        required
-        hint="如需切换，请关闭对话框，对表格左上方选择器进行操作"
-      />
+      <field-label text="所属应用" required hint="创建后不支持变更" />
       <q-select
         :model-value="formData.application_id"
         :options="appOptions"
@@ -116,11 +112,8 @@ import { defineComponent, PropType, ref } from 'vue';
 import { PermissionPostData, PermissionPostError } from 'pages/permission/type';
 import { Application, Tag } from 'pages/type';
 
-import BaseForm from '../form/BaseForm.vue';
-
 export default defineComponent({
-  name: 'CreatePermForm',
-  extends: BaseForm,
+  name: 'PermFormContent',
 
   props: {
     /** 指定权限所属应用 */

@@ -134,9 +134,8 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
-import { FormComponent } from 'components/form/type';
+import { FormAction, FormComponent } from 'components/form/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
-import { FormAction } from 'components/permission/type';
 import {
   DataTableComponent,
   FilterColumn,

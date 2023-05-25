@@ -309,85 +309,11 @@
       </q-tab-panel>
     </q-tab-panels>
   </page-wrapper>
-  <form-dialog
-    ref="roleDialog"
-    v-model="roleForm"
-    title="创建角色"
-    width="450px"
-    @confirm="saveRoleForm"
-    @close="resetRoleForm"
-  >
-    <template #form-content>
-      <div class="q-col-gutter-md q-pa-md">
-        <q-option-group
-          v-model="roleTypeTab"
-          inline
-          class="q-px-md"
-          :options="[
-            { label: '全局可选角色', value: 'global' },
-            { label: '指定组织类型下可选角色', value: 'org_type' },
-          ]"
-        />
-        <div v-if="roleTypeTab === 'org_type'">
-          <field-label text="所属组织类型" required />
-          <q-select
-            v-model="roleFormData.org_type_id"
-            :options="orgTypeOptions"
-            dense
-            filled
-            class="full-width"
-            option-label="name"
-            option-value="id"
-            emit-value
-            map-options
-            hide-bottom-space
-            :rules="[(val) => !!val || '请选择所属组织类型']"
-          />
-        </div>
-      </div>
-      <q-separator inset />
-      <div class="q-col-gutter-md q-pa-md">
-        <div>
-          <field-label text="角色名称" required />
-          <q-input
-            v-model="roleFormData.name"
-            filled
-            dense
-            placeholder="请填写角色名称"
-            hide-bottom-space
-            :error="!!roleFormError.name"
-            :error-message="roleFormError.name"
-          />
-        </div>
-        <div>
-          <field-label
-            text="角色 Code"
-            hint="角色的唯一标识符，可用于获取角色信息"
-          />
-          <q-input
-            v-model="roleFormData.code"
-            filled
-            dense
-            placeholder="请填写角色代码"
-            hide-bottom-space
-            :error="!!roleFormError.code"
-            :error-message="roleFormError.code"
-          />
-        </div>
-        <div>
-          <field-label text="角色描述" />
-          <q-input
-            v-model="roleFormData.description"
-            filled
-            dense
-            type="textarea"
-            placeholder="请填写角色描述"
-            hide-bottom-space
-          />
-        </div>
-      </div>
-    </template>
-  </form-dialog>
+  <role-form
+    ref="createRoleForm"
+    :action="FormAction.create"
+    @refresh="refreshRoleData"
+  />
   <set-roles-form ref="setRolesForm" @user-updated="loadUserTable" />
 </template>
 
@@ -395,7 +321,7 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps, QTreeNode } from 'quasar';
 
-import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction, FormComponent } from 'components/form/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import {
   DataTableComponent,
@@ -403,11 +329,12 @@ import {
   FilterOperator,
 } from 'components/table/type';
 import { SetRolesComponent } from 'components/user/type';
-import { Role, RolePostData, RolePostError, RoleSet } from 'pages/role/type';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department, OrgType } from 'pages/type';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Department, OrgType } from '../type';
 import { User } from '../user/type';
+
+import { Role, RoleSet } from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -565,12 +492,7 @@ export default defineComponent({
       userColumns: userColumns,
       availableRoleSet: ref<RoleSet[]>([]),
 
-      // form dialog
-      orgTypeOptions: ref<OrgType[]>([]),
-      roleTypeTab: ref('global'),
-      roleForm: ref(false),
-      roleFormData: ref<RolePostData>({}),
-      roleFormError: ref<RolePostError>({}),
+      FormAction,
     };
   },
 
@@ -622,37 +544,7 @@ export default defineComponent({
     },
 
     openRoleForm() {
-      this.loadOrgTypes();
-      this.roleForm = true;
-    },
-
-    async saveRoleForm() {
-      try {
-        this.roleFormError = {};
-        if (this.roleTypeTab === 'global') {
-          this.roleFormData.org_type_id = undefined;
-        }
-        await this.$api.post('/roles', this.roleFormData, {
-          successMsg: '角色创建成功',
-        });
-        (this.$refs.roleDialog as FormDialogComponent).hide();
-        this.refreshRoleData();
-        this.resetRoleForm();
-      } catch (e) {
-        this.roleFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetRoleForm() {
-      this.roleFormData = {};
-      this.roleFormError = {};
-      this.roleTypeTab = 'global';
-    },
-
-    async loadOrgTypes() {
-      const resp = await this.$api.get('/org_types');
-      this.orgTypeOptions = resp.data.org_types;
-      this.roleFormData.org_type_id = this.orgTypeOptions[0].id;
+      (this.$refs.createRoleForm as FormComponent).show();
     },
 
     openSetRolesForm(user: User) {

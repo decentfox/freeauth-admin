@@ -2,9 +2,9 @@
   <page-wrapper page-title="应用管理">
     <data-table
       ref="applicationTable"
-      :columns="columns"
       api-url="/applications/query"
       api-method="POST"
+      :columns="columns"
       :filter-columns="filterColumns"
       search-placeholder="搜索应用信息"
       wrap-cells

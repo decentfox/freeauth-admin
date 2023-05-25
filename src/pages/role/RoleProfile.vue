@@ -36,7 +36,7 @@
     </template>
     <template #panels>
       <q-tab-panel name="role">
-        <q-card flat bordered class="q-pa-md">
+        <!-- <q-card flat bordered class="q-pa-md">
           <q-form>
             <div class="q-col-gutter-md q-pa-sm">
               <div>
@@ -106,7 +106,13 @@
               />
             </q-card-actions>
           </q-form>
-        </q-card>
+        </q-card> -->
+        <role-form
+          ref="updateRoleForm"
+          :role="role"
+          :action="FormAction.update"
+          @refresh="loadRoleInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="users">
         <data-table
@@ -386,20 +392,22 @@ import { defineComponent, ref } from 'vue';
 import { QSelect, QTableProps, VueStyleObjectProp } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction } from 'components/form/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import { DataTableComponent } from 'components/table/type';
 import { ProfileComponent } from 'layouts/type';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Application, Department, Tag } from '../type';
+import { User } from '../user/type';
+
 import {
   BindUsersToRolesPostData,
   BindUsersToRolesPostError,
   Role,
   RolePostData,
   RolePostError,
-} from 'pages/role/type';
-import { User } from 'pages/user/type';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Application, Department, Tag } from '../type';
+} from './type';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -534,6 +542,8 @@ export default defineComponent({
         height: '2px',
         opacity: '0.75',
       }),
+
+      FormAction,
     };
   },
 
@@ -622,26 +632,6 @@ export default defineComponent({
       this.bindUsersFormData = {};
       this.bindUsersFormError = {};
       this.selectedUsers = [];
-    },
-
-    async saveRoleForm() {
-      if (JSON.stringify(this.role) === JSON.stringify(this.roleFormData))
-        return;
-      try {
-        this.roleFormError = {};
-        const resp = await this.$api.put(
-          `/roles/${this.role.id}`,
-          this.roleFormData,
-          {
-            successMsg: '角色更新成功',
-          }
-        );
-        this.role = resp.data;
-        this.roleFormData = Object.assign({}, resp.data);
-        this.roleFormError = {};
-      } catch (e) {
-        this.roleFormError = (e as Error).cause || {};
-      }
     },
 
     refreshRoleData(op: string) {

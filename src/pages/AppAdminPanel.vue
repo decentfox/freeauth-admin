@@ -103,6 +103,11 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
+import {
+  Application,
+  ApplicationPostData,
+  ApplicationPostError,
+} from 'components/application/type';
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import {
@@ -110,8 +115,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import { Application, ApplicationPostData, ApplicationPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {

@@ -267,20 +267,20 @@
 import { defineComponent, ref } from 'vue';
 import { QTableProps, VueStyleObjectProp } from 'quasar';
 
+import { Application } from 'components/application/type';
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
-import { RoleOperationsMixin } from 'components/role/RoleOperations';
-import { DataTableComponent } from 'components/table/type';
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Application, Department, Tag } from '../type';
-import { User } from '../user/type';
-
+import { Department } from 'components/organization/type';
+import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import {
   BindUsersToRolesPostData,
   BindUsersToRolesPostError,
   Role,
-} from './type';
+} from 'components/role/type';
+import { DataTableComponent } from 'components/table/type';
+import { Tag } from 'components/tag/type';
+import { User } from 'components/user/type';
 
 const userColumns: QTableProps['columns'] = [
   {

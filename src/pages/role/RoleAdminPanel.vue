@@ -323,19 +323,16 @@ import { defineComponent, ref } from 'vue';
 import { date, QTableProps, QTreeNode } from 'quasar';
 
 import { FormAction, FormComponent } from 'components/form/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Department, OrgType } from 'components/organization/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
+import { Role, RoleSet } from 'components/role/type';
 import {
   DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-import { SetRolesComponent } from 'components/user/type';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department, OrgType } from '../type';
-import { User } from '../user/type';
-
-import { Role, RoleSet } from './type';
+import { SetRolesComponent, User } from 'components/user/type';
 
 const columns: QTableProps['columns'] = [
   {

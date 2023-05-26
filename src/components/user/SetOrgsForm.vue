@@ -53,12 +53,14 @@
 import { defineComponent, ref } from 'vue';
 import { QTreeNode } from 'quasar';
 
-import { OrgType } from 'pages/type';
-import { User } from 'pages/user/type';
-
 import { FormDialogComponent } from '../dialog/type';
+import { OrgType } from '../organization/type';
 
-import { SetOrganizationsPostData, SetOrganizationsPostError } from './type';
+import {
+  SetOrganizationsPostData,
+  SetOrganizationsPostError,
+  User,
+} from './type';
 
 export default defineComponent({
   name: 'SetOrgsForm',
@@ -80,7 +82,7 @@ export default defineComponent({
   },
 
   methods: {
-    async show(user: User) {
+    show(user: User) {
       this.user = user;
       this.transferForm = true;
       this.loadOrgTypes();

@@ -236,18 +236,16 @@ import { date, QTableProps } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
-import { PermOperationsMixin } from 'components/permission/PermOperations';
-import { DataTableComponent } from 'components/table/type';
-
-import { Role } from '../role/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department } from '../type';
-
+import { Department } from 'components/organization/type';
+import { PermOperationsMixin } from 'components/permission/PermOperations';
 import {
   BindRolesToPermsPostData,
   BindRolesToPermsPostError,
   Permission,
-} from './type';
+} from 'components/permission/type';
+import { Role } from 'components/role/type';
+import { DataTableComponent } from 'components/table/type';
 
 const roleColumns: QTableProps['columns'] = [
   {

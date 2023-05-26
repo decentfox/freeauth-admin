@@ -131,7 +131,7 @@
                       v-close-popup
                       clickable
                       class="q-my-xs"
-                      @click="deleteOrganization(prop.node.id)"
+                      @click="deleteOrganization(prop.node, refreshEnterprise)"
                     >
                       <q-item-section> 删除该项 </q-item-section>
                     </q-item>
@@ -144,190 +144,34 @@
       </q-tree>
     </q-tab-panel>
   </div>
-  <form-dialog
-    ref="enterpriseDialog"
-    v-model="enterpriseForm"
-    title="企业机构"
-    width="450px"
-    @confirm="saveEnterpriseForm"
-    @close="resetEnterpriseForm"
-  >
-    <template #form-content>
-      <div class="q-gutter-md q-pa-md">
-        <div>
-          <field-label text="企业机构名称" required />
-          <q-input
-            v-model="enterpriseFormData.name"
-            filled
-            dense
-            placeholder="请填写企业名称"
-            hide-bottom-space
-            :error="!!enterpriseFormError.name"
-            :error-message="enterpriseFormError.name"
-          />
-        </div>
-        <div>
-          <field-label
-            text="企业机构 Code"
-            hint="企业机构的唯一标识符，同一组织类型下唯一，可用于获取企业信息"
-          />
-          <q-input
-            v-model="enterpriseFormData.code"
-            filled
-            dense
-            placeholder="请填写企业代码"
-            hide-bottom-space
-            :error="!!enterpriseFormError.code"
-            :error-message="enterpriseFormError.code"
-          />
-        </div>
-        <div>
-          <field-label text="企业税务信息" />
-          <q-input
-            v-model="enterpriseFormData.tax_id"
-            filled
-            dense
-            placeholder="请填写 15、18 或 20 位纳税识别号"
-            hide-bottom-space
-            :error="!!enterpriseFormError.tax_id"
-            :error-message="enterpriseFormError.tax_id"
-          />
-        </div>
-
-        <div>
-          <field-label text="企业银行信息" />
-          <div class="q-gutter-sm">
-            <q-input
-              v-model="enterpriseFormData.issuing_bank"
-              filled
-              dense
-              placeholder="请填写开户行名称"
-              hide-bottom-space
-              class="col"
-            />
-            <q-input
-              v-model="enterpriseFormData.bank_account_number"
-              filled
-              dense
-              placeholder="请填写银行账号"
-              hide-bottom-space
-              class="col"
-            />
-          </div>
-        </div>
-
-        <div>
-          <field-label text="企业办公信息" />
-          <div class="q-gutter-sm">
-            <q-input
-              v-model="enterpriseFormData.contact_address"
-              filled
-              dense
-              placeholder="请填写办公地址"
-              hide-bottom-space
-              class="col"
-            />
-            <q-input
-              v-model="enterpriseFormData.contact_phone_num"
-              filled
-              dense
-              placeholder="请填写办公电话"
-              hide-bottom-space
-              class="col"
-            />
-          </div>
-        </div>
-      </div>
-    </template>
-  </form-dialog>
-  <form-dialog
-    ref="departmentDialog"
-    v-model="departmentForm"
-    title="部门分支"
-    width="450px"
-    @confirm="saveDepartmentForm"
-    @close="resetDepartmentForm"
-  >
-    <template #form-content>
-      <div class="q-col-gutter-md q-pa-md">
-        <div>
-          <field-label text="所属上级部门" required />
-          <tree-select
-            v-model="departmentFormData.parent_id"
-            :nodes="orgTreeData"
-            :initial-selected-items="parentDepartment"
-          />
-          <div
-            v-if="!!departmentFormError.parent_id"
-            class="error-hint text-negative"
-          >
-            {{ departmentFormError.parent_id }}
-          </div>
-        </div>
-        <div>
-          <field-label text="部门名称" required />
-          <q-input
-            v-model="departmentFormData.name"
-            filled
-            dense
-            placeholder="请填写部门名称"
-            hide-bottom-space
-            :error="!!departmentFormError.name"
-            :error-message="departmentFormError.name"
-          />
-        </div>
-        <div>
-          <field-label
-            text="部门 Code"
-            hint="部门分支的唯一标识符，同一企业机构下唯一，可用于获取部门信息"
-          />
-          <q-input
-            v-model="departmentFormData.code"
-            filled
-            dense
-            placeholder="请填写部门代码"
-            hide-bottom-space
-            :error="!!departmentFormError.code"
-            :error-message="departmentFormError.code"
-          />
-        </div>
-        <div>
-          <field-label text="部门描述" />
-          <q-input
-            v-model="departmentFormData.description"
-            filled
-            dense
-            type="textarea"
-            placeholder="请填写部门描述"
-            hide-bottom-space
-          />
-        </div>
-      </div>
-    </template>
-  </form-dialog>
+  <enterprise-form
+    ref="enterpriseForm"
+    :selected-org-type-id="selectedOrgType.id"
+    @enterprise-updated="refreshEnterprise"
+  />
+  <department-form
+    ref="departmentForm"
+    :selected-org-type-id="selectedOrgType.id"
+    @department-updated="loadOrgTree"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QInput, QTree, QTreeNode } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
+import { OrgOperationsMixin } from './OrgOperations';
 import {
-  Department,
-  DepartmentPostData,
-  DepartmentPostError,
-  Enterprise,
-  EnterprisePostData,
-  EnterprisePostError,
+  DepartmentFormComponent,
+  EnterpriseFormComponent,
   OrgType,
-} from 'pages/type';
-
-import { FormDialogComponent } from '../dialog/type';
-
-import { OrgTypeSelectComponent } from './type';
+  OrgTypeSelectComponent,
+} from './type';
 
 export default defineComponent({
   name: 'OrgTree',
+
+  mixins: [OrgOperationsMixin],
 
   props: {
     editable: {
@@ -351,26 +195,6 @@ export default defineComponent({
       filter: ref(''),
       filterRef: ref(null),
       orgTreeData: ref<QTreeNode[]>([]),
-
-      // form dialog
-      enterpriseForm: ref(false),
-      enterpriseFormError: ref<EnterprisePostError>({}),
-      enterpriseFormData: ref<EnterprisePostData>({}),
-      operatedEnterprise: ref<Enterprise>({
-        id: '',
-        name: '',
-      }),
-
-      departmentForm: ref(false),
-      departmentFormData: ref<DepartmentPostData>({}),
-      departmentFormError: ref<DepartmentPostError>({}),
-      operatedDepartment: ref<Department>({
-        id: '',
-        name: '',
-        parent_id: '',
-      }),
-
-      parentDepartment: ref<QTreeNode[]>([]),
     };
   },
 
@@ -404,156 +228,24 @@ export default defineComponent({
     },
 
     /** organization type related methods */
-    async openOrgTypeForm() {
+    openOrgTypeForm() {
       (this.$refs.orgTypeSelect as OrgTypeSelectComponent).openOrgTypeForm();
     },
 
     /** enterprise related methods */
-
-    async openEnterpriseForm(enterpriseId?: string) {
-      if (enterpriseId) {
-        const resp = await this.$api.get(`/enterprises/${enterpriseId}`);
-        this.operatedEnterprise = resp.data;
-        this.enterpriseFormData = {
-          name: resp.data.name,
-          code: resp.data.code,
-          tax_id: resp.data.tax_id,
-          issuing_bank: resp.data.issuing_bank,
-          bank_account_number: resp.data.bank_account_number,
-          contact_address: resp.data.contact_address,
-          contact_phone_num: resp.data.contact_phone_num,
-        };
-      }
-      this.enterpriseForm = true;
-    },
-
-    async saveEnterpriseForm() {
-      try {
-        this.enterpriseFormError = {};
-        this.enterpriseFormData.org_type_id = this.selectedOrgType.id;
-        if (!this.operatedEnterprise.id) {
-          await this.$api.post('/enterprises', this.enterpriseFormData, {
-            successMsg: '企业机构创建成功',
-          });
-        } else {
-          await this.$api.put(
-            `/enterprises/${this.operatedEnterprise.id}`,
-            this.enterpriseFormData,
-            {
-              successMsg: '企业机构更新成功',
-            }
-          );
-        }
-        (this.$refs.enterpriseDialog as FormDialogComponent).hide();
-        this.$emit('refresh', 'enterprise');
-        this.loadOrgTree();
-        this.resetEnterpriseForm();
-      } catch (e) {
-        this.enterpriseFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetEnterpriseForm() {
-      this.enterpriseFormError = {};
-      this.enterpriseFormData = {};
-      this.operatedEnterprise = {
-        id: '',
-        name: '',
-      };
+    openEnterpriseForm(enterpriseId?: string) {
+      (this.$refs.enterpriseForm as EnterpriseFormComponent).show(enterpriseId);
     },
 
     /** department or department related methods */
-
-    async openDepartmentForm(nodeId?: string, parentId?: string) {
-      if (parentId) {
-        const node = (this.$refs.orgTree as QTree).getNodeByKey(parentId);
-        this.departmentFormData.parent_id = parentId;
-        this.parentDepartment = [node];
-      }
-      if (nodeId) {
-        const resp = await this.$api.get(`/departments/${nodeId}`);
-        this.operatedDepartment = resp.data;
-        this.departmentFormData = {
-          name: resp.data.name,
-          description: resp.data.description,
-          parent_id: resp.data.parent.id,
-          code: resp.data.code,
-        };
-      }
-      this.departmentForm = true;
+    openDepartmentForm(nodeId?: string, parentId?: string) {
+      const node = (this.$refs.orgTree as QTree).getNodeByKey(parentId);
+      (this.$refs.departmentForm as DepartmentFormComponent).show(nodeId, node);
     },
 
-    async saveDepartmentForm() {
-      try {
-        this.departmentFormError = {};
-        if (!this.operatedDepartment.id) {
-          await this.$api.post('/departments', this.departmentFormData, {
-            successMsg: '部门分支创建成功',
-          });
-        } else {
-          await this.$api.put(
-            `/departments/${this.operatedDepartment.id}`,
-            this.departmentFormData,
-            {
-              successMsg: '部门分支更新成功',
-            }
-          );
-        }
-        (this.$refs.departmentDialog as FormDialogComponent).hide();
-        this.loadOrgTree();
-        this.resetDepartmentForm();
-      } catch (e) {
-        this.departmentFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetDepartmentForm() {
-      this.departmentFormError = {};
-      this.departmentFormData = {};
-      this.parentDepartment = [];
-      this.operatedDepartment = {
-        id: '',
-        name: '',
-        parent_id: '',
-      };
-    },
-
-    deleteOrganization(orgId: string) {
-      const node = (this.$refs.orgTree as QTree).getNodeByKey(orgId);
-      const orgName = node.name;
-      this.$q
-        .dialog({
-          component: ConfirmDialog,
-          componentProps: {
-            title: node.is_enterprise ? '删除企业' : '删除部门',
-            content: `操作后，【${orgName}】的下属部门将一并执行删除；与其关联的用户将自动解绑，但仍可继续正常使用。请问您确认要执行删除吗？`,
-            buttons: [
-              { label: '取消', class: 'secondary-btn' },
-              {
-                label: '删除',
-                actionType: 'delete',
-                class: 'accent-btn',
-              },
-            ],
-          },
-        })
-        .onOk(async ({ type }) => {
-          if (type === 'delete') {
-            try {
-              await this.$api.request({
-                method: 'DELETE',
-                url: '/organizations',
-                data: { ids: [orgId] },
-                successMsg: node.is_enterprise
-                  ? '企业删除成功'
-                  : '部门删除成功',
-              });
-            } finally {
-              this.$emit('refresh', 'enterprise');
-              this.loadOrgTree();
-            }
-          }
-        });
+    refreshEnterprise() {
+      this.$emit('refresh', 'enterprise');
+      this.loadOrgTree();
     },
 
     onNodeUpdated(selected: string) {

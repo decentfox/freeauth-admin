@@ -109,10 +109,11 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import { PermissionPostData, PermissionPostError } from 'pages/permission/type';
-import { Application, Tag } from 'pages/type';
-
+import { Application } from '../application/type';
 import { FormAction } from '../form/type';
+import { Tag } from '../tag/type';
+
+import { PermissionPostData, PermissionPostError } from './type';
 
 export default defineComponent({
   name: 'PermFormContent',

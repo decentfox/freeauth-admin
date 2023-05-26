@@ -91,10 +91,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import { RolePostData, RolePostError } from 'pages/role/type';
-import { OrgType } from 'pages/type';
-
 import { FormAction } from '../form/type';
+import { OrgType } from '../organization/type';
+
+import { RolePostData, RolePostError } from './type';
 
 export default defineComponent({
   name: 'RoleFormContent',

@@ -134,6 +134,7 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
+import { Application } from 'components/application/type';
 import { FormAction, FormComponent } from 'components/form/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
 import {
@@ -141,8 +142,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import { Application } from '../type';
 
 const columns: QTableProps['columns'] = [
   {

@@ -48,10 +48,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import { Role, RolePostData, RolePostError } from 'pages/role/type';
-
 import { FormDialogComponent } from '../dialog/type';
 import { FormAction } from '../form/type';
+
+import { Role, RolePostData, RolePostError } from './type';
 
 export default defineComponent({
   name: 'RoleForm',

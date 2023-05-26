@@ -50,10 +50,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import { User, UserPostData, UserPostError } from 'pages/user/type';
-
 import { FormDialogComponent } from '../dialog/type';
 import { FormAction } from '../form/type';
+
+import { User, UserPostData, UserPostError } from './type';
 
 export default defineComponent({
   name: 'UserForm',

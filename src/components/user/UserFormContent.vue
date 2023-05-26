@@ -125,9 +125,9 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import { UserPostData, UserPostError } from 'pages/user/type';
-
 import { FormAction } from '../form/type';
+
+import { UserPostData, UserPostError } from './type';
 
 export default defineComponent({
   name: 'RoleFormContent',

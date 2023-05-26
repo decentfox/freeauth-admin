@@ -268,17 +268,15 @@ import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
 import { FormAction } from 'components/form/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Role } from 'components/role/type';
 import { DataTableComponent } from 'components/table/type';
 import {
   SetOrganizationsComponent,
   SetRolesComponent,
+  User,
 } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Role } from '../role/type';
-
-import { User } from './type';
 
 const roleColumns: QTableProps['columns'] = [
   {

@@ -51,14 +51,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 
-import {
-  Permission,
-  PermissionPostData,
-  PermissionPostError,
-} from 'pages/permission/type';
-
 import { FormDialogComponent } from '../dialog/type';
 import { FormAction } from '../form/type';
+
+import { Permission, PermissionPostData, PermissionPostError } from './type';
 
 export default defineComponent({
   name: 'PermForm',

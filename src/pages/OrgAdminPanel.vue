@@ -20,7 +20,7 @@
 
       <!--the second splitted screen-->
       <template #after>
-        <div class="q-px-md">
+        <div class="q-pl-md">
           <q-toolbar class="q-pa-none">
             <q-tabs
               v-model="leftPanelTab"
@@ -192,9 +192,7 @@
                       "
                       @copy="copyInfoToClipboard(props.row)"
                       @delete="
-                        (
-                          $refs.orgStructure as OrgTreeComponent
-                        ).deleteOrganization(props.row.id)
+                        deleteOrganization(props.row, refreshAfterDeletingOrg)
                       "
                     />
                   </q-td>
@@ -291,21 +289,24 @@ import { defineComponent, ref } from 'vue';
 import { QTableProps, QTreeNode } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
-import { DataTableComponent } from 'components/table/type';
-import { SetOrganizationsComponent } from 'components/user/type';
-import { UserOperationsMixin } from 'components/user/UserOperations';
-
-import { User, UserPostData, UserPostError } from './user/type';
+import { OrgOperationsMixin } from 'components/organization/OrgOperations';
 import {
   BindUsersToOrgsPostData,
   BindUsersToOrgsPostError,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Department,
   Enterprise,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   OrgTreeComponent,
   OrgType,
-} from './type';
+} from 'components/organization/type';
+import { DataTableComponent } from 'components/table/type';
+import {
+  SetOrganizationsComponent,
+  User,
+  UserPostData,
+  UserPostError,
+} from 'components/user/type';
+import { UserOperationsMixin } from 'components/user/UserOperations';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -407,7 +408,7 @@ const enterpriseColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'OrgAdminPanel',
 
-  mixins: [UserOperationsMixin],
+  mixins: [UserOperationsMixin, OrgOperationsMixin],
 
   setup() {
     return {
@@ -494,6 +495,11 @@ export default defineComponent({
           ut.fetchRows();
         }, 20);
       }
+    },
+
+    refreshAfterDeletingOrg() {
+      (this.$refs.orgStructure as OrgTreeComponent).loadOrgTree();
+      this.loadEnterpriseTable();
     },
 
     switchPanelTab(val: string) {

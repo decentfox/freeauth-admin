@@ -68,12 +68,10 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
-import { Role } from 'pages/role/type';
-import { User } from 'pages/user/type';
-
 import { FormDialogComponent } from '../dialog/type';
+import { Role } from '../role/type';
 
-import { SetRolesPostData, SetRolesPostError } from './type';
+import { SetRolesPostData, SetRolesPostError, User } from './type';
 
 export default defineComponent({
   name: 'SetRolesForm',

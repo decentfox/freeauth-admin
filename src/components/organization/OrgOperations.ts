@@ -43,14 +43,16 @@ export const OrgOperationsMixin: OrgOperationsType = {
 
     deleteOrganization(
       org: Organization,
-      handler?: (...args: [string]) => void
+      handler?: (...args: [string]) => void,
+      isEnterprise?: boolean
     ) {
       const orgId = org.id;
       const orgName = org.name;
+      const enterprise = org.is_enterprise || isEnterprise;
       Dialog.create({
         component: ConfirmDialog,
         componentProps: {
-          title: org.is_enterprise ? '删除企业' : '删除部门',
+          title: enterprise ? '删除企业' : '删除部门',
           content: `操作后，【${orgName}】的下属部门将一并执行删除；与其关联的用户将自动解绑，但仍可继续正常使用。请问您确认要执行删除吗？`,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
@@ -68,7 +70,7 @@ export const OrgOperationsMixin: OrgOperationsType = {
               method: 'DELETE',
               url: '/organizations',
               data: { ids: [orgId] },
-              successMsg: org.is_enterprise ? '企业删除成功' : '部门删除成功',
+              successMsg: enterprise ? '企业删除成功' : '部门删除成功',
             });
           } finally {
             if (handler) {

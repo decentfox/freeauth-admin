@@ -131,7 +131,14 @@
                       v-close-popup
                       clickable
                       class="q-my-xs"
-                      @click="deleteOrganization(prop.node, refreshEnterprise)"
+                      @click="
+                        selected === prop.node.id
+                          ? deleteOrganization(
+                              prop.node,
+                              refreshAfterDeletingSelectedOrg
+                            )
+                          : deleteOrganization(prop.node, refreshEnterprise)
+                      "
                     >
                       <q-item-section> 删除该项 </q-item-section>
                     </q-item>
@@ -243,6 +250,11 @@ export default defineComponent({
       (this.$refs.departmentForm as DepartmentFormComponent).show(nodeId, node);
     },
 
+    refreshAfterDeletingSelectedOrg() {
+      this.$emit('refresh', 'enterprise');
+      this.loadOrgTree(true);
+    },
+
     refreshEnterprise() {
       this.$emit('refresh', 'enterprise');
       this.loadOrgTree();
@@ -254,7 +266,6 @@ export default defineComponent({
         const node = (this.$refs.orgTree as QTree).getNodeByKey(selected);
         this.$emit('update:selectNode', node);
       }
-      return;
     },
 
     changeOrgType(selected: OrgType) {

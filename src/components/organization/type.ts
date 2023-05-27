@@ -9,7 +9,8 @@ export interface OrgOperationsType {
 
     deleteOrganization: (
       org: Organization,
-      handler?: (...args: [string]) => void
+      handler?: (...args: [string]) => void,
+      isEnterprise?: boolean
     ) => void;
   };
 }

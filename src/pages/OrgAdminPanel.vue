@@ -183,7 +183,17 @@
                       "
                       @copy="copyInfoToClipboard(props.row)"
                       @delete="
-                        deleteOrganization(props.row, refreshAfterDeletingOrg)
+                        selectedNode.id === props.row.id
+                          ? deleteOrganization(
+                              props.row,
+                              refreshAfterDeletingSelectedOrg,
+                              true
+                            )
+                          : deleteOrganization(
+                              props.row,
+                              refreshAfterDeletingOrg,
+                              true
+                            )
                       "
                     />
                   </q-td>
@@ -488,6 +498,11 @@ export default defineComponent({
 
     refreshAfterDeletingOrg() {
       (this.$refs.orgStructure as OrgTreeComponent).loadOrgTree();
+      this.loadEnterpriseTable();
+    },
+
+    refreshAfterDeletingSelectedOrg() {
+      (this.$refs.orgStructure as OrgTreeComponent).loadOrgTree(true);
       this.loadEnterpriseTable();
     },
 

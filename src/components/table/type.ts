@@ -6,7 +6,7 @@ export interface DataTableComponent {
   /** 设置获取表格数据的 API 信息 */
   setApiInfo: (apiUrl: string, apiMethod: string) => void;
   /** 基于外部传入的过滤键值，对表格数据进行过滤 */
-  onExternalFiltered: (key: string, value: string | boolean) => void;
+  onExternalFiltered: (key: string, value: string | boolean | string[]) => void;
   /** 移除外部传入的过滤键值，取消对该字段的过滤 */
   removeExternalFilter: (key: string) => void;
 }

@@ -252,9 +252,9 @@ export default defineComponent({
 
     async loadPermissionsbyApp() {
       setTimeout(() => {
-        const et = this.$refs.permissionTable as DataTableComponent;
-        et.setApiInfo('/permissions/query', 'POST');
-        et.onExternalFiltered('application_id', this.selectedAppId);
+        const pt = this.$refs.permissionTable as DataTableComponent;
+        pt.setApiInfo('/permissions/query', 'POST');
+        pt.onExternalFiltered('application_id', this.selectedAppId);
       }, 20);
     },
 

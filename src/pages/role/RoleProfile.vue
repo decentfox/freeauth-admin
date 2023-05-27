@@ -64,16 +64,7 @@
           </template>
           <template #body-cell-departments="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(dept, idx) in (props.row.departments as Department[])"
-                :key="idx"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ dept.name }}
-              </q-chip>
+              <chip-group :chips="props.row.departments" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -107,53 +98,30 @@
           <div class="text-caption">应用：</div>
           <q-scroll-area
             :thumb-style="thumbStyle"
-            style="height: 36px; width: calc(100% - 40px)"
+            style="height: 32px; width: calc(100% - 40px)"
           >
             <div class="row no-wrap q-gutter-col-xs">
-              <q-chip
-                v-for="item in applicationChips"
-                :key="item.id"
+              <!-- TODO Chip -->
+              <chip-group
+                :chips="(applicationChips as ChipGroupItem[])"
+                icon="wysiwyg"
                 clickable
                 square
-                :color="
-                  selectedApplication.id === item.id ? 'info' : 'secondary'
-                "
-                @click="clickApplicationChip(item)"
-              >
-                <q-avatar
-                  :color="
-                    selectedApplication.id === item.id ? 'primary' : 'secondary'
-                  "
-                  :text-color="
-                    selectedApplication.id === item.id
-                      ? 'white'
-                      : $q.dark.isActive
-                      ? 'grey-1'
-                      : 'grey-10'
-                  "
-                >
-                  12
-                </q-avatar>
-                {{ item.name }}
-              </q-chip>
+                @selected-change="filterByApp"
+              />
             </div>
           </q-scroll-area>
         </div>
         <div class="q-pa-sm q-pb-md row">
           <div class="text-caption q-py-xs">标签：</div>
           <div class="q-gutter-col-xs" style="width: calc(100% - 40px)">
-            <q-chip
-              v-for="item in tagChips"
-              :key="item.id"
+            <chip-group
+              :chips="tagChips"
+              icon="local_offer"
               clickable
-              size="12px"
-              :color="selectedTags.includes(item.id) ? 'primary' : 'secondary'"
-              :text-color="selectedTags.includes(item.id) ? 'white' : ''"
-              @click="clickTagChip(item)"
-            >
-              <span class="material-icons-outlined q-pr-xs"> local_offer </span>
-              {{ item.name }}
-            </q-chip>
+              selection="multiple"
+              @selected-change="filterByTags"
+            />
           </div>
         </div>
 
@@ -183,29 +151,12 @@
           </template>
           <template #body-cell-tags="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(tag, idx) in props.row.tags"
-                :key="idx"
-                size="12px"
-                color="secondary"
-                class="q-ml-none"
-              >
-                <span class="material-icons-outlined q-pr-xs">
-                  local_offer
-                </span>
-                {{ tag.name }}
-              </q-chip>
+              <chip-group :chips="props.row.tags" icon="local_offer" />
             </q-td>
           </template>
           <template #body-cell-application="props">
             <q-td :props="props">
-              <q-chip
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-                :label="props.row.application.name"
-              />
+              <chip-group :chips="[props.row.application]" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -266,12 +217,12 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QTableProps, VueStyleObjectProp } from 'quasar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ChipGroupItem } from 'src/components/common/type';
 
 import { Application } from 'components/application/type';
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department } from 'components/organization/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import {
   BindUsersToRolesPostData,
@@ -445,7 +396,6 @@ export default defineComponent({
     },
 
     async loadTagOptions() {
-      this.selectedTags = [];
       const resp = await this.$api.get('/permission_tags');
       this.tagChips = resp.data.permission_tags;
     },
@@ -490,18 +440,15 @@ export default defineComponent({
       console.error('TODO');
     },
 
-    clickApplicationChip(app: Application) {
+    filterByApp(selected: string[]) {
+      console.error(selected);
       this.selectedApplication =
-        this.selectedApplication.id === app.id ? { id: '' } : app;
+        selected.length === 0 ? { id: '' } : { id: selected[0] };
       this.loadPermissionsbyApp();
     },
 
-    clickTagChip(tag: Tag) {
-      if (this.selectedTags.includes(tag.id)) {
-        this.selectedTags = this.selectedTags.filter((tid) => tid != tag.id);
-      } else {
-        this.selectedTags.push(tag.id);
-      }
+    filterByTags() {
+      console.error('TODO');
     },
 
     async loadPermissionsbyApp() {

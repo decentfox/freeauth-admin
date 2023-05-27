@@ -26,3 +26,8 @@ export interface MenuButton {
   /** 禁用按钮提示信息 */
   disableHint?: string;
 }
+
+export interface ChipGroupItem {
+  id: string;
+  name: string;
+}

@@ -17,7 +17,7 @@
         </q-chip>
       </template>
       <template v-if="!multiSelect && !!selectedNode.id">
-        <q-chip color="primary" text-color="white" square>
+        <q-chip color="primary" text-color="white" dense square>
           {{ selectedNode.name }}
         </q-chip>
       </template>

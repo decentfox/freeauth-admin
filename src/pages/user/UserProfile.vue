@@ -58,26 +58,17 @@
         >
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.org_type"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.org_type.name }}
-              </q-chip>
+              <chip-group :chips="[props.row.org_type]" square />
             </q-td>
           </template>
           <template #body-cell-enterprise="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{
-                  props.row.enterprise
-                    ? props.row.enterprise.name
-                    : props.row.name
-                }}
-              </q-chip>
+              <chip-group
+                :chips="
+                  props.row.enterprise ? [props.row.enterprise] : [props.row]
+                "
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-actions="props">
@@ -132,9 +123,10 @@
         >
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
-              </q-chip>
+              <chip-group
+                :chips="props.row.org_type ? [props.row.org_type] : []"
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -192,48 +184,19 @@
         >
           <template #body-cell-tags="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(tag, idx) in props.row.tags"
-                :key="idx"
-                size="12px"
-                color="secondary"
-                class="q-ml-none"
-              >
-                <span class="material-icons-outlined q-pr-xs">
-                  local_offer
-                </span>
-                {{ tag.name }}
-              </q-chip>
+              <chip-group :chips="props.row.tags" icon="local_offer" />
             </q-td>
           </template>
           <template #body-cell-roles="props">
             <q-td :props="props">
               <div class="row">
-                <div
-                  v-for="(role, idx) in (props.row.roles as Role[])"
-                  :key="idx"
-                >
-                  <q-chip
-                    v-if="
-                      user.roles &&
-                      user.roles.map((r: Role) => r.id).includes(role.id)
-                    "
-                    size="12px"
-                    square
-                    color="secondary"
-                    class="q-ml-none"
-                  >
-                    {{ role.name }}
-                  </q-chip>
-                </div>
+                <chip-group :chips="props.row.roles" square />
               </div>
             </q-td>
           </template>
           <template #body-cell-application="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.application.name }}
-              </q-chip>
+              <chip-group :chips="[props.row.application]" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -374,7 +337,7 @@ const permColumns: QTableProps['columns'] = [
   },
   {
     name: 'roles',
-    label: '权限来源角色',
+    label: '关联角色',
     align: 'left',
     field: 'roles',
   },

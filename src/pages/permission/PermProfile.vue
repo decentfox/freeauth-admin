@@ -69,9 +69,10 @@
           </template>
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
-              </q-chip>
+              <chip-group
+                :chips="props.row.org_type ? [props.row.org_type] : []"
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -171,16 +172,7 @@
           </template>
           <template #body-cell-departments="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(dept, idx) in (props.row.departments as Department[])"
-                :key="idx"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ dept.name }}
-              </q-chip>
+              <chip-group :chips="props.row.departments" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
@@ -236,8 +228,6 @@ import { date, QTableProps } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department } from 'components/organization/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
 import {
   BindRolesToPermsPostData,

@@ -77,16 +77,7 @@
                 </template>
                 <template #body-cell-departments="props">
                   <q-td :props="props">
-                    <q-chip
-                      v-for="(dept, idx) in (props.row.departments as Department[])"
-                      :key="idx"
-                      size="12px"
-                      square
-                      color="secondary"
-                      class="q-ml-none"
-                    >
-                      {{ dept.name }}
-                    </q-chip>
+                    <chip-group :chips="props.row.departments" square />
                   </q-td>
                 </template>
                 <template #body-cell-is_deleted="props">
@@ -293,8 +284,6 @@ import { OrgOperationsMixin } from 'components/organization/OrgOperations';
 import {
   BindUsersToOrgsPostData,
   BindUsersToOrgsPostError,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
   Enterprise,
   OrgTreeComponent,
   OrgType,

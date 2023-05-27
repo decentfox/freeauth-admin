@@ -50,27 +50,12 @@
       </template>
       <template #body-cell-tags="props">
         <q-td :props="props">
-          <q-chip
-            v-for="(tag, idx) in props.row.tags"
-            :key="idx"
-            size="12px"
-            color="secondary"
-            class="q-ml-none"
-          >
-            <span class="material-icons-outlined q-pr-xs"> local_offer </span>
-            {{ tag.name }}
-          </q-chip>
+          <chip-group :chips="props.row.tags" icon="local_offer" />
         </q-td>
       </template>
       <template #body-cell-application="props">
         <q-td :props="props">
-          <q-chip
-            size="12px"
-            square
-            color="secondary"
-            class="q-ml-none"
-            :label="props.row.application.name"
-          />
+          <chip-group :chips="[props.row.application]" square />
         </q-td>
       </template>
       <template #body-cell-is_deleted="props">

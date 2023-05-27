@@ -55,12 +55,7 @@
           <slot name="option-caption-label" :opt="scope.opt" />
         </q-item-section>
         <q-item-section v-if="!!scope.opt.org_type" side>
-          <q-chip
-            square
-            size="12px"
-            :label="scope.opt.org_type.name"
-            class="q-pa-sm bg-secondary"
-          />
+          <chip-group :chips="[scope.opt.org_type]" square />
         </q-item-section>
       </q-item>
     </template>

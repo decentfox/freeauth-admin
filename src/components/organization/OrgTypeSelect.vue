@@ -106,7 +106,8 @@
       <q-chip
         :label="`代码：${selectedOrgType.code}`"
         square
-        class="q-pa-sm q-ml-xs bg-secondary text-black-white cursor-pointer"
+        clickable
+        class="q-pa-sm bg-secondary"
         @click="$utils.copyToClipboard(selectedOrgType.code)"
       >
         <q-tooltip anchor="bottom left" self="top start">

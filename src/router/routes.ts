@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
-    component: () => import('pages/LoginPage.vue'),
+    component: () => import('pages/login/LoginPage.vue'),
   },
   {
     path: '/',
@@ -15,7 +15,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/login_settings',
-        component: () => import('pages/LoginSettings.vue'),
+        component: () => import('pages/login/LoginSettings.vue'),
       },
       {
         path: '/common_settings',

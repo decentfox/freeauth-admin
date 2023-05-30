@@ -1,7 +1,7 @@
 import { api } from 'boot/axios';
 import { defineStore } from 'pinia';
 
-import { User } from 'pages/user/type';
+import { User } from 'components/user/type';
 
 export const authStore = defineStore('auth', {
   state: () => ({
@@ -20,7 +20,7 @@ export const authStore = defineStore('auth', {
           hideProgress: true,
         }
       );
-      this.user = {};
+      this.user = { id: '' };
       this.authenticated = false;
     },
 

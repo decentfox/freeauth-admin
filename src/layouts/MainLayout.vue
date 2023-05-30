@@ -119,7 +119,7 @@
 import { defineComponent, ref } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
-import { MainMenuSection } from 'components/type';
+import { MainMenuSection } from 'components/common/type';
 import { authStore } from 'stores/auth-store';
 
 const menuLinkList: MainMenuSection[] = [

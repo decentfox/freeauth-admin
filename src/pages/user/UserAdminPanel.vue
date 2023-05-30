@@ -1,22 +1,14 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn
-      unelevated
-      dense
-      class="no-hover-btn hint-label"
-      @click="$router.go(0)"
-    >
-      <q-icon size="18px" class="q-pr-xs" name="subject" />用户管理
-    </q-btn>
+  <page-wrapper page-title="用户管理">
     <data-table
-      ref="table"
-      :columns="columns"
+      ref="userTable"
       api-url="/users/query"
       api-method="POST"
+      :columns="columns"
+      :filter-columns="filterColumns"
       sticky-action-column
       search-placeholder="搜索用户信息"
       selection="multiple"
-      :filter-columns="filterColumns"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="
         (selected) => toggleUsersStatus(selected, true, refreshUserData)
@@ -32,7 +24,7 @@
           dense
           label="创建用户"
           class="q-ml-sm q-px-md primary-btn"
-          @click="newUserForm = true"
+          @click="openUserForm"
         />
       </template>
       <template #body-cell-name="props">
@@ -46,19 +38,15 @@
       </template>
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
-          <q-chip
-            square
-            size="12px"
-            :label="!props.row.is_deleted ? '正常' : '禁用'"
-            class="text-weight-bold q-pa-sm q-ml-none"
-            :class="
-              !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-            "
+          <boolean-chip
+            :value="!props.row.is_deleted"
+            true-label="正常"
+            false-label="禁用"
           />
         </q-td>
       </template>
       <template #body-cell-actions="props">
-        <q-td :props="props" @click.stop>
+        <q-td :props="props">
           <dropdown-button
             :buttons="[
               {
@@ -74,7 +62,6 @@
                 actionType: 'delete',
               },
             ]"
-            @click.stop
             @disable="toggleUsersStatus([props.row], true, refreshUserData)"
             @enable="toggleUsersStatus([props.row], false, refreshUserData)"
             @delete="deleteUsers([props.row], refreshUserData)"
@@ -84,110 +71,25 @@
     </data-table>
 
     <!--Dialogs-->
-    <form-dialog
-      ref="newUserDialog"
-      v-model="newUserForm"
-      title="创建用户"
-      width="450px"
-      @confirm="createUser"
-      @close="resetNewUserForm"
-    >
-      <template #form-content>
-        <div class="q-gutter-md q-pa-md">
-          <div>
-            <field-label name="登录信息" required hint="至少填写一项" />
-            <div class="q-gutter-sm">
-              <q-input
-                v-model="newUserFormData.username"
-                filled
-                dense
-                placeholder="请填写用户名"
-                hide-bottom-space
-                class="col"
-                :error="!!newUserFormError.username"
-                :error-message="newUserFormError.username"
-              />
-              <q-input
-                v-model="newUserFormData.mobile"
-                filled
-                dense
-                placeholder="请填写手机号"
-                hide-bottom-space
-                class="col"
-                :error="!!newUserFormError.mobile"
-                :error-message="newUserFormError.mobile"
-              />
-              <q-input
-                v-model="newUserFormData.email"
-                filled
-                dense
-                placeholder="请填写邮箱"
-                hide-bottom-space
-                class="col"
-                :error="!!newUserFormError.email"
-                :error-message="newUserFormError.email"
-                @update:model-value="
-                  if (!newUserFormData.email) firstLoginNotification = false;
-                "
-              />
-            </div>
-            <div
-              v-if="!!newUserFormError.__root__"
-              class="error-hint text-negative"
-            >
-              {{ newUserFormError.__root__ }}
-            </div>
-          </div>
-          <div>
-            <field-label name="用户姓名" />
-            <q-input
-              v-model="newUserFormData.name"
-              filled
-              dense
-              placeholder="请填写用户姓名"
-              hide-bottom-space
-              :error="!!newUserFormError.name"
-              :error-message="newUserFormError.name"
-            />
-          </div>
-          <div>
-            <q-toggle
-              v-model="passwordChangingRequired"
-              label="强制用户在首次登录时修改密码"
-            />
-            <q-toggle
-              v-model="firstLoginNotification"
-              label="通过邮件发送初始默认登录信息"
-              :disable="!newUserFormData.email"
-            >
-              <q-tooltip
-                v-if="!newUserFormData.email"
-                anchor="bottom left"
-                self="center start"
-              >
-                填写有效邮箱后才可启用
-              </q-tooltip>
-            </q-toggle>
-          </div>
-        </div>
-      </template>
-    </form-dialog>
-  </q-page>
+    <user-form
+      ref="createUserForm"
+      :action="FormAction.create"
+      @refresh="refreshUserData"
+    />
+  </page-wrapper>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import { date, QTableProps } from 'quasar';
 
-import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction, FormComponent } from 'components/form/type';
 import {
   DataTableComponent,
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-
-import { UserPostData, UserPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -337,41 +239,19 @@ export default defineComponent({
 
   setup() {
     return {
-      // user list table
       columns: columns,
       filterColumns: filterColumns,
-
-      // create new user
-      newUserForm: ref(false),
-      newUserFormData: ref<UserPostData>({}),
-      newUserFormError: ref<UserPostError>({}),
-      firstLoginNotification: ref(false),
-      passwordChangingRequired: ref(false),
+      FormAction,
     };
   },
 
   methods: {
-    async createUser() {
-      try {
-        this.newUserFormError = {};
-        await this.$api.post('/users', this.newUserFormData, {
-          successMsg: '用户创建成功',
-        });
-        (this.$refs.newUserDialog as FormDialogComponent).hide();
-        this.resetNewUserForm();
-        this.refreshUserData();
-      } catch (e) {
-        this.newUserFormError = (e as Error).cause || {};
-      }
-    },
-
-    resetNewUserForm() {
-      this.newUserFormError = {};
-      this.newUserFormData = {};
+    openUserForm() {
+      (this.$refs.createUserForm as FormComponent).show();
     },
 
     refreshUserData() {
-      (this.$refs.table as DataTableComponent).fetchRows();
+      (this.$refs.userTable as DataTableComponent).fetchRows();
     },
 
     goToUserProfile(evt: Event, userId: string) {

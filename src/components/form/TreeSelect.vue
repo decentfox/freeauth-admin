@@ -16,12 +16,12 @@
           {{ node.name }}
         </q-chip>
       </template>
-      <template v-if="!multiSelect && selectedNode">
-        <q-chip color="primary" text-color="white" square>
+      <template v-if="!multiSelect && !!selectedNode.id">
+        <q-chip color="primary" text-color="white" dense square>
           {{ selectedNode.name }}
         </q-chip>
       </template>
-      <template v-if="tickedNodes.length === 0 && !selectedNode">
+      <template v-if="tickedNodes.length === 0 && !selectedNode.id">
         <span class="field-placeholder">请选择所属上级部门</span>
       </template>
     </div>
@@ -99,6 +99,10 @@ export default defineComponent({
       this.resetTree();
       this.initTree();
     },
+  },
+
+  mounted() {
+    this.initTree();
   },
 
   unmounted() {

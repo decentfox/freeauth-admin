@@ -10,7 +10,7 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div v-if="!user.org_type">
-          <field-label name="组织类型" required />
+          <field-label text="组织类型" required />
           <q-select
             v-model="selectedOrgTypeId"
             :options="orgTypeOptions"
@@ -27,7 +27,7 @@
           />
         </div>
         <div>
-          <field-label name="组织归属" required />
+          <field-label text="组织归属" required />
           <tree-select
             v-model="transferFormData.organization_ids"
             :nodes="orgTreeData"
@@ -53,15 +53,17 @@
 import { defineComponent, ref } from 'vue';
 import { QTreeNode } from 'quasar';
 
-import { OrgType } from 'pages/type';
-import { User } from 'pages/user/type';
-
 import { FormDialogComponent } from '../dialog/type';
+import { OrgType } from '../organization/type';
 
-import { SetOrganizationsPostData, SetOrganizationsPostError } from './type';
+import {
+  SetOrganizationsPostData,
+  SetOrganizationsPostError,
+  User,
+} from './type';
 
 export default defineComponent({
-  name: 'SetOrganizationsForm',
+  name: 'SetOrgsForm',
 
   emits: ['userUpdated'],
 
@@ -80,7 +82,7 @@ export default defineComponent({
   },
 
   methods: {
-    async show(user: User) {
+    show(user: User) {
       this.user = user;
       this.transferForm = true;
       this.loadOrgTypes();

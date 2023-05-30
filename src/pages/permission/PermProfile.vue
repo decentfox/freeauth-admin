@@ -40,91 +40,12 @@
     </template>
     <template #panels>
       <q-tab-panel name="perm">
-        <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label name="所属应用（不支持变更）" required />
-                <q-input
-                  :model-value="permission.application?.name"
-                  filled
-                  dense
-                  hide-bottom-space
-                  disable
-                  :error="!!permissionFormError.application_id"
-                  :error-message="permissionFormError.application_id"
-                />
-              </div>
-              <div>
-                <field-label name="权限名称" required />
-                <q-input
-                  v-model="permissionFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写权限名称"
-                  hide-bottom-space
-                  :error="!!permissionFormError.name"
-                  :error-message="permissionFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  name="权限 Code"
-                  required
-                  hint="权限的唯一标识符，可用于获取权限信息"
-                />
-                <q-input
-                  v-model="permissionFormData.code"
-                  filled
-                  dense
-                  placeholder="请填写权限代码"
-                  hide-bottom-space
-                  :error="!!permissionFormError.code"
-                  :error-message="permissionFormError.code"
-                />
-              </div>
-              <div>
-                <field-label name="权限标签" />
-                <q-select
-                  ref="tags"
-                  v-model="selectedTags"
-                  filled
-                  dense
-                  use-input
-                  use-chips
-                  option-label="name"
-                  option-value="id"
-                  emit-value
-                  map-options
-                  multiple
-                  input-debounce="0"
-                  :options="tagOptions"
-                  @new-value="createValue"
-                  @filter="filterFn"
-                />
-              </div>
-              <div>
-                <field-label name="权限描述" />
-                <q-input
-                  v-model="permissionFormData.description"
-                  filled
-                  dense
-                  type="textarea"
-                  placeholder="请填写权限描述"
-                  hide-bottom-space
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="savePermissionForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+        <perm-form
+          ref="updatePermForm"
+          :permission="permission"
+          :action="FormAction.update"
+          @refresh="loadPermInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="roles">
         <data-table
@@ -148,21 +69,18 @@
           </template>
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
-              </q-chip>
+              <chip-group
+                :chips="props.row.org_type ? [props.row.org_type] : []"
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -254,28 +172,15 @@
           </template>
           <template #body-cell-departments="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(dept, idx) in (props.row.departments as Department[])"
-                :key="idx"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ dept.name }}
-              </q-chip>
+              <chip-group :chips="props.row.departments" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -294,75 +199,12 @@
         <template #form-content>
           <div class="q-gutter-md q-pa-md">
             <div>
-              <field-label name="关联角色" required />
-              <q-select
-                ref="select"
+              <field-label text="关联角色" required />
+              <searchable-multiple-select
                 v-model="selectedRoles"
-                :options="roleOptions"
                 placeholder="输入角色名称进行搜索"
-                filled
-                dense
-                use-input
-                hide-dropdown-icon
-                multiple
-                map-options
-                virtual-scroll-slice-size="5"
-                @filter="searchRole"
-                @update:model-value="clearFilter"
-              >
-                <template #no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      找不到任何匹配项
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template #selected-item="scope">
-                  <q-chip
-                    removable
-                    dense
-                    :tabindex="scope.tabindex"
-                    color="primary"
-                    text-color="white"
-                    class="q-pa-sm"
-                    :label="scope.opt.name"
-                    @remove="scope.removeAtIndex(scope.index)"
-                  />
-                </template>
-                <template #option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                        class="text-weight-bold q-pa-sm"
-                        :class="
-                          !scope.opt.is_deleted
-                            ? 'chip-status-on'
-                            : 'chip-status-off'
-                        "
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ scope.opt.name }}（{{ scope.opt.name }}）
-                      </q-item-label>
-                      <q-item-label caption>
-                        {{ scope.opt.mobile }} {{ scope.opt.email }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section v-if="!!scope.opt.org_type" side>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="scope.opt.org_type.name"
-                        class="q-pa-sm bg-secondary"
-                      />
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                option-api-url="/roles/query"
+              />
               <div
                 v-if="!!bindRolesFormError.role_ids"
                 class="error-hint text-negative"
@@ -382,24 +224,18 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { date, QSelect, QTableProps } from 'quasar';
+import { date, QTableProps } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction } from 'components/form/type';
 import { PermOperationsMixin } from 'components/permission/PermOperations';
-import { DataTableComponent } from 'components/table/type';
-import { ProfileComponent } from 'layouts/type';
-
-import { Role } from '../role/type';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Department, Tag } from '../type';
-
 import {
   BindRolesToPermsPostData,
   BindRolesToPermsPostError,
   Permission,
-  PermissionPostData,
-  PermissionPostError,
-} from './type';
+} from 'components/permission/type';
+import { Role } from 'components/role/type';
+import { DataTableComponent } from 'components/table/type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -497,44 +333,25 @@ export default defineComponent({
         id: '',
       }),
       panelTab: ref('perm'),
-
-      permissionFormData: ref<PermissionPostData>({}),
-      permissionFormError: ref<PermissionPostError>({}),
-
       roleColumns: roleColumns,
       userColumns: userColumns,
+      FormAction,
 
       bindRolesForm: ref(false),
-      roleOptions: ref([]),
       selectedRoles: ref<Role[]>([]),
       bindRolesFormData: ref<BindRolesToPermsPostData>({}),
       bindRolesFormError: ref<BindRolesToPermsPostError>({}),
-
-      initialTagOptions: ref<Tag[]>([]),
-      tagOptions: ref<Tag[]>([]),
-      selectedTags: ref<string[]>([]),
     };
   },
 
   mounted() {
     this.loadPermInfo();
-    this.loadTagOptions();
   },
 
   methods: {
     async loadPermInfo() {
       const resp = await this.$api.get(`/permissions/${this.permId}`);
       this.permission = resp.data;
-      this.permissionFormData = Object.assign({}, resp.data);
-      this.selectedTags = this.permission.tags
-        ? this.permission.tags.map((p) => p.id)
-        : [];
-    },
-
-    async loadTagOptions() {
-      const resp = await this.$api.get('/permission_tags');
-      this.initialTagOptions = resp.data.permission_tags;
-      this.tagOptions = resp.data.permission_tags;
     },
 
     switchPanelTab(val: string) {
@@ -550,39 +367,6 @@ export default defineComponent({
           et.setApiInfo(`/permissions/${this.permission.id}/users`, 'POST');
           et.fetchRows();
         }, 20);
-      } else if (val === 'perm') {
-        this.loadTagOptions();
-      }
-    },
-
-    async savePermissionForm() {
-      this.permissionFormData.existing_tag_ids = this.selectedTags.filter(
-        (tag) => this.initialTagOptions.map((t) => t.id).includes(tag)
-      );
-      this.permissionFormData.new_tags = this.selectedTags.filter(
-        (tag) => !this.initialTagOptions.map((t) => t.id).includes(tag)
-      );
-      if (
-        JSON.stringify(this.permission) ===
-        JSON.stringify(this.permissionFormData)
-      )
-        return;
-      try {
-        this.permissionFormError = {};
-        this.permissionFormData.application_id =
-          this.permission.application?.id;
-        const resp = await this.$api.put(
-          `/permissions/${this.permission.id}`,
-          this.permissionFormData,
-          {
-            successMsg: '权限更新成功',
-          }
-        );
-        this.permission = resp.data;
-        this.permissionFormData = Object.assign({}, resp.data);
-        this.permissionFormError = {};
-      } catch (e) {
-        this.permissionFormError = (e as Error).cause || {};
       }
     },
 
@@ -590,33 +374,11 @@ export default defineComponent({
       if (['disable', 'enable'].includes(op)) {
         this.loadPermInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
+        this.$router.back();
       } else if (op === 'unbind') {
         this.loadPermInfo();
         (this.$refs.rolesTable as DataTableComponent).fetchRows();
       }
-    },
-
-    searchRole(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/roles/query', {
-          q: kw,
-        });
-        this.roleOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async saveBindRolesForm() {
@@ -646,30 +408,6 @@ export default defineComponent({
       this.bindRolesFormData = {};
       this.bindRolesFormError = {};
       this.selectedRoles = [];
-    },
-
-    createValue(
-      val: string,
-      done: (item?: string, mode?: 'add' | 'add-unique' | 'toggle') => void
-    ) {
-      if (val.length > 0) {
-        if (!this.initialTagOptions.map((tag) => tag.name).includes(val)) {
-          done(val, 'add-unique');
-        }
-      }
-    },
-
-    filterFn(val: string, update: (fn: () => void) => void) {
-      update(() => {
-        if (val === '') {
-          this.tagOptions = this.initialTagOptions;
-        } else {
-          const needle = val.toLowerCase();
-          this.tagOptions = this.initialTagOptions.filter(
-            (v) => v.name.toLowerCase().indexOf(needle) > -1
-          );
-        }
-      });
     },
   },
 });

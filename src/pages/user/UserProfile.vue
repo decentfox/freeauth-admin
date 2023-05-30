@@ -41,74 +41,12 @@
     </template>
     <template #panels>
       <q-tab-panel name="user">
-        <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label name="姓名（昵称）" required />
-                <q-input
-                  v-model="userFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!userFormError.name"
-                  :error-message="userFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  name="用户名"
-                  required
-                  hint="可用于用户名密码登录"
-                />
-                <q-input
-                  v-model="userFormData.username"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!userFormError.username"
-                  :error-message="userFormError.username"
-                />
-              </div>
-              <div>
-                <field-label name="手机号码" hint="可用于手机号验证码登录" />
-                <q-input
-                  v-model="userFormData.mobile"
-                  filled
-                  dense
-                  placeholder="请填写手机号"
-                  hide-bottom-space
-                  class="col"
-                  :error="!!userFormError.mobile"
-                  :error-message="userFormError.mobile"
-                />
-              </div>
-              <div>
-                <field-label name="邮箱地址" hint="可用于邮箱验证码登录" />
-                <q-input
-                  v-model="userFormData.email"
-                  filled
-                  dense
-                  placeholder="请填写邮箱"
-                  hide-bottom-space
-                  class="col"
-                  :error="!!userFormError.email"
-                  :error-message="userFormError.email"
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="saveUserForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+        <user-form
+          ref="updateUserForm"
+          :user="user"
+          :action="FormAction.update"
+          @refresh="loadUserInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="organizations">
         <q-table
@@ -120,26 +58,17 @@
         >
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip
-                v-if="props.row.org_type"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ props.row.org_type.name }}
-              </q-chip>
+              <chip-group :chips="[props.row.org_type]" square />
             </q-td>
           </template>
           <template #body-cell-enterprise="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{
-                  props.row.enterprise
-                    ? props.row.enterprise.name
-                    : props.row.name
-                }}
-              </q-chip>
+              <chip-group
+                :chips="
+                  props.row.enterprise ? [props.row.enterprise] : [props.row]
+                "
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-actions="props">
@@ -194,21 +123,18 @@
         >
           <template #body-cell-org_type="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.org_type ? props.row.org_type.name : '全局' }}
-              </q-chip>
+              <chip-group
+                :chips="props.row.org_type ? [props.row.org_type] : []"
+                square
+              />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -258,60 +184,27 @@
         >
           <template #body-cell-tags="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(tag, idx) in props.row.tags"
-                :key="idx"
-                size="12px"
-                color="secondary"
-                class="q-ml-none"
-              >
-                <span class="material-icons-outlined q-pr-xs">
-                  local_offer
-                </span>
-                {{ tag.name }}
-              </q-chip>
+              <chip-group :chips="props.row.tags" icon="local_offer" />
             </q-td>
           </template>
           <template #body-cell-roles="props">
             <q-td :props="props">
               <div class="row">
-                <div
-                  v-for="(role, idx) in (props.row.roles as Role[])"
-                  :key="idx"
-                >
-                  <q-chip
-                    v-if="
-                      user.roles &&
-                      user.roles.map((r) => r.id).includes(role.id)
-                    "
-                    size="12px"
-                    square
-                    color="secondary"
-                    class="q-ml-none"
-                  >
-                    {{ role.name }}
-                  </q-chip>
-                </div>
+                <chip-group :chips="props.row.roles" square />
               </div>
             </q-td>
           </template>
           <template #body-cell-application="props">
             <q-td :props="props">
-              <q-chip size="12px" square color="secondary" class="q-ml-none">
-                {{ props.row.application.name }}
-              </q-chip>
+              <chip-group :chips="[props.row.application]" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -327,10 +220,7 @@
       </q-tab-panel>
     </template>
     <template #dialog>
-      <set-organizations-form
-        ref="setOrganizationsForm"
-        @user-updated="loadUserInfo"
-      />
+      <set-orgs-form ref="setOrganizationsForm" @user-updated="loadUserInfo" />
       <set-roles-form ref="setRolesForm" @user-updated="loadUserInfo" />
     </template>
   </profile-page>
@@ -340,18 +230,16 @@
 import { defineComponent, ref } from 'vue';
 import { QTableProps } from 'quasar';
 
+import { FormAction } from 'components/form/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Role } from 'components/role/type';
 import { DataTableComponent } from 'components/table/type';
 import {
   SetOrganizationsComponent,
   SetRolesComponent,
+  User,
 } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
-import { ProfileComponent } from 'layouts/type';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Role } from '../role/type';
-
-import { User, UserPostData, UserPostError } from './type';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -449,7 +337,7 @@ const permColumns: QTableProps['columns'] = [
   },
   {
     name: 'roles',
-    label: '权限来源角色',
+    label: '关联角色',
     align: 'left',
     field: 'roles',
   },
@@ -493,10 +381,7 @@ export default defineComponent({
       roleColumns: roleColumns,
       deptColumns: deptColumns,
       permColumns: permColumns,
-
-      userForm: ref(false),
-      userFormData: ref<UserPostData>({}),
-      userFormError: ref<UserPostError>({}),
+      FormAction,
     };
   },
 
@@ -509,7 +394,6 @@ export default defineComponent({
     async loadUserInfo() {
       const resp = await this.$api.get(`/users/${this.userId}`);
       this.user = resp.data;
-      this.userFormData = Object.assign({}, resp.data);
     },
 
     switchPanelTab(val: string) {
@@ -526,27 +410,7 @@ export default defineComponent({
       if (['disable', 'enable', 'resign', 'unbind'].includes(op)) {
         this.loadUserInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
-      }
-    },
-
-    async saveUserForm() {
-      if (JSON.stringify(this.user) === JSON.stringify(this.userFormData))
-        return;
-      try {
-        this.userFormError = {};
-        const resp = await this.$api.put(
-          `/users/${this.user.id}`,
-          this.userFormData,
-          {
-            successMsg: '角色更新成功',
-          }
-        );
-        this.user = resp.data;
-        this.userFormData = Object.assign({}, resp.data);
-        this.userFormError = {};
-      } catch (e) {
-        this.userFormError = (e as Error).cause || {};
+        this.$router.back();
       }
     },
 

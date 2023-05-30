@@ -36,77 +36,12 @@
     </template>
     <template #panels>
       <q-tab-panel name="role">
-        <q-card flat bordered class="q-pa-md">
-          <q-form>
-            <div class="q-col-gutter-md q-pa-sm">
-              <div>
-                <field-label name="角色归属（不支持变更）" required />
-                <div class="row items-center">
-                  <q-option-group
-                    v-model="roleTypeTab"
-                    inline
-                    :options="[
-                      { label: '全局可选角色', value: 'global' },
-                      { label: '指定组织类型下可选角色', value: 'org_type' },
-                    ]"
-                    disable
-                  />
-                  <div v-if="!!role.org_type">
-                    <q-chip size="12px" square color="secondary">
-                      {{ role.org_type.name }}
-                    </q-chip>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <field-label name="角色名称" required />
-                <q-input
-                  v-model="roleFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写角色名称"
-                  hide-bottom-space
-                  :error="!!roleFormError.name"
-                  :error-message="roleFormError.name"
-                />
-              </div>
-              <div>
-                <field-label
-                  name="角色 Code"
-                  hint="角色的唯一标识符，可用于获取角色信息"
-                />
-                <q-input
-                  v-model="roleFormData.code"
-                  filled
-                  dense
-                  placeholder="请填写角色代码"
-                  hide-bottom-space
-                  :error="!!roleFormError.code"
-                  :error-message="roleFormError.code"
-                />
-              </div>
-              <div>
-                <field-label name="角色描述" />
-                <q-input
-                  v-model="roleFormData.description"
-                  filled
-                  dense
-                  type="textarea"
-                  placeholder="请填写角色描述"
-                  hide-bottom-space
-                />
-              </div>
-            </div>
-            <q-card-actions>
-              <q-btn
-                unelevated
-                class="primary-btn"
-                label="保存"
-                @click="saveRoleForm"
-              />
-            </q-card-actions>
-          </q-form>
-        </q-card>
+        <role-form
+          ref="updateRoleForm"
+          :role="role"
+          :action="FormAction.update"
+          @refresh="loadRoleInfo"
+        />
       </q-tab-panel>
       <q-tab-panel name="users">
         <data-table
@@ -129,28 +64,15 @@
           </template>
           <template #body-cell-departments="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(dept, idx) in (props.row.departments as Department[])"
-                :key="idx"
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-              >
-                {{ dept.name }}
-              </q-chip>
+              <chip-group :chips="props.row.departments" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -176,53 +98,30 @@
           <div class="text-caption">应用：</div>
           <q-scroll-area
             :thumb-style="thumbStyle"
-            style="height: 36px; width: calc(100% - 40px)"
+            style="height: 32px; width: calc(100% - 40px)"
           >
             <div class="row no-wrap q-gutter-col-xs">
-              <q-chip
-                v-for="item in applicationChips"
-                :key="item.id"
+              <!-- TODO Chip -->
+              <chip-group
+                :chips="(applicationChips as ChipGroupItem[])"
+                icon="wysiwyg"
                 clickable
                 square
-                :color="
-                  selectedApplication.id === item.id ? 'info' : 'secondary'
-                "
-                @click="clickApplicationChip(item)"
-              >
-                <q-avatar
-                  :color="
-                    selectedApplication.id === item.id ? 'primary' : 'secondary'
-                  "
-                  :text-color="
-                    selectedApplication.id === item.id
-                      ? 'white'
-                      : $q.dark.isActive
-                      ? 'grey-1'
-                      : 'grey-10'
-                  "
-                >
-                  12
-                </q-avatar>
-                {{ item.name }}
-              </q-chip>
+                @selected-change="filterByApp"
+              />
             </div>
           </q-scroll-area>
         </div>
-        <div class="q-pa-sm q-pb-md row items-center">
-          <div class="text-caption">标签：</div>
-          <div class="q-gutter-col-xs">
-            <q-chip
-              v-for="item in tagChips"
-              :key="item.id"
+        <div class="q-pa-sm q-pb-md row">
+          <div class="text-caption q-py-xs">标签：</div>
+          <div class="q-gutter-col-xs" style="width: calc(100% - 40px)">
+            <chip-group
+              :chips="tagChips"
+              icon="local_offer"
               clickable
-              size="12px"
-              :color="selectedTags.includes(item.id) ? 'primary' : 'secondary'"
-              :text-color="selectedTags.includes(item.id) ? 'white' : ''"
-              @click="clickTagChip(item)"
-            >
-              <span class="material-icons-outlined q-pr-xs"> local_offer </span>
-              {{ item.name }}
-            </q-chip>
+              selection="multiple"
+              @selected-change="filterByTags"
+            />
           </div>
         </div>
 
@@ -252,41 +151,20 @@
           </template>
           <template #body-cell-tags="props">
             <q-td :props="props">
-              <q-chip
-                v-for="(tag, idx) in props.row.tags"
-                :key="idx"
-                size="12px"
-                color="secondary"
-                class="q-ml-none"
-              >
-                <span class="material-icons-outlined q-pr-xs">
-                  local_offer
-                </span>
-                {{ tag.name }}
-              </q-chip>
+              <chip-group :chips="props.row.tags" icon="local_offer" />
             </q-td>
           </template>
           <template #body-cell-application="props">
             <q-td :props="props">
-              <q-chip
-                size="12px"
-                square
-                color="secondary"
-                class="q-ml-none"
-                :label="props.row.application.name"
-              />
+              <chip-group :chips="[props.row.application]" square />
             </q-td>
           </template>
           <template #body-cell-is_deleted="props">
             <q-td :props="props">
-              <q-chip
-                square
-                size="12px"
-                :label="!props.row.is_deleted ? '正常' : '禁用'"
-                class="text-weight-bold q-pa-sm q-ml-none"
-                :class="
-                  !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-                "
+              <boolean-chip
+                :value="!props.row.is_deleted"
+                true-label="正常"
+                false-label="禁用"
               />
             </q-td>
           </template>
@@ -305,75 +183,16 @@
         <template #form-content>
           <div class="q-gutter-md q-pa-md">
             <div>
-              <field-label name="关联主体" required />
-              <q-select
-                ref="select"
+              <field-label text="关联主体" required />
+              <searchable-multiple-select
                 v-model="selectedUsers"
-                :options="userOptions"
-                placeholder="输入用户姓名进行搜索"
-                filled
-                dense
-                use-input
-                hide-dropdown-icon
-                multiple
-                map-options
-                virtual-scroll-slice-size="5"
-                @filter="searchUser"
-                @update:model-value="clearFilter"
-              >
-                <template #no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      找不到任何匹配项
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template #selected-item="scope">
-                  <q-chip
-                    removable
-                    dense
-                    :tabindex="scope.tabindex"
-                    color="primary"
-                    text-color="white"
-                    class="q-pa-sm"
-                    :label="scope.opt.name"
-                    @remove="scope.removeAtIndex(scope.index)"
-                  />
-                </template>
-                <template #option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                        class="text-weight-bold q-pa-sm"
-                        :class="
-                          !scope.opt.is_deleted
-                            ? 'chip-status-on'
-                            : 'chip-status-off'
-                        "
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>
-                        {{ scope.opt.name }}（{{ scope.opt.username }}）
-                      </q-item-label>
-                      <q-item-label caption>
-                        {{ scope.opt.mobile }} {{ scope.opt.email }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section v-if="!!scope.opt.org_type" side>
-                      <q-chip
-                        square
-                        size="12px"
-                        :label="scope.opt.org_type.name"
-                        class="q-pa-sm bg-secondary"
-                      />
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+                placeholder="输入用户信息进行搜索"
+                option-api-url="/users/query"
+                :option-api-params="{
+                  org_type_id: role.org_type?.id,
+                  include_unassigned_users: !!role.org_type ? false : true,
+                }"
+              />
               <div
                 v-if="!!bindUsersFormError.user_ids"
                 class="error-hint text-negative"
@@ -397,23 +216,22 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps, VueStyleObjectProp } from 'quasar';
+import { QTableProps, VueStyleObjectProp } from 'quasar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ChipGroupItem } from 'src/components/common/type';
 
+import { Application } from 'components/application/type';
 import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction } from 'components/form/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
-import { DataTableComponent } from 'components/table/type';
-import { ProfileComponent } from 'layouts/type';
 import {
   BindUsersToRolesPostData,
   BindUsersToRolesPostError,
   Role,
-  RolePostData,
-  RolePostError,
-} from 'pages/role/type';
-import { User } from 'pages/user/type';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Application, Department, Tag } from '../type';
+} from 'components/role/type';
+import { DataTableComponent } from 'components/table/type';
+import { Tag } from 'components/tag/type';
+import { User } from 'components/user/type';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -524,13 +342,9 @@ export default defineComponent({
       panelTab: ref('role'),
       userColumns: userColumns,
       permColumns: permColumns,
-
-      roleTypeTab: ref('global'),
-      roleFormData: ref<RolePostData>({}),
-      roleFormError: ref<RolePostError>({}),
+      FormAction,
 
       bindUsersForm: ref(false),
-      userOptions: ref([]),
       selectedUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToRolesPostData>({}),
       bindUsersFormError: ref<BindUsersToRolesPostError>({}),
@@ -560,8 +374,6 @@ export default defineComponent({
     async loadRoleInfo() {
       const resp = await this.$api.get(`/roles/${this.roleId}`);
       this.role = resp.data;
-      this.roleFormData = Object.assign({}, resp.data);
-      this.roleTypeTab = !!this.role.org_type ? 'org_type' : 'global';
     },
 
     switchPanelTab(val: string) {
@@ -584,33 +396,8 @@ export default defineComponent({
     },
 
     async loadTagOptions() {
-      this.selectedTags = [];
       const resp = await this.$api.get('/permission_tags');
       this.tagChips = resp.data.permission_tags;
-    },
-
-    searchUser(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/users/query', {
-          q: kw,
-          org_type_id: this.role.org_type?.id,
-          include_unassigned_users: !!this.role.org_type ? false : true,
-        });
-        this.userOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async saveBindUsersForm() {
@@ -638,31 +425,11 @@ export default defineComponent({
       this.selectedUsers = [];
     },
 
-    async saveRoleForm() {
-      if (JSON.stringify(this.role) === JSON.stringify(this.roleFormData))
-        return;
-      try {
-        this.roleFormError = {};
-        const resp = await this.$api.put(
-          `/roles/${this.role.id}`,
-          this.roleFormData,
-          {
-            successMsg: '角色更新成功',
-          }
-        );
-        this.role = resp.data;
-        this.roleFormData = Object.assign({}, resp.data);
-        this.roleFormError = {};
-      } catch (e) {
-        this.roleFormError = (e as Error).cause || {};
-      }
-    },
-
     refreshRoleData(op: string) {
       if (['disable', 'enable'].includes(op)) {
         this.loadRoleInfo();
       } else if (op === 'delete') {
-        (this.$refs.profile as ProfileComponent).goBack();
+        this.$router.back();
       } else if (op === 'unbind') {
         this.loadRoleInfo();
         (this.$refs.userTable as DataTableComponent).fetchRows();
@@ -673,18 +440,15 @@ export default defineComponent({
       console.error('TODO');
     },
 
-    clickApplicationChip(app: Application) {
+    filterByApp(selected: string[]) {
+      console.error(selected);
       this.selectedApplication =
-        this.selectedApplication.id === app.id ? { id: '' } : app;
+        selected.length === 0 ? { id: '' } : { id: selected[0] };
       this.loadPermissionsbyApp();
     },
 
-    clickTagChip(tag: Tag) {
-      if (this.selectedTags.includes(tag.id)) {
-        this.selectedTags = this.selectedTags.filter((tid) => tid != tag.id);
-      } else {
-        this.selectedTags.push(tag.id);
-      }
+    filterByTags() {
+      console.error('TODO');
     },
 
     async loadPermissionsbyApp() {

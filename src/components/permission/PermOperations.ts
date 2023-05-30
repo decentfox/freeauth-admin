@@ -1,11 +1,10 @@
 import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import { Permission } from 'pages/permission/type';
-import { Role } from 'pages/role/type';
+import ConfirmDialog from '../dialog/ConfirmDialog.vue';
+import { Role } from '../role/type';
 
-import { PermOperationsType } from './type';
+import { Permission, PermOperationsType } from './type';
 
 export const PermOperationsMixin: PermOperationsType = {
   methods: {

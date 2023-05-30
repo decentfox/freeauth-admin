@@ -28,7 +28,11 @@
             :selected="child.selected"
             :opt-label="optLabel"
             :opt-value="optValue"
-            @update:model="onValueUpdated"
+            @update:model="
+              (value: CascadeOption[]) => {
+                onValueUpdated(value);
+              }
+            "
           />
         </q-list>
       </q-menu>
@@ -76,7 +80,7 @@ export default defineComponent({
       this.$emit('update:model', [this.scope]);
     },
 
-    onValueUpdated(selected: CascadeOption) {
+    onValueUpdated(selected: CascadeOption[]) {
       const newSelected = [this.scope].concat(selected);
       this.$emit('update:model', newSelected);
     },

@@ -10,53 +10,17 @@
     <template #form-content>
       <div class="q-gutter-md q-pa-md">
         <div>
-          <field-label name="关联角色" />
-          <q-select
+          <field-label text="关联角色" />
+          <searchable-multiple-select
             v-model="selectedRoles"
-            :options="availableRoleOptions"
-            dense
-            filled
-            class="full-width"
-            option-label="name"
-            option-value="id"
-            multiple
-            use-chips
-          >
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section avatar>
-                  <q-chip
-                    square
-                    size="12px"
-                    :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                    class="text-weight-bold q-pa-sm"
-                    :class="
-                      !scope.opt.is_deleted
-                        ? 'chip-status-on'
-                        : 'chip-status-off'
-                    "
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>
-                    {{ scope.opt.name }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-chip
-                    square
-                    size="12px"
-                    :label="
-                      !scope.opt.org_type
-                        ? '全局角色'
-                        : scope.opt.org_type.name + '角色'
-                    "
-                    class="q-pa-sm bg-secondary"
-                  />
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
+            placeholder="输入角色名称进行搜索"
+            option-api-url="/roles/query"
+            :option-api-params="
+              user.org_type?.id
+                ? { org_type_id: user.org_type.id }
+                : { include_org_type_roles: false }
+            "
+          />
         </div>
         <div v-if="user.org_type" class="text-caption hint-label">
           提示：仅能选择全局角色或该用户所属组织类型【{{
@@ -74,12 +38,10 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
-import { Role } from 'pages/role/type';
-import { User } from 'pages/user/type';
-
 import { FormDialogComponent } from '../dialog/type';
+import { Role } from '../role/type';
 
-import { SetRolesPostData, SetRolesPostError } from './type';
+import { SetRolesPostData, SetRolesPostError, User } from './type';
 
 export default defineComponent({
   name: 'SetRolesForm',
@@ -90,7 +52,6 @@ export default defineComponent({
     return {
       user: ref<User>({ id: '' }),
       selectedRoles: ref<Role[]>([]),
-      availableRoleOptions: ref<Role[]>([]),
       setRolesForm: ref(false),
       setRolesFormData: ref<SetRolesPostData>({}),
       setRolesFormError: ref<SetRolesPostError>({}),
@@ -100,17 +61,8 @@ export default defineComponent({
   methods: {
     show(user: User) {
       this.user = user;
-      this.loadAvailableRoles();
       this.setRolesForm = true;
       this.selectedRoles = user.roles || [];
-    },
-
-    async loadAvailableRoles() {
-      const params = this.user.org_type?.id
-        ? { org_type_id: this.user.org_type.id }
-        : { include_org_type_roles: false };
-      const resp = await this.$api.post('/roles/query', params);
-      this.availableRoleOptions = resp.data.rows;
     },
 
     async saveSetRolesForm() {

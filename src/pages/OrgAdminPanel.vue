@@ -1,18 +1,13 @@
 <template>
-  <q-page class="full-width">
-    <q-splitter
-      v-model="splitterModel"
-      class="q-py-sm"
-      unit="px"
-      :limits="[250, 400]"
-    >
+  <page-wrapper>
+    <q-splitter v-model="splitterModel" unit="px" :limits="[250, 400]">
       <!--the first splitted screen-->
       <template #before>
         <org-tree
           ref="orgStructure"
           editable
           @update:select-node="onNodeUpdated"
-          @update:change-org-type="onOrgTypeChanged"
+          @update:org-type="onOrgTypeChanged"
           @refresh="refresh($event)"
         />
       </template>
@@ -25,7 +20,7 @@
 
       <!--the second splitted screen-->
       <template #after>
-        <div class="q-px-md q-py-sm">
+        <div class="q-pl-md">
           <q-toolbar class="q-pa-none">
             <q-tabs
               v-model="leftPanelTab"
@@ -82,30 +77,15 @@
                 </template>
                 <template #body-cell-departments="props">
                   <q-td :props="props">
-                    <q-chip
-                      v-for="(dept, idx) in (props.row.departments as Department[])"
-                      :key="idx"
-                      size="12px"
-                      square
-                      color="secondary"
-                      class="q-ml-none"
-                    >
-                      {{ dept.name }}
-                    </q-chip>
+                    <chip-group :chips="props.row.departments" square />
                   </q-td>
                 </template>
                 <template #body-cell-is_deleted="props">
                   <q-td :props="props">
-                    <q-chip
-                      square
-                      size="12px"
-                      :label="!props.row.is_deleted ? '正常' : '禁用'"
-                      class="text-weight-bold q-pa-sm q-ml-none"
-                      :class="
-                        !props.row.is_deleted
-                          ? 'chip-status-on'
-                          : 'chip-status-off'
-                      "
+                    <boolean-chip
+                      :value="!props.row.is_deleted"
+                      true-label="正常"
+                      false-label="禁用"
                     />
                   </q-td>
                 </template>
@@ -203,9 +183,17 @@
                       "
                       @copy="copyInfoToClipboard(props.row)"
                       @delete="
-                        (
-                          $refs.orgStructure as OrgTreeComponent
-                        ).deleteOrganization(props.row.id)
+                        selectedNode.id === props.row.id
+                          ? deleteOrganization(
+                              props.row,
+                              refreshAfterDeletingSelectedOrg,
+                              true
+                            )
+                          : deleteOrganization(
+                              props.row,
+                              refreshAfterDeletingOrg,
+                              true
+                            )
                       "
                     />
                   </q-td>
@@ -227,7 +215,7 @@
       <template #form-content>
         <div class="q-col-gutter-sm q-pa-md">
           <div>
-            <field-label name="直属组织" required />
+            <field-label text="直属组织" required />
             <tree-select
               v-model="selectedOrganizations"
               :nodes="orgTreeData"
@@ -256,81 +244,16 @@
           <q-tab-panel name="existing">
             <div class="q-gutter-md">
               <div>
-                <field-label name="关联用户" required />
-                <q-select
-                  ref="select"
+                <field-label text="关联用户" required />
+                <searchable-multiple-select
                   v-model="selectedExistingUsers"
-                  :options="userOptions"
-                  placeholder="输入用户姓名进行搜索"
-                  filled
-                  dense
-                  use-input
-                  hide-dropdown-icon
-                  multiple
-                  map-options
-                  virtual-scroll-slice-size="5"
-                  @filter="searchUser"
-                  @update:model-value="clearFilter"
-                >
-                  <template #no-option>
-                    <q-item>
-                      <q-item-section class="text-grey">
-                        找不到任何匹配项
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                  <template #selected-item="scope">
-                    <q-chip
-                      removable
-                      dense
-                      :tabindex="scope.tabindex"
-                      color="primary"
-                      text-color="white"
-                      class="q-pa-sm"
-                      :label="scope.opt.name"
-                      @remove="scope.removeAtIndex(scope.index)"
-                    />
-                  </template>
-                  <template #option="scope">
-                    <q-item
-                      v-bind="scope.itemProps"
-                      :disable="
-                        !!scope.opt.org_type &&
-                        scope.opt.org_type.id !== selectedOrgType.id
-                      "
-                    >
-                      <q-item-section avatar>
-                        <q-chip
-                          square
-                          size="12px"
-                          :label="!scope.opt.is_deleted ? '正常' : '禁用'"
-                          class="text-weight-bold q-pa-sm"
-                          :class="
-                            !scope.opt.is_deleted
-                              ? 'chip-status-on'
-                              : 'chip-status-off'
-                          "
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>
-                          {{ scope.opt.name }}（{{ scope.opt.username }}）
-                        </q-item-label>
-                        <q-item-label caption>
-                          {{ scope.opt.mobile }} {{ scope.opt.email }}
-                        </q-item-label>
-                      </q-item-section>
-                      <q-item-section v-if="!!scope.opt.org_type" side>
-                        <q-chip
-                          square
-                          size="12px"
-                          :label="scope.opt.org_type.name"
-                          class="q-pa-sm bg-secondary"
-                        />
-                      </q-item-section>
-                    </q-item>
-                  </template>
-                </q-select>
+                  placeholder="输入用户信息进行搜索"
+                  option-api-url="/users/query"
+                  :option-api-params="{
+                    org_type_id: selectedOrgType.id,
+                    include_unassigned_users: true,
+                  }"
+                />
                 <div
                   v-if="!!bindUsersFormError.user_ids"
                   class="error-hint text-negative"
@@ -346,115 +269,43 @@
             </div>
           </q-tab-panel>
           <q-tab-panel name="new">
-            <div class="q-gutter-md">
-              <div>
-                <field-label name="登录信息" required hint="至少填写一项" />
-                <div class="q-gutter-sm">
-                  <q-input
-                    v-model="newUserFormData.username"
-                    filled
-                    dense
-                    placeholder="请填写用户名"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.username"
-                    :error-message="newUserFormError.username"
-                  />
-                  <q-input
-                    v-model="newUserFormData.mobile"
-                    filled
-                    dense
-                    placeholder="请填写手机号"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.mobile"
-                    :error-message="newUserFormError.mobile"
-                  />
-                  <q-input
-                    v-model="newUserFormData.email"
-                    filled
-                    dense
-                    placeholder="请填写邮箱"
-                    hide-bottom-space
-                    class="col"
-                    :error="!!newUserFormError.email"
-                    :error-message="newUserFormError.email"
-                    @update:model-value="
-                      if (!newUserFormData.email)
-                        firstLoginNotification = false;
-                    "
-                  />
-                </div>
-                <div
-                  v-if="!!newUserFormError.__root__"
-                  class="error-hint text-negative"
-                >
-                  {{ newUserFormError.__root__ }}
-                </div>
-              </div>
-              <div>
-                <field-label name="用户姓名" />
-                <q-input
-                  v-model="newUserFormData.name"
-                  filled
-                  dense
-                  placeholder="请填写用户姓名"
-                  hide-bottom-space
-                  :error="!!newUserFormError.name"
-                  :error-message="newUserFormError.name"
-                />
-              </div>
-              <div>
-                <q-toggle
-                  v-model="passwordChangingRequired"
-                  label="强制用户在首次登录时修改密码"
-                />
-                <q-toggle
-                  v-model="firstLoginNotification"
-                  label="通过邮件发送初始默认登录信息"
-                  :disable="!newUserFormData.email"
-                >
-                  <q-tooltip
-                    v-if="!newUserFormData.email"
-                    anchor="bottom middle"
-                    self="center end"
-                  >
-                    填写有效邮箱后才可启用
-                  </q-tooltip>
-                </q-toggle>
-              </div>
-            </div>
+            <user-form-content
+              v-model:username="newUserFormData.username"
+              v-model:name="newUserFormData.name"
+              v-model:mobile="newUserFormData.mobile"
+              v-model:email="newUserFormData.email"
+              :form-data="newUserFormData"
+              :form-error="newUserFormError"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </template>
     </form-dialog>
-    <set-organizations-form
-      ref="setOrganizationsForm"
-      @user-updated="loadUserTable"
-    />
-  </q-page>
+    <set-orgs-form ref="setOrganizationsForm" @user-updated="loadUserTable" />
+  </page-wrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { QSelect, QTableProps, QTreeNode } from 'quasar';
+import { QTableProps, QTreeNode } from 'quasar';
 
 import { FormDialogComponent } from 'components/dialog/type';
-import { DataTableComponent } from 'components/table/type';
-import { SetOrganizationsComponent } from 'components/user/type';
-import { UserOperationsMixin } from 'components/user/UserOperations';
-
-import { User, UserPostData, UserPostError } from './user/type';
+import { OrgOperationsMixin } from 'components/organization/OrgOperations';
 import {
   BindUsersToOrgsPostData,
   BindUsersToOrgsPostError,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Department,
   Enterprise,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   OrgTreeComponent,
   OrgType,
-} from './type';
+} from 'components/organization/type';
+import { DataTableComponent } from 'components/table/type';
+import {
+  SetOrganizationsComponent,
+  User,
+  UserPostData,
+  UserPostError,
+} from 'components/user/type';
+import { UserOperationsMixin } from 'components/user/UserOperations';
 
 const userColumns: QTableProps['columns'] = [
   {
@@ -556,7 +407,7 @@ const enterpriseColumns: QTableProps['columns'] = [
 export default defineComponent({
   name: 'OrgAdminPanel',
 
-  mixins: [UserOperationsMixin],
+  mixins: [UserOperationsMixin, OrgOperationsMixin],
 
   setup() {
     return {
@@ -589,7 +440,6 @@ export default defineComponent({
       selectedOrganizations: ref<string[]>([]),
 
       // add new member, existing user
-      userOptions: ref([]),
       selectedExistingUsers: ref<User[]>([]),
       bindUsersFormData: ref<BindUsersToOrgsPostData>({}),
       bindUsersFormError: ref<BindUsersToOrgsPostError>({}),
@@ -597,8 +447,6 @@ export default defineComponent({
       // add new user
       newUserFormData: ref<UserPostData>({}),
       newUserFormError: ref<UserPostError>({}),
-      firstLoginNotification: ref(false),
-      passwordChangingRequired: ref(false),
     };
   },
 
@@ -648,6 +496,16 @@ export default defineComponent({
       }
     },
 
+    refreshAfterDeletingOrg() {
+      (this.$refs.orgStructure as OrgTreeComponent).loadOrgTree();
+      this.loadEnterpriseTable();
+    },
+
+    refreshAfterDeletingSelectedOrg() {
+      (this.$refs.orgStructure as OrgTreeComponent).loadOrgTree(true);
+      this.loadEnterpriseTable();
+    },
+
     switchPanelTab(val: string) {
       if (val === 'users') {
         this.loadUserTable();
@@ -659,29 +517,6 @@ export default defineComponent({
     filterDirectUsers(val: boolean) {
       const ut = this.$refs.userTable as DataTableComponent;
       ut.onExternalFiltered('include_sub_members', !val);
-    },
-
-    searchUser(
-      val: string,
-      update: (fn: () => void) => void,
-      abort: () => void
-    ) {
-      const kw = val.trim();
-      if (kw === '') {
-        abort();
-        return;
-      }
-      update(async () => {
-        let resp = await this.$api.post('/users/query', {
-          q: kw,
-          include_unassigned_users: true,
-        });
-        this.userOptions = resp.data.rows;
-      });
-    },
-
-    clearFilter() {
-      (this.$refs.select as QSelect).updateInputValue('');
     },
 
     async openAddMembersForm() {
@@ -697,6 +532,7 @@ export default defineComponent({
     },
 
     async saveAddMembersForm() {
+      const postParams = { org_type_id: this.selectedOrgType.id };
       if (this.addMembersTab === 'existing' && this.selectedExistingUsers) {
         this.bindUsersFormData.user_ids = this.selectedExistingUsers.map(
           (user) => user.id
@@ -706,19 +542,12 @@ export default defineComponent({
           this.bindUsersFormError = {};
           await this.$api.post(
             '/organizations/bind_users',
-            Object.assign(
-              {
-                org_type_id: this.selectedOrgType.id,
-              },
-              this.bindUsersFormData
-            ),
+            Object.assign(postParams, this.bindUsersFormData),
             {
               successMsg: '成员添加成功',
             }
           );
-          (this.$refs.addMembersDialog as FormDialogComponent).hide();
-          this.loadUserTable();
-          this.resetAddMembersForm();
+          this.afterSaveAddMembers();
         } catch (e) {
           this.bindUsersFormError = (e as Error).cause || {};
         }
@@ -728,23 +557,22 @@ export default defineComponent({
           this.newUserFormError = {};
           await this.$api.post(
             '/users',
-            Object.assign(
-              {
-                org_type_id: this.selectedOrgType.id,
-              },
-              this.newUserFormData
-            ),
+            Object.assign(postParams, this.newUserFormData),
             {
               successMsg: '成员创建成功',
             }
           );
-          (this.$refs.addMembersDialog as FormDialogComponent).hide();
-          this.loadUserTable();
-          this.resetAddMembersForm();
+          this.afterSaveAddMembers();
         } catch (e) {
           this.newUserFormError = (e as Error).cause || {};
         }
       }
+    },
+
+    afterSaveAddMembers() {
+      (this.$refs.addMembersDialog as FormDialogComponent).hide();
+      this.loadUserTable();
+      this.resetAddMembersForm();
     },
 
     resetAddMembersForm() {

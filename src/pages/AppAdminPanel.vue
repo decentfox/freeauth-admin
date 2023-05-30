@@ -1,18 +1,10 @@
 <template>
-  <q-page class="full-width q-pa-md">
-    <q-btn
-      unelevated
-      dense
-      class="no-hover-btn hint-label"
-      @click="$router.go(0)"
-    >
-      <q-icon size="18px" class="q-pr-xs" name="subject" />应用管理
-    </q-btn>
+  <page-wrapper page-title="应用管理">
     <data-table
       ref="applicationTable"
-      :columns="columns"
       api-url="/applications/query"
       api-method="POST"
+      :columns="columns"
       :filter-columns="filterColumns"
       search-placeholder="搜索应用信息"
       wrap-cells
@@ -30,14 +22,10 @@
       </template>
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
-          <q-chip
-            square
-            size="12px"
-            :label="!props.row.is_deleted ? '正常' : '禁用'"
-            class="text-weight-bold q-pa-sm q-ml-none"
-            :class="
-              !props.row.is_deleted ? 'chip-status-on' : 'chip-status-off'
-            "
+          <boolean-chip
+            :value="!props.row.is_deleted"
+            true-label="正常"
+            false-label="禁用"
           />
         </q-td>
       </template>
@@ -72,49 +60,54 @@
         </q-td>
       </template>
     </data-table>
-  </q-page>
-  <form-dialog
-    ref="applicationDialog"
-    v-model="applicationForm"
-    title="创建应用"
-    width="450px"
-    @confirm="saveApplicationForm"
-    @close="resetApplicationForm"
-  >
-    <template #form-content>
-      <div class="q-col-gutter-md q-pa-md">
-        <div>
-          <field-label name="应用名称" required />
-          <q-input
-            v-model="applicationFormData.name"
-            filled
-            dense
-            placeholder="请填写应用名称"
-            hide-bottom-space
-            :error="!!applicationFormError.name"
-            :error-message="applicationFormError.name"
-          />
+    <form-dialog
+      ref="applicationDialog"
+      v-model="applicationForm"
+      title="创建应用"
+      width="450px"
+      @confirm="saveApplicationForm"
+      @close="resetApplicationForm"
+    >
+      <template #form-content>
+        <div class="q-col-gutter-md q-pa-md">
+          <div>
+            <field-label text="应用名称" required />
+            <q-input
+              v-model="applicationFormData.name"
+              filled
+              dense
+              placeholder="请填写应用名称"
+              hide-bottom-space
+              :error="!!applicationFormError.name"
+              :error-message="applicationFormError.name"
+            />
+          </div>
+          <div>
+            <field-label text="应用描述" />
+            <q-input
+              v-model="applicationFormData.description"
+              filled
+              dense
+              type="textarea"
+              placeholder="请填写应用描述"
+              hide-bottom-space
+            />
+          </div>
         </div>
-        <div>
-          <field-label name="应用描述" />
-          <q-input
-            v-model="applicationFormData.description"
-            filled
-            dense
-            type="textarea"
-            placeholder="请填写应用描述"
-            hide-bottom-space
-          />
-        </div>
-      </div>
-    </template>
-  </form-dialog>
+      </template>
+    </form-dialog>
+  </page-wrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
+import {
+  Application,
+  ApplicationPostData,
+  ApplicationPostError,
+} from 'components/application/type';
 import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
 import { FormDialogComponent } from 'components/dialog/type';
 import {
@@ -122,8 +115,6 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
-
-import { Application, ApplicationPostData, ApplicationPostError } from './type';
 
 const columns: QTableProps['columns'] = [
   {

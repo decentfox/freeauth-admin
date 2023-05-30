@@ -10,3 +10,12 @@ export type CascadeOption = {
   /** 选项自定义显示文本及选项值 */
   [key: string]: string | number | CascadeOption[] | boolean | undefined;
 };
+
+export interface FormComponent {
+  show: () => void;
+}
+
+export enum FormAction {
+  create = 'create',
+  update = 'update',
+}

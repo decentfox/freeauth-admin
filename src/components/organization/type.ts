@@ -1,8 +1,44 @@
+import { QTreeNode } from 'quasar';
+
+export interface OrgOperationsType {
+  methods: {
+    deleteOrgType: (
+      orgType: OrgType,
+      handler?: (...args: [string]) => void
+    ) => void;
+
+    deleteOrganization: (
+      org: Organization,
+      handler?: (...args: [string]) => void,
+      isEnterprise?: boolean
+    ) => void;
+  };
+}
+
 export interface OrgTreeComponent {
   /** 打开企业机构的表单对话框 */
   openEnterpriseForm: (enterpriseId?: string) => void;
-  /** 删除企业机构的表单对话框 */
-  deleteOrganization: (orgId: string) => void;
+  /** 刷新组织树结构 */
+  loadOrgTree: (resetSelectedNode?: boolean) => void;
+}
+
+export interface OrgTypeSelectComponent {
+  openOrgTypeForm: (orgType?: OrgType) => void;
+}
+
+export interface OrgTypeFormComponent {
+  /** 唤醒组织类型编辑对话框 */
+  show: (orgType?: OrgType) => void;
+}
+
+export interface EnterpriseFormComponent {
+  /** 唤醒企业信息编辑对话框 */
+  show: (enterpriseId?: string) => void;
+}
+
+export interface DepartmentFormComponent {
+  /** 唤醒部门信息编辑对话框 */
+  show: (deptId?: string, parentNode?: QTreeNode) => void;
 }
 
 export interface Organization {
@@ -12,6 +48,8 @@ export interface Organization {
   code?: string;
   /** 组织名称 */
   name: string;
+  /** 组织是否为企业类型 */
+  is_enterprise?: boolean;
 }
 
 export interface OrgType extends Organization {
@@ -113,33 +151,4 @@ export interface BindUsersToOrgsPostData {
 export interface BindUsersToOrgsPostError {
   user_ids?: string;
   organization_ids?: string;
-}
-
-export interface Application {
-  /** 应用 ID */
-  id: string;
-  /** 应用名称 */
-  name?: string;
-  /** 应用描述 */
-  description?: string;
-  /** 应用密钥 */
-  secret_key?: string;
-}
-
-export interface ApplicationPostData {
-  /** 应用名称 */
-  name?: string;
-  /** 应用描述 */
-  description?: string;
-}
-
-export interface ApplicationPostError {
-  name?: string;
-}
-
-export interface Tag {
-  /** 标签 ID */
-  id: string;
-  /** 标签名称 */
-  name: string;
 }

@@ -1,11 +1,10 @@
 import { api } from 'boot/axios';
 import { Dialog } from 'quasar';
 
-import ConfirmDialog from 'components/dialog/ConfirmDialog.vue';
-import { Role } from 'pages/role/type';
-import { User } from 'pages/user/type';
+import ConfirmDialog from '../dialog/ConfirmDialog.vue';
+import { User } from '../user/type';
 
-import { RoleOperationsType } from './type';
+import { Role, RoleOperationsType } from './type';
 
 export const RoleOperationsMixin: RoleOperationsType = {
   methods: {

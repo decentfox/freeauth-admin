@@ -138,7 +138,7 @@
             <q-checkbox
               v-model="linkedPermCheck"
               label="仅展示已关联该角色的权限"
-              @update:model-value="filterLinkedPerms"
+              @update:model-value="filterByRole"
             />
           </template>
           <template #body-cell-linked="props">
@@ -435,11 +435,16 @@ export default defineComponent({
       }
     },
 
-    filterLinkedPerms() {
-      console.error('TODO');
+    filterByRole(ticked: boolean) {
+      const pt = this.$refs.permissionTable as DataTableComponent;
+      if (ticked) {
+        pt.onExternalFiltered('role_id', this.role.id);
+      } else {
+        pt.removeExternalFilter('role_id');
+      }
     },
 
-    async filterByApp(selected: string[]) {
+    filterByApp(selected: string[]) {
       const pt = this.$refs.permissionTable as DataTableComponent;
       if (selected.length !== 0) {
         pt.onExternalFiltered('application_id', selected[0]);
@@ -448,7 +453,7 @@ export default defineComponent({
       }
     },
 
-    async filterByTags(selected: string[]) {
+    filterByTags(selected: string[]) {
       const pt = this.$refs.permissionTable as DataTableComponent;
       if (selected.length !== 0) {
         pt.onExternalFiltered('tag_ids', selected);

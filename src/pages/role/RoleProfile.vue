@@ -127,8 +127,8 @@
 
         <data-table
           ref="permissionTable"
-          api-method="POST"
-          api-url="/permissions/query"
+          api-method="GET"
+          api-url="/permissions"
           :columns="permColumns"
           search-placeholder="搜索权限信息"
           hide-import
@@ -138,13 +138,15 @@
             <q-checkbox
               v-model="linkedPermCheck"
               label="仅展示已关联该角色的权限"
-              @update:model-value="filterLinkedPerms"
+              @update:model-value="filterByRole"
             />
           </template>
           <template #body-cell-linked="props">
             <q-td :props="props">
               <q-checkbox
-                v-model="props.row.linked"
+                :model-value="
+                  props.row.roles.map((r:Role) => r.id).includes(role.id)
+                "
                 @update:model-value="(val) => toggleLinked(val, props.row.id)"
               />
             </q-td>
@@ -351,9 +353,7 @@ export default defineComponent({
 
       linkedPermCheck: ref(false),
       applicationChips: ref<Application[]>([]),
-      selectedApplication: ref<Application>({ id: '' }),
       tagChips: ref<Tag[]>([]),
-      selectedTags: ref<string[]>([]),
 
       thumbStyle: ref<VueStyleObjectProp>({
         right: '2px',
@@ -390,7 +390,6 @@ export default defineComponent({
     },
 
     async loadApplicationOptions() {
-      this.selectedApplication = { id: '' };
       const resp = await this.$api.post('/applications/query', {});
       this.applicationChips = resp.data.rows;
     },
@@ -436,38 +435,46 @@ export default defineComponent({
       }
     },
 
-    filterLinkedPerms() {
-      console.error('TODO');
+    filterByRole(ticked: boolean) {
+      const pt = this.$refs.permissionTable as DataTableComponent;
+      if (ticked) {
+        pt.onExternalFiltered('role_id', this.role.id);
+      } else {
+        pt.removeExternalFilter('role_id');
+      }
     },
 
     filterByApp(selected: string[]) {
-      console.error(selected);
-      this.selectedApplication =
-        selected.length === 0 ? { id: '' } : { id: selected[0] };
-      this.loadPermissionsbyApp();
-    },
-
-    filterByTags() {
-      console.error('TODO');
-    },
-
-    async loadPermissionsbyApp() {
       const pt = this.$refs.permissionTable as DataTableComponent;
-      if (!!this.selectedApplication.id) {
-        pt.onExternalFiltered('application_id', this.selectedApplication.id);
+      if (selected.length !== 0) {
+        pt.onExternalFiltered('application_id', selected[0]);
       } else {
         pt.removeExternalFilter('application_id');
       }
     },
 
+    filterByTags(selected: string[]) {
+      const pt = this.$refs.permissionTable as DataTableComponent;
+      if (selected.length !== 0) {
+        pt.onExternalFiltered('tag_ids', selected);
+      } else {
+        pt.removeExternalFilter('tag_ids');
+      }
+    },
+
     async toggleLinked(ticked: boolean, permission_id: string) {
-      await this.$api.post(
-        ticked ? '/permissions/bind_roles' : '/permissions/unbind_roles',
-        { role_ids: [this.role.id], permission_ids: [permission_id] },
-        {
-          successMsg: ticked ? '关联成功' : '移除成功',
-        }
-      );
+      try {
+        await this.$api.post(
+          ticked ? '/permissions/bind_roles' : '/permissions/unbind_roles',
+          { role_ids: [this.role.id], permission_ids: [permission_id] },
+          {
+            successMsg: ticked ? '关联成功' : '移除成功',
+          }
+        );
+      } finally {
+        const pt = this.$refs.permissionTable as DataTableComponent;
+        pt.fetchRows();
+      }
     },
   },
 });

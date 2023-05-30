@@ -154,6 +154,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+import qs from 'qs';
 import { QTable, QTableColumn, QTableProps } from 'quasar';
 
 import { FilterColumn, FilterCondition, Pagination, QueryData } from './type';
@@ -258,12 +259,17 @@ export default defineComponent({
       }
       this.loading = true;
       try {
+        const paramsSerializer = (params: unknown) => {
+          return qs.stringify(params, { arrayFormat: 'repeat' });
+        };
+
         const resp = await this.$api.request({
           url: this.url,
           method: this.method,
           data: this.method === 'POST' ? this.queryData : null,
           params: this.method === 'GET' ? this.queryData : null,
           hideProgress: true,
+          paramsSerializer,
         });
         const data = resp.data;
         this.rows = data.rows;
@@ -304,7 +310,7 @@ export default defineComponent({
       this.fetchRows();
     },
 
-    onExternalFiltered(key: string, value: string | boolean) {
+    onExternalFiltered(key: string, value: string | boolean | string[]) {
       this.queryData[key] = value;
       this.fetchRows();
     },

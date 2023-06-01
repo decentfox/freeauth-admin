@@ -11,11 +11,7 @@
   >
     <template #form-content>
       <user-form-content
-        v-model:username="userFormData.username"
-        v-model:name="userFormData.name"
-        v-model:mobile="userFormData.mobile"
-        v-model:email="userFormData.email"
-        :form-data="userFormData"
+        v-model="userFormData"
         :form-error="userFormError"
         class="q-pa-md"
       />
@@ -26,12 +22,8 @@
   <q-card v-if="action === FormAction.update" flat bordered class="q-pa-sm">
     <q-form>
       <user-form-content
-        v-model:username="userFormData.username"
-        v-model:name="userFormData.name"
-        v-model:mobile="userFormData.mobile"
-        v-model:email="userFormData.email"
+        v-model="userFormData"
         :action="FormAction.update"
-        :form-data="userFormData"
         :form-error="userFormError"
         class="q-pa-md"
       />
@@ -79,7 +71,10 @@ export default defineComponent({
     return {
       FormAction,
       userFormDialog: ref(false),
-      userFormData: ref<UserPostData>({}),
+      userFormData: ref<UserPostData>({
+        reset_pwd_on_first_login: false,
+        send_first_login_email: false,
+      }),
       userFormError: ref<UserPostError>({}),
       userPreviousData: ref<UserPostData>({}),
     };
@@ -88,7 +83,7 @@ export default defineComponent({
   watch: {
     user() {
       this.userFormData = {
-        username: this.user.name,
+        username: this.user.username,
         mobile: this.user.mobile,
         email: this.user.email,
         name: this.user.name,
@@ -125,7 +120,7 @@ export default defineComponent({
       try {
         this.userFormError = {};
         await this.$api.put(`/users/${this.user.id}`, this.userFormData, {
-          successMsg: '角色更新成功',
+          successMsg: '用户信息更新成功',
         });
         this.$emit('refresh');
         this.userFormError = {};

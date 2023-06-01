@@ -2,7 +2,9 @@
   <q-layout>
     <q-page-container>
       <q-page class="flex flex-center login-bg">
+        <reset-pwd-frame v-if="resetPwdRequired" />
         <signup-and-login-frame
+          v-else
           v-model="currentGuardMode"
           v-model:signup-mode="currentSignupMode"
           v-model:login-mode="currentLoginMode"
@@ -17,6 +19,7 @@ import { defineComponent, ref } from 'vue';
 import { mapActions, mapState } from 'pinia';
 
 import { AuthMode, GuardMode, LoginMode } from 'components/login/type';
+import { authStore } from 'stores/auth-store';
 import { loginSettingsStore } from 'stores/login-settings-store';
 
 export default defineComponent({
@@ -39,6 +42,8 @@ export default defineComponent({
       'codeLoginEnabled',
       'pwdLoginEnabled',
     ]),
+
+    ...mapState(authStore, ['resetPwdRequired']),
   },
 
   created() {

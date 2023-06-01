@@ -9,6 +9,9 @@
     <div class="text-weight-bold text-h6 text-grey-10">
       {{ loginSettings.guardTitle || `自定义标题` }}
     </div>
+    <div v-if="!!description" class="q-mt-lg q-mx-md text-grey-8">
+      {{ description }}
+    </div>
   </div>
 </template>
 
@@ -20,6 +23,14 @@ import { loginSettingsStore } from 'stores/login-settings-store';
 
 export default defineComponent({
   name: 'GuardHeader',
+
+  props: {
+    /** 特殊说明 */
+    description: {
+      type: String,
+      default: null,
+    },
+  },
 
   computed: {
     ...mapState(loginSettingsStore, ['loginSettings']),

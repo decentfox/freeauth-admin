@@ -15,32 +15,11 @@
         <q-icon name="perm_identity" color="grey-7" />
       </template>
     </q-input>
-    <q-input
+    <pwd-field
       v-model="password"
-      dense
-      filled
-      placeholder="请输入密码"
-      :type="!showPwd ? 'password' : 'text'"
-      hide-bottom-space
-      minlength="6"
-      bg-color="grey-2"
       :disable="isPreview"
-      :error="!!formError.password"
-      :error-message="formError.password"
-    >
-      <template #prepend>
-        <q-icon name="lock_outline" color="grey-7" />
-      </template>
-      <template #append>
-        <q-icon
-          :name="showPwd ? 'visibility' : 'visibility_off'"
-          size="20px"
-          color="grey-7"
-          class="cursor-pointer"
-          @click="showPwd = !showPwd"
-        />
-      </template>
-    </q-input>
+      :error="formError.password"
+    />
     <div class="flex flex-center">
       <q-btn
         unelevated
@@ -100,7 +79,7 @@ export default defineComponent({
   setup() {
     return {
       account: ref<string | null>(null),
-      password: ref<string | null>(null),
+      password: ref<string>(''),
       formError: ref<AuthError>({}),
 
       showPwd: ref(false),

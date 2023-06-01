@@ -62,11 +62,6 @@ export default boot(({ app, router }) => {
     },
     (err) => {
       Loading.hide();
-      if (err.response.status === 401) {
-        router.push('/login');
-        return Promise.reject(err);
-      }
-
       const error = get(err.response, 'data.detail');
       let message = '请求失败';
       if (typeof error === 'string') {
@@ -74,15 +69,20 @@ export default boot(({ app, router }) => {
       } else if (error) {
         message = error.message;
       }
+      const errObj = new Error(err.response.status, {
+        cause: get(error, 'errors'),
+      });
+
+      if (err.response.status === 401) {
+        router.push('/login');
+        return Promise.reject(errObj);
+      }
+
       Notify.create({
         type: 'negative',
         message: message,
       });
-      return Promise.reject(
-        new Error(err.response.status, {
-          cause: get(error, 'errors'),
-        })
-      );
+      return Promise.reject(errObj);
     }
   );
 });

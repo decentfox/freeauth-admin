@@ -16,7 +16,7 @@
             hint="可用于用户名密码登录"
           />
           <q-input
-            :model-value="formData.username"
+            :model-value="modelValue.username"
             filled
             dense
             placeholder="请填写用户名"
@@ -24,11 +24,7 @@
             class="col"
             :error="!!formError.username"
             :error-message="formError.username"
-            @update:model-value="
-              (value) => {
-                $emit('update:username', value);
-              }
-            "
+            @update:model-value="(val) => onModelUpdated('username', val)"
           />
         </div>
         <div>
@@ -38,7 +34,7 @@
             hint="可用于手机号验证码登录"
           />
           <q-input
-            :model-value="formData.mobile"
+            :model-value="modelValue.mobile"
             filled
             dense
             placeholder="请填写手机号"
@@ -46,11 +42,7 @@
             class="col"
             :error="!!formError.mobile"
             :error-message="formError.mobile"
-            @update:model-value="
-              (value) => {
-                $emit('update:mobile', value);
-              }
-            "
+            @update:model-value="(val) => onModelUpdated('mobile', val)"
           />
         </div>
         <div>
@@ -60,7 +52,7 @@
             hint="可用于邮箱验证码登录"
           />
           <q-input
-            :model-value="formData.email"
+            :model-value="modelValue.email"
             filled
             dense
             placeholder="请填写邮箱"
@@ -68,11 +60,7 @@
             class="col"
             :error="!!formError.email"
             :error-message="formError.email"
-            @update:model-value="
-              (value) => {
-                updateEmail(value);
-              }
-            "
+            @update:model-value="(val) => onModelUpdated('email', val)"
           />
         </div>
       </div>
@@ -86,32 +74,34 @@
         :required="action === FormAction.update"
       />
       <q-input
-        :model-value="formData.name"
+        :model-value="modelValue.name"
         filled
         dense
         placeholder="请填写用户姓名"
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="
-          (value) => {
-            $emit('update:name', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('name', val)"
       />
     </div>
     <div v-if="action === FormAction.create">
       <q-toggle
-        v-model="passwordChangingRequired"
+        :model-value="modelValue.reset_pwd_on_first_login"
         label="强制用户在首次登录时修改密码"
+        @update:model-value="
+          (val) => onModelUpdated('reset_pwd_on_first_login', val)
+        "
       />
       <q-toggle
-        v-model="firstLoginNotification"
+        :model-value="modelValue.send_first_login_email"
         label="通过邮件发送初始默认登录信息"
-        :disable="!formData.email"
+        :disable="!modelValue.email"
+        @update:model-value="
+          (val) => onModelUpdated('send_first_login_email', val)
+        "
       >
         <q-tooltip
-          v-if="!formData.email"
+          v-if="!modelValue.email"
           anchor="bottom left"
           self="center start"
         >
@@ -123,7 +113,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 import { FormAction } from '../form/type';
 
@@ -133,19 +123,19 @@ export default defineComponent({
   name: 'RoleFormContent',
 
   props: {
-    /** 角色表单操作类型：创建或更新 */
+    /** 用户表单操作类型：创建或更新 */
     action: {
       type: String as PropType<FormAction>,
       default: FormAction.create,
     },
-    /** 角色表单数据结构 */
-    formData: {
+    /** 用户表单数据结构 */
+    modelValue: {
       type: Object as PropType<UserPostData>,
       default: () => {
         return {};
       },
     },
-    /** 角色表单错误提示 */
+    /** 用户表单错误提示 */
     formError: {
       type: Object as PropType<UserPostError>,
       default: () => {
@@ -154,20 +144,26 @@ export default defineComponent({
     },
   },
 
-  emits: ['update:username', 'update:name', 'update:mobile', 'update:email'],
+  emits: ['update:modelValue'],
 
   setup() {
     return {
       FormAction,
-      firstLoginNotification: ref(false),
-      passwordChangingRequired: ref(false),
     };
   },
 
   methods: {
-    updateEmail(val: string | number | null) {
-      this.$emit('update:email', val);
-      if (!this.formData.email) this.firstLoginNotification = false;
+    onModelUpdated(field: string, val: string | number | boolean | null) {
+      this.$emit(
+        'update:modelValue',
+        Object.assign({}, this.modelValue, {
+          [field]: val,
+          send_first_login_email:
+            field === 'email' && !val
+              ? false
+              : this.modelValue.send_first_login_email,
+        })
+      );
     },
   },
 });

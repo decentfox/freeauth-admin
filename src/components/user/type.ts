@@ -37,6 +37,10 @@ export interface UserPostData {
   username?: string;
   /** 用户直属部门 */
   organization_ids?: string[];
+  /** 是否强制用户在首次登录时修改密码  */
+  reset_pwd_on_first_login?: boolean;
+  /** 是否通过邮件发送初始默认登录信息  */
+  send_first_login_email?: boolean;
 }
 
 export interface UserPostError {

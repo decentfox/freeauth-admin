@@ -33,7 +33,7 @@ export const authStore = defineStore('auth', {
     async fetchProfile() {
       try {
         const resp = await api.get('/me');
-        this.user = resp.data.user;
+        this.user = resp.data;
         this.authenticated = true;
         this.resetPwdRequired = false;
       } catch (e) {
@@ -46,6 +46,13 @@ export const authStore = defineStore('auth', {
           });
         }
       }
+    },
+
+    hasAnyPermission(permList: string[]) {
+      return (
+        this.user.perms?.includes('*') ||
+        permList.filter((p) => this.user.perms?.includes(p)).length > 0
+      );
     },
   },
 });

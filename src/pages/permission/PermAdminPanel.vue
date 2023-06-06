@@ -244,8 +244,8 @@ export default defineComponent({
 
   methods: {
     async loadApplicationOptions() {
-      const resp = await this.$api.post('/applications/query', {});
-      this.appOptions = resp.data.rows;
+      const resp = await this.$api.get('/applications/options');
+      this.appOptions = resp.data;
       this.selectedAppId = this.appOptions[0].id;
       this.loadPermissionsbyApp();
     },

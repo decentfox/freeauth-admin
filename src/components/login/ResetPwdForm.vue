@@ -50,9 +50,6 @@ export default defineComponent({
       password: ref<string>(''),
       repeatPassword: ref<string>(''),
       formError: ref<AuthError>({}),
-
-      showPwd: ref(false),
-      showRepeatPwd: ref(false),
       submitting: ref(false),
     };
   },

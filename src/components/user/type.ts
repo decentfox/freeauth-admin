@@ -24,6 +24,8 @@ export interface User {
   created_at?: Date;
   /** 用户状态：true-禁用；false-正常 */
   is_deleted?: boolean;
+  /** 用户所拥有的权限（代码） */
+  perms?: string[];
 }
 
 export interface UserPostData {

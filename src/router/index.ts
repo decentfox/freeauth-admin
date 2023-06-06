@@ -4,8 +4,10 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router';
-import { LoadingBar } from 'quasar';
+import { LoadingBar, Notify } from 'quasar';
 import { route } from 'quasar/wrappers';
+
+import { authStore } from 'stores/auth-store';
 
 import routes from './routes';
 
@@ -35,8 +37,20 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach(async () => {
+  Router.beforeEach(async (to) => {
     LoadingBar.start();
+    const auth = authStore();
+    const requiredPerms = to.meta.requiredPerms;
+    if (auth.authenticated && requiredPerms) {
+      if (!auth.hasAnyPermission(requiredPerms)) {
+        Notify.create({
+          type: 'negative',
+          message: '权限不足',
+        });
+        LoadingBar.stop();
+        return '/';
+      }
+    }
   });
 
   Router.afterEach(() => {

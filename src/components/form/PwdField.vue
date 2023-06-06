@@ -43,7 +43,7 @@ export default defineComponent({
       type: String,
       default: null,
     },
-    /**  */
+    /** 默认提示文字 */
     placeholder: {
       type: String,
       default: '请输入密码',

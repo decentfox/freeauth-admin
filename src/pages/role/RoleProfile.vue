@@ -390,8 +390,8 @@ export default defineComponent({
     },
 
     async loadApplicationOptions() {
-      const resp = await this.$api.post('/applications/query', {});
-      this.applicationChips = resp.data.rows;
+      const resp = await this.$api.get('/applications/options');
+      this.applicationChips = resp.data;
     },
 
     async loadTagOptions() {

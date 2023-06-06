@@ -12,6 +12,8 @@ export interface MainMenuLink {
   icon: string;
   /** 菜单链接，可空 */
   link?: string;
+  /** 菜单权限配置 */
+  requiredPerms?: string[];
 }
 
 export interface MenuButton {

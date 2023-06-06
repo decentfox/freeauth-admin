@@ -99,13 +99,12 @@ export default defineComponent({
 
     async createUser() {
       try {
-        this.userFormError = {};
         await this.$api.post('/users', this.userFormData, {
           successMsg: '用户创建成功',
         });
         (this.$refs.userDialog as FormDialogComponent).hide();
         this.$emit('refresh');
-        this.resetUserForm;
+        this.resetUserForm();
       } catch (e) {
         this.userFormError = (e as Error).cause || {};
       }
@@ -118,7 +117,6 @@ export default defineComponent({
       )
         return;
       try {
-        this.userFormError = {};
         await this.$api.put(`/users/${this.user.id}`, this.userFormData, {
           successMsg: '用户信息更新成功',
         });
@@ -130,7 +128,10 @@ export default defineComponent({
     },
 
     resetUserForm() {
-      this.userFormData = {};
+      this.userFormData = {
+        reset_pwd_on_first_login: false,
+        send_first_login_email: false,
+      };
       this.userFormError = {};
     },
   },

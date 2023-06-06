@@ -270,11 +270,7 @@
           </q-tab-panel>
           <q-tab-panel name="new">
             <user-form-content
-              v-model:username="newUserFormData.username"
-              v-model:name="newUserFormData.name"
-              v-model:mobile="newUserFormData.mobile"
-              v-model:email="newUserFormData.email"
-              :form-data="newUserFormData"
+              v-model="newUserFormData"
               :form-error="newUserFormError"
             />
           </q-tab-panel>
@@ -445,7 +441,10 @@ export default defineComponent({
       bindUsersFormError: ref<BindUsersToOrgsPostError>({}),
 
       // add new user
-      newUserFormData: ref<UserPostData>({}),
+      newUserFormData: ref<UserPostData>({
+        reset_pwd_on_first_login: false,
+        send_first_login_email: false,
+      }),
       newUserFormError: ref<UserPostError>({}),
     };
   },
@@ -578,7 +577,10 @@ export default defineComponent({
     resetAddMembersForm() {
       this.bindUsersFormData = {};
       this.bindUsersFormError = {};
-      this.newUserFormData = {};
+      this.newUserFormData = {
+        reset_pwd_on_first_login: false,
+        send_first_login_email: false,
+      };
       this.newUserFormError = {};
       this.selectedExistingUsers = [];
       this.selectedOrganizations = [];

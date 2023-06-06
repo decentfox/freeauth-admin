@@ -130,16 +130,19 @@ const menuLinkList: MainMenuSection[] = [
         title: '定制登录',
         icon: 'password',
         link: '/login_settings',
+        requiredPerms: ['manage:login_settings'],
       },
       {
         title: '用户管理',
         icon: 'contacts',
         link: '/user_admin_panel',
+        requiredPerms: ['manage:users'],
       },
       {
         title: '审计日志',
         icon: 'mark_chat_read',
         link: '/audit_logs',
+        requiredPerms: ['manage:audit_logs'],
       },
       {
         title: '参数设置',
@@ -155,16 +158,19 @@ const menuLinkList: MainMenuSection[] = [
         title: '组织管理',
         icon: 'account_tree',
         link: '/org_admin_panel',
+        requiredPerms: ['manage:orgs'],
       },
       {
         title: '角色管理',
         icon: 'people_alt',
         link: '/role_admin_panel',
+        requiredPerms: ['manage:roles'],
       },
       {
         title: '权限管理',
         icon: 'room_preferences',
         link: '/perm_admin_panel',
+        requiredPerms: ['manage:perms'],
       },
     ],
   },
@@ -175,6 +181,7 @@ const menuLinkList: MainMenuSection[] = [
         title: '应用管理',
         icon: 'apps',
         link: '/app_admin_panel',
+        requiredPerms: ['manage:apps'],
       },
       {
         title: '单点登录',
@@ -191,7 +198,6 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
 
     return {
-      mainMenu: menuLinkList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -201,6 +207,19 @@ export default defineComponent({
 
   computed: {
     ...mapState(authStore, ['authenticated']),
+
+    mainMenu() {
+      return menuLinkList
+        .map((list) => {
+          return Object.assign({}, list, {
+            links: list.links.filter(
+              (link) =>
+                !link.requiredPerms || this.hasAnyPermission(link.requiredPerms)
+            ),
+          });
+        })
+        .filter((list) => list.links.length > 0);
+    },
   },
 
   async created() {
@@ -210,7 +229,7 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapActions(authStore, ['fetchProfile', 'signOut']),
+    ...mapActions(authStore, ['fetchProfile', 'signOut', 'hasAnyPermission']),
 
     async onSignOut() {
       await this.signOut();

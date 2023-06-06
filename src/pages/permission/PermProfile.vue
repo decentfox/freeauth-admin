@@ -18,13 +18,13 @@
         btn-class="q-px-md secondary-btn"
         :buttons="[
           {
-            label: !permission.is_deleted ? '禁用角色' : '启用角色',
+            label: !permission.is_deleted ? '禁用权限' : '启用权限',
             icon: !permission.is_deleted ? 'remove_circle_outline' : 'task_alt',
             actionType: !permission.is_deleted ? 'disable' : 'enable',
           },
 
           {
-            label: '删除角色',
+            label: '删除权限',
             icon: 'delete_outline',
             actionType: 'delete',
           },

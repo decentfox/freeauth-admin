@@ -32,7 +32,13 @@
             label="取消"
             class="text-black-white"
           />
-          <q-btn unelevated :label="okLabel" type="submit" class="primary-btn">
+          <q-btn
+            unelevated
+            :label="okLabel"
+            :disable="!canSubmit"
+            type="submit"
+            class="primary-btn"
+          >
           </q-btn>
         </q-card-actions>
       </q-form>
@@ -68,6 +74,11 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    /** 表单提交按钮是否可以点击 */
+    canSubmit: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   emits: ['confirm', 'close'],
@@ -79,6 +90,10 @@ export default defineComponent({
           this.$emit('confirm');
         }
       });
+    },
+
+    show() {
+      (this.$refs['dialog'] as QDialog).show();
     },
 
     hide() {

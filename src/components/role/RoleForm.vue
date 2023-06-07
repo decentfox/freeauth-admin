@@ -10,14 +10,7 @@
     @close="resetRoleForm"
   >
     <template #form-content>
-      <role-form-content
-        v-model:org_type_id="roleFormData.org_type_id"
-        v-model:name="roleFormData.name"
-        v-model:code="roleFormData.code"
-        v-model:description="roleFormData.description"
-        :form-data="roleFormData"
-        :form-error="roleFormError"
-      />
+      <role-form-content v-model="roleFormData" :form-error="roleFormError" />
     </template>
   </form-dialog>
 
@@ -25,12 +18,8 @@
   <q-card v-if="action === FormAction.update" flat bordered class="q-pa-sm">
     <q-form>
       <role-form-content
-        v-model:org_type_id="roleFormData.org_type_id"
-        v-model:name="roleFormData.name"
-        v-model:code="roleFormData.code"
-        v-model:description="roleFormData.description"
+        v-model="roleFormData"
         :action="FormAction.update"
-        :form-data="roleFormData"
         :form-error="roleFormError"
       />
       <q-card-actions class="q-px-md">

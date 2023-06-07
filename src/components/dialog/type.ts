@@ -1,6 +1,8 @@
 export interface FormDialogComponent {
   /** 手动关闭对话框 */
   hide: () => void;
+  /** 手动打开对话框 */
+  show: () => void;
 }
 
 export type DialogButton = {

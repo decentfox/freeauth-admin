@@ -35,6 +35,11 @@
             <dropdown-button
               :buttons="[
                 {
+                  label: '重置密钥',
+                  icon: 'restart_alt',
+                  actionType: 'reset',
+                },
+                {
                   label: !props.row.is_deleted ? '禁用应用' : '启用应用',
                   icon: !props.row.is_deleted
                     ? 'remove_circle_outline'
@@ -55,6 +60,7 @@
               @delete="deleteApplications([props.row])"
               @disable="toggleApplicationsStatus([props.row], true)"
               @enable="toggleApplicationsStatus([props.row], false)"
+              @reset="resetAppSecret(props.row.id)"
             />
           </div>
         </q-td>
@@ -103,6 +109,7 @@
 import { defineComponent, ref } from 'vue';
 import { date, QTableProps } from 'quasar';
 
+import AppSecretFormDialog from 'components/application/AppSecretFormDialog.vue';
 import {
   Application,
   ApplicationPostData,
@@ -130,12 +137,6 @@ const columns: QTableProps['columns'] = [
     field: 'description',
     style: 'max-width: 400px',
     headerStyle: 'max-width: 400px',
-  },
-  {
-    name: 'secret_key',
-    label: '密钥',
-    align: 'left',
-    field: 'secret_key',
   },
   {
     name: 'created_at',
@@ -214,15 +215,43 @@ export default defineComponent({
     async saveApplicationForm() {
       try {
         this.applicationFormError = {};
-        await this.$api.post('/applications', this.applicationFormData, {
-          successMsg: '应用创建成功',
-        });
+        const resp = await this.$api.post(
+          '/applications',
+          this.applicationFormData,
+          {
+            successMsg: '应用创建成功',
+          }
+        );
         (this.$refs.applicationDialog as FormDialogComponent).hide();
         this.refreshApplicationData();
         this.resetApplicationForm();
+        const app = resp.data;
+        this.showAppSecretDialog(app.id, app.secret);
       } catch (e) {
         this.applicationFormError = (e as Error).cause || {};
       }
+    },
+
+    showAppSecretDialog(appId: string, appSecret: string) {
+      this.$q.dialog({
+        component: AppSecretFormDialog,
+        componentProps: {
+          appId: appId,
+          appSecret: appSecret,
+        },
+      });
+    },
+
+    async resetAppSecret(appId: string) {
+      const resp = await this.$api.put(
+        `/applications/${appId}/secret`,
+        {},
+        {
+          successMsg: '应用密钥重置成功',
+        }
+      );
+      const app = resp.data;
+      this.showAppSecretDialog(app.id, app.secret);
     },
 
     resetApplicationForm() {

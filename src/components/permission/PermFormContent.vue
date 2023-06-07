@@ -3,7 +3,7 @@
     <div>
       <field-label text="所属应用" required hint="创建后不支持变更" />
       <q-select
-        :model-value="formData.application_id"
+        :model-value="modelValue.application_id"
         :options="appOptions"
         dense
         filled
@@ -12,32 +12,24 @@
         option-value="id"
         emit-value
         map-options
-        :disable="action === FormAction.update || !!appId"
+        :disable="!!appId"
         hide-bottom-space
         :error="!!formError.application_id"
         :error-message="formError.application_id"
-        @update:model-value="
-          (value) => {
-            $emit('update:application_id', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('application_id', val)"
       />
     </div>
     <div>
       <field-label text="权限名称" required />
       <q-input
-        :model-value="formData.name"
+        :model-value="modelValue.name"
         filled
         dense
         placeholder="请填写权限名称"
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="
-          (value) => {
-            $emit('update:name', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('name', val)"
       />
     </div>
     <div>
@@ -47,25 +39,21 @@
         hint="权限的唯一标识符，可用于获取权限信息"
       />
       <q-input
-        :model-value="formData.code"
+        :model-value="modelValue.code"
         filled
         dense
         placeholder="请填写权限代码"
         hide-bottom-space
         :error="!!formError.code"
         :error-message="formError.code"
-        @update:model-value="
-          (value) => {
-            $emit('update:code', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('code', val)"
       />
     </div>
     <div>
       <field-label text="权限标签" />
       <q-select
         ref="tags"
-        :model-value="formData.tags"
+        :model-value="modelValue.tags"
         filled
         dense
         use-input
@@ -80,27 +68,19 @@
         @new-value="createValue"
         @filter="filterFn"
         @click="loadTagOptions"
-        @update:model-value="
-          (value) => {
-            $emit('update:tags', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('tags', val)"
       />
     </div>
     <div>
       <field-label text="权限描述" />
       <q-input
-        :model-value="formData.description"
+        :model-value="modelValue.description"
         filled
         dense
         type="textarea"
         placeholder="请填写权限描述"
         hide-bottom-space
-        @update:model-value="
-          (value) => {
-            $emit('update:description', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('description', val)"
       />
     </div>
   </div>
@@ -110,7 +90,6 @@
 import { defineComponent, PropType, ref } from 'vue';
 
 import { Application } from '../application/type';
-import { FormAction } from '../form/type';
 import { Tag } from '../tag/type';
 
 import { PermissionPostData, PermissionPostError } from './type';
@@ -119,18 +98,13 @@ export default defineComponent({
   name: 'PermFormContent',
 
   props: {
-    /** 权限表单操作类型：创建或更新 */
-    action: {
-      type: String as PropType<FormAction>,
-      default: FormAction.create,
-    },
     /** 指定权限所属应用 */
     appId: {
       type: String,
       default: '',
     },
     /** 权限表单数据结构 */
-    formData: {
+    modelValue: {
       type: Object as PropType<PermissionPostData>,
       default: () => {
         return {};
@@ -145,17 +119,10 @@ export default defineComponent({
     },
   },
 
-  emits: [
-    'update:application_id',
-    'update:name',
-    'update:code',
-    'update:tags',
-    'update:description',
-  ],
+  emits: ['update:modelValue'],
 
   setup() {
     return {
-      FormAction,
       appOptions: ref<Application[]>([]),
       initialTagOptions: ref<Tag[]>([]),
       tagOptions: ref<Tag[]>([]),
@@ -200,6 +167,15 @@ export default defineComponent({
           );
         }
       });
+    },
+
+    onModelUpdated(field: string, val: string | number | boolean | null) {
+      this.$emit(
+        'update:modelValue',
+        Object.assign({}, this.modelValue, {
+          [field]: val,
+        })
+      );
     },
   },
 });

@@ -11,13 +11,8 @@
   >
     <template #form-content>
       <perm-form-content
-        v-model:name="permissionFormData.name"
-        v-model:code="permissionFormData.code"
-        v-model:tags="permissionFormData.tags"
-        v-model:description="permissionFormData.description"
-        v-model:application_id="permissionFormData.application_id"
+        v-model="permissionFormData"
         :app-id="appId"
-        :form-data="permissionFormData"
         :form-error="permissionFormError"
       />
     </template>
@@ -27,13 +22,8 @@
   <q-card v-if="action === FormAction.update" flat bordered class="q-pa-sm">
     <q-form>
       <perm-form-content
-        v-model:name="permissionFormData.name"
-        v-model:code="permissionFormData.code"
-        v-model:tags="permissionFormData.tags"
-        v-model:description="permissionFormData.description"
-        v-model:application_id="permissionFormData.application_id"
-        :action="FormAction.update"
-        :form-data="permissionFormData"
+        v-model="permissionFormData"
+        :app-id="permissionFormData.application_id"
         :form-error="permissionFormError"
       />
       <q-card-actions class="q-px-md">

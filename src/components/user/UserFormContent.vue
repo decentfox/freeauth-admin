@@ -2,7 +2,7 @@
   <div class="q-gutter-md">
     <div>
       <field-label
-        v-if="action === FormAction.create"
+        v-if="!isUpdate"
         text="登录信息"
         required
         hint="至少填写一项"
@@ -10,7 +10,7 @@
       <div class="q-gutter-sm">
         <div>
           <field-label
-            v-if="action === FormAction.update"
+            v-if="isUpdate"
             text="用户名"
             required
             hint="可用于用户名密码登录"
@@ -29,7 +29,7 @@
         </div>
         <div>
           <field-label
-            v-if="action === FormAction.update"
+            v-if="isUpdate"
             text="手机号码"
             hint="可用于手机号验证码登录"
           />
@@ -47,7 +47,7 @@
         </div>
         <div>
           <field-label
-            v-if="action === FormAction.update"
+            v-if="isUpdate"
             text="邮箱地址"
             hint="可用于邮箱验证码登录"
           />
@@ -69,10 +69,7 @@
       </div>
     </div>
     <div>
-      <field-label
-        text="用户姓名（昵称）"
-        :required="action === FormAction.update"
-      />
+      <field-label text="用户姓名（昵称）" :required="isUpdate" />
       <q-input
         :model-value="modelValue.name"
         filled
@@ -84,7 +81,7 @@
         @update:model-value="(val) => onModelUpdated('name', val)"
       />
     </div>
-    <div v-if="action === FormAction.create">
+    <div v-if="!isUpdate">
       <q-toggle
         :model-value="modelValue.reset_pwd_on_first_login"
         label="强制用户在首次登录时修改密码"
@@ -146,10 +143,10 @@ export default defineComponent({
 
   emits: ['update:modelValue'],
 
-  setup() {
-    return {
-      FormAction,
-    };
+  computed: {
+    isUpdate(): boolean {
+      return this.action === FormAction.update;
+    },
   },
 
   methods: {

@@ -4,7 +4,7 @@
       v-model="selectType"
       inline
       class="q-px-md"
-      :disable="action === FormAction.update"
+      :disable="isUpdate"
       :options="[
         { label: '全局可选角色', value: 'global' },
         { label: '指定组织类型下可选角色', value: 'org_type' },
@@ -13,7 +13,7 @@
     <div v-if="selectType === 'org_type'">
       <field-label text="所属组织类型" required />
       <q-select
-        :model-value="formData.org_type_id"
+        :model-value="modelValue.org_type_id"
         :options="orgTypeOptions"
         dense
         filled
@@ -23,30 +23,22 @@
         emit-value
         map-options
         hide-bottom-space
-        :disable="action === FormAction.update"
+        :disable="isUpdate"
         :rules="[(val) => !!val || '请选择所属组织类型']"
-        @update:model-value="
-          (value) => {
-            $emit('update:org_type_id', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('org_type_id', val)"
       />
     </div>
     <div>
       <field-label text="角色名称" required />
       <q-input
-        :model-value="formData.name"
+        :model-value="modelValue.name"
         filled
         dense
         placeholder="请填写角色名称"
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="
-          (value) => {
-            $emit('update:name', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('name', val)"
       />
     </div>
     <div>
@@ -55,34 +47,26 @@
         hint="角色的唯一标识符，可用于获取角色信息"
       />
       <q-input
-        :model-value="formData.code"
+        :model-value="modelValue.code"
         filled
         dense
         placeholder="请填写角色代码"
         hide-bottom-space
         :error="!!formError.code"
         :error-message="formError.code"
-        @update:model-value="
-          (value) => {
-            $emit('update:code', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('code', val)"
       />
     </div>
     <div>
       <field-label text="角色描述" />
       <q-input
-        :model-value="formData.description"
+        :model-value="modelValue.description"
         filled
         dense
         type="textarea"
         placeholder="请填写角色描述"
         hide-bottom-space
-        @update:model-value="
-          (value) => {
-            $emit('update:description', value);
-          }
-        "
+        @update:model-value="(val) => onModelUpdated('description', val)"
       />
     </div>
   </div>
@@ -106,7 +90,7 @@ export default defineComponent({
       default: FormAction.create,
     },
     /** 角色表单数据结构 */
-    formData: {
+    modelValue: {
       type: Object as PropType<RolePostData>,
       default: () => {
         return {};
@@ -121,25 +105,24 @@ export default defineComponent({
     },
   },
 
-  emits: [
-    'update:org_type_id',
-    'update:name',
-    'update:code',
-    'update:description',
-  ],
+  emits: ['update:modelValue'],
 
-  setup() {
+  setup(props) {
     return {
-      FormAction,
       orgTypeOptions: ref<OrgType[]>([]),
-      selectType: ref('global'),
+      selectType: ref(!!props.modelValue.org_type_id ? 'org_type' : 'global'),
     };
   },
 
+  computed: {
+    isUpdate(): boolean {
+      return this.action === FormAction.update;
+    },
+  },
+
   watch: {
-    formData() {
-      if (this.action === FormAction.update)
-        this.selectType = !!this.formData.org_type_id ? 'org_type' : 'global';
+    'modelValue.org_type_id'(val) {
+      this.selectType = !!val ? 'org_type' : 'global';
     },
   },
 
@@ -151,6 +134,15 @@ export default defineComponent({
     async loadOrgTypes() {
       const resp = await this.$api.get('/org_types');
       this.orgTypeOptions = resp.data.org_types;
+    },
+
+    onModelUpdated(field: string, val: string | number | boolean | null) {
+      this.$emit(
+        'update:modelValue',
+        Object.assign({}, this.modelValue, {
+          [field]: val,
+        })
+      );
     },
   },
 });

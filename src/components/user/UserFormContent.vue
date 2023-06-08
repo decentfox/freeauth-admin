@@ -158,6 +158,8 @@ export default defineComponent({
           send_first_login_email:
             field === 'email' && !val
               ? false
+              : field === 'send_first_login_email'
+              ? val
               : this.modelValue.send_first_login_email,
         })
       );

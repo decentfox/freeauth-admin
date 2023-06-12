@@ -9,7 +9,7 @@
       width: options.length * 102 + 'px',
       color: !!color ? `${color} !important` : null,
     }"
-    @update:model-value="(val) => $emit('update:modelValue', val)"
+    @update:model-value="(val: string) => $emit('update:modelValue', val)"
   >
     <q-tab
       v-for="(mode, idx) in tabOptions"

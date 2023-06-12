@@ -78,11 +78,15 @@
                     ? 'remove_circle_outline'
                     : 'task_alt',
                   actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                  disable: props.row.code === '*',
+                  disableHint: '系统内置通配符权限，不支持禁用',
                 },
                 {
                   label: '删除权限',
                   icon: 'delete_outline',
                   actionType: 'delete',
+                  disable: props.row.code === '*',
+                  disableHint: '系统内置通配符权限，不支持删除',
                 },
               ]"
               @click.stop

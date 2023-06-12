@@ -6,7 +6,7 @@
     class="text-weight-bold"
     icon="verified_user"
     @update:model-value="
-      (value) => {
+      (value: boolean) => {
         $emit('update:modelValue', value);
       }
     "
@@ -28,7 +28,7 @@
       style="max-width: 120px"
       hint="限定周期时间"
       @update:model-value="
-        (value) => {
+        (value: string) => {
           $emit('update:interval', parseInt(value as string) || 0);
         }
       "
@@ -43,7 +43,7 @@
       style="max-width: 120px"
       :hint="actionHint"
       @update:model-value="
-        (value) => {
+        (value: string) => {
           $emit('update:maxAttempts', parseInt(value as string) || 0);
         }
       "

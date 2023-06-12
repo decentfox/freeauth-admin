@@ -17,7 +17,7 @@
         indicator-color="primary"
         align="left"
         narrow-indicator
-        @update:model-value="(value) => $emit('update:tabValue', value)"
+        @update:model-value="(value: string) => $emit('update:tabValue', value)"
       >
         <q-tab
           v-for="(tab, idx) in tabs"

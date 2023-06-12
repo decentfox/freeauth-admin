@@ -24,7 +24,7 @@
             class="col"
             :error="!!formError.username"
             :error-message="formError.username"
-            @update:model-value="(val) => onModelUpdated('username', val)"
+            @update:model-value="(val: string) => onModelUpdated('username', val)"
           />
         </div>
         <div>
@@ -42,7 +42,7 @@
             class="col"
             :error="!!formError.mobile"
             :error-message="formError.mobile"
-            @update:model-value="(val) => onModelUpdated('mobile', val)"
+            @update:model-value="(val: string) => onModelUpdated('mobile', val)"
           />
         </div>
         <div>
@@ -60,7 +60,7 @@
             class="col"
             :error="!!formError.email"
             :error-message="formError.email"
-            @update:model-value="(val) => onModelUpdated('email', val)"
+            @update:model-value="(val: string) => onModelUpdated('email', val)"
           />
         </div>
       </div>
@@ -78,7 +78,7 @@
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="(val) => onModelUpdated('name', val)"
+        @update:model-value="(val: string) => onModelUpdated('name', val)"
       />
     </div>
     <div v-if="!isUpdate">
@@ -86,7 +86,7 @@
         :model-value="modelValue.reset_pwd_on_first_login"
         label="强制用户在首次登录时修改密码"
         @update:model-value="
-          (val) => onModelUpdated('reset_pwd_on_first_login', val)
+          (val: boolean) => onModelUpdated('reset_pwd_on_first_login', val)
         "
       />
       <q-toggle
@@ -94,7 +94,7 @@
         label="通过邮件发送初始默认登录信息"
         :disable="!modelValue.email"
         @update:model-value="
-          (val) => onModelUpdated('send_first_login_email', val)
+          (val: boolean) => onModelUpdated('send_first_login_email', val)
         "
       >
         <q-tooltip

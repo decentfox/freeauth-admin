@@ -16,7 +16,7 @@
         hide-bottom-space
         :error="!!formError.application_id"
         :error-message="formError.application_id"
-        @update:model-value="(val) => onModelUpdated('application_id', val)"
+        @update:model-value="(val: string) => onModelUpdated('application_id', val)"
       />
     </div>
     <div>
@@ -29,7 +29,7 @@
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="(val) => onModelUpdated('name', val)"
+        @update:model-value="(val: string) => onModelUpdated('name', val)"
       />
     </div>
     <div>
@@ -46,7 +46,7 @@
         hide-bottom-space
         :error="!!formError.code"
         :error-message="formError.code"
-        @update:model-value="(val) => onModelUpdated('code', val)"
+        @update:model-value="(val: string) => onModelUpdated('code', val)"
       />
     </div>
     <div>
@@ -68,7 +68,7 @@
         @new-value="createValue"
         @filter="filterFn"
         @click="loadTagOptions"
-        @update:model-value="(val) => onModelUpdated('tags', val)"
+        @update:model-value="(val: string[]) => onModelUpdated('tags', val)"
       />
     </div>
     <div>
@@ -80,7 +80,7 @@
         type="textarea"
         placeholder="请填写权限描述"
         hide-bottom-space
-        @update:model-value="(val) => onModelUpdated('description', val)"
+        @update:model-value="(val: string) => onModelUpdated('description', val)"
       />
     </div>
   </div>
@@ -169,7 +169,7 @@ export default defineComponent({
       });
     },
 
-    onModelUpdated(field: string, val: string | number | boolean | null) {
+    onModelUpdated(field: string, val: string | string[] | null) {
       this.$emit(
         'update:modelValue',
         Object.assign({}, this.modelValue, {

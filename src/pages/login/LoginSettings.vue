@@ -125,7 +125,7 @@
               title="注册配置"
               icon="settings_accessibility"
               @update:model-value="
-                (val) =>
+                (val: boolean) =>
                   (currentGuardMode = val ? GuardMode.signup : currentGuardMode)
               "
             >
@@ -141,7 +141,7 @@
                   size="32px"
                   class="q-mt-sm"
                   @update:model-value="
-                    (modes) => (currentSignupMode = modes.slice(-1)[0])
+                    (modes: AuthMode[]) => (currentSignupMode = modes.slice(-1)[0])
                   "
                 />
               </q-card-section>
@@ -194,7 +194,7 @@
               title="登录配置"
               icon="password"
               @update:model-value="
-                (val) =>
+                (val: boolean) =>
                   (currentGuardMode = val ? GuardMode.signin : currentGuardMode)
               "
             >
@@ -210,7 +210,7 @@
                   size="32px"
                   class="q-mt-sm"
                   @update:model-value="
-                    (modes) =>
+                    (modes: AuthMode[]) =>
                       (currentLoginMode =
                         !pwdLoginEnabled || modes.length > 0
                           ? LoginMode.code
@@ -257,7 +257,7 @@
                   size="32px"
                   class="q-mt-sm"
                   @update:model-value="
-                    (modes) =>
+                    (modes: AuthMode[]) =>
                       (currentLoginMode =
                         modes.length > 0 ? LoginMode.password : LoginMode.code)
                   "
@@ -285,7 +285,7 @@
                   toggle-label="cookie 过期时间"
                   description="用户登录状态的有效时间，过期后用户需要重新登录"
                   @update:model-value="
-                    (val) => (loginSettings.jwtTokenTtl = val ? 1440 : 0)
+                    (val: number) => (loginSettings.jwtTokenTtl = val ? 1440 : 0)
                   "
                 />
               </q-card-section>

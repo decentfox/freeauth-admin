@@ -147,7 +147,7 @@
                 :model-value="
                   props.row.roles.map((r:Role) => r.id).includes(role.id)
                 "
-                @update:model-value="(val) => toggleLinked(val, props.row.id)"
+                @update:model-value="(val: boolean) => toggleLinked(val, props.row.id)"
               />
             </q-td>
           </template>

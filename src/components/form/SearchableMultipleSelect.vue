@@ -15,7 +15,7 @@
     map-options
     virtual-scroll-slice-size="5"
     @filter="searchOptions"
-    @update:model-value="(value) => clearFilter(value)"
+    @update:model-value="(value: string[]) => clearFilter(value)"
   >
     <template #no-option>
       <q-item>
@@ -135,7 +135,7 @@ export default defineComponent({
       });
     },
 
-    clearFilter(val: string) {
+    clearFilter(val: string[]) {
       this.$emit('update:modelValue', val);
       (this.$refs.select as QSelect).updateInputValue('');
     },

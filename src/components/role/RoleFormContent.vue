@@ -24,8 +24,8 @@
         map-options
         hide-bottom-space
         :disable="isUpdate"
-        :rules="[(val) => !!val || '请选择所属组织类型']"
-        @update:model-value="(val) => onModelUpdated('org_type_id', val)"
+        :rules="[(val: string) => !!val || '请选择所属组织类型']"
+        @update:model-value="(val: string) => onModelUpdated('org_type_id', val)"
       />
     </div>
     <div>
@@ -38,7 +38,7 @@
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="(val) => onModelUpdated('name', val)"
+        @update:model-value="(val: string) => onModelUpdated('name', val)"
       />
     </div>
     <div>
@@ -54,7 +54,7 @@
         hide-bottom-space
         :error="!!formError.code"
         :error-message="formError.code"
-        @update:model-value="(val) => onModelUpdated('code', val)"
+        @update:model-value="(val: string) => onModelUpdated('code', val)"
       />
     </div>
     <div>
@@ -66,7 +66,7 @@
         type="textarea"
         placeholder="请填写角色描述"
         hide-bottom-space
-        @update:model-value="(val) => onModelUpdated('description', val)"
+        @update:model-value="(val: string) => onModelUpdated('description', val)"
       />
     </div>
   </div>

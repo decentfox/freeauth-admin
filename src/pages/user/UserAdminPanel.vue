@@ -11,12 +11,12 @@
       selection="multiple"
       :batch-actions="['批量禁用', '批量启用', '批量删除']"
       @批量禁用="
-        (selected) => toggleUsersStatus(selected, true, refreshUserData)
+        (selected: User[]) => toggleUsersStatus(selected, true, refreshUserData)
       "
       @批量启用="
-        (selected) => toggleUsersStatus(selected, false, refreshUserData)
+        (selected: User[]) => toggleUsersStatus(selected, false, refreshUserData)
       "
-      @批量删除="(selected) => deleteUsers(selected, refreshUserData)"
+      @批量删除="(selected: User[]) => deleteUsers(selected, refreshUserData)"
     >
       <template #table-action>
         <q-btn
@@ -89,6 +89,8 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { User } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
 
 const columns: QTableProps['columns'] = [

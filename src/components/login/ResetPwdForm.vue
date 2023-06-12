@@ -3,13 +3,13 @@
     <pwd-field
       v-model="password"
       placeholder="请输入新密码"
-      :rules="[(val) => val.length >= 6 || '请使用至少 6 位字符作为密码']"
+      :rules="[(val: string) => val.length >= 6 || '请使用至少 6 位字符作为密码']"
       :error="formError.password"
     />
     <pwd-field
       v-model="repeatPassword"
       placeholder="请再次确认密码"
-      :rules="[(val) => (!!val && val === password) || '两次输入密码不一致']"
+      :rules="[(val: string) => (!!val && val === password) || '两次输入密码不一致']"
     />
     <div class="flex flex-center">
       <q-btn

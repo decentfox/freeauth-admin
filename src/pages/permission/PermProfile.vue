@@ -21,12 +21,16 @@
             label: !permission.is_deleted ? '禁用权限' : '启用权限',
             icon: !permission.is_deleted ? 'remove_circle_outline' : 'task_alt',
             actionType: !permission.is_deleted ? 'disable' : 'enable',
+            disable: permission.code === '*',
+            disableHint: '系统内置通配符权限，不支持禁用',
           },
 
           {
             label: '删除权限',
             icon: 'delete_outline',
             actionType: 'delete',
+            disable: permission.code === '*',
+            disableHint: '系统内置通配符权限，不支持删除',
           },
         ]"
         @disable="

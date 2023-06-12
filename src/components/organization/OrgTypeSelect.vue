@@ -14,7 +14,7 @@
         option-value="id"
         @popup-show="selectWidth = ($refs.select as QSelect).$el.offsetWidth"
         @update:model-value="
-          (value) => {
+          (value: OrgType) => {
             $emit('update:modelValue', value);
           }
         "

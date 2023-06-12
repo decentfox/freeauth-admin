@@ -16,7 +16,7 @@
             :guard-mode="GuardMode.signup"
             :color="loginSettings.guardPrimaryColor"
             :options="loginSettings.signupModes"
-            @update:model-value="(val) => $emit('update:signupMode', val)"
+            @update:model-value="(val: string) => $emit('update:signupMode', val)"
           />
           <q-tab-panels :model-value="signupMode" animated class="bg-white">
             <!-- 注册框：手机号或邮箱注册 -->
@@ -63,7 +63,7 @@
             :guard-mode="GuardMode.signin"
             :color="loginSettings.guardPrimaryColor"
             :options="loginModeOptions"
-            @update:model-value="(val) => $emit('update:loginMode', val)"
+            @update:model-value="(val: string) => $emit('update:loginMode', val)"
           />
           <q-tab-panels :model-value="loginMode" animated class="bg-white">
             <!-- 登录框：验证码或密码登录 -->

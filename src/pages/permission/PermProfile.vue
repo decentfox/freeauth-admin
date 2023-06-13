@@ -354,7 +354,9 @@ export default defineComponent({
 
   methods: {
     async loadPermInfo() {
-      const resp = await this.$api.get(`/permissions/${this.permId}`);
+      const resp = await this.$api.get(`/permissions/${this.permId}`, {
+        showProgress: true,
+      });
       this.permission = resp.data;
     },
 

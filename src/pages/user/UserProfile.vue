@@ -392,7 +392,9 @@ export default defineComponent({
 
   methods: {
     async loadUserInfo() {
-      const resp = await this.$api.get(`/users/${this.userId}`);
+      const resp = await this.$api.get(`/users/${this.userId}`, {
+        showProgress: true,
+      });
       this.user = resp.data;
     },
 

@@ -372,7 +372,9 @@ export default defineComponent({
 
   methods: {
     async loadRoleInfo() {
-      const resp = await this.$api.get(`/roles/${this.roleId}`);
+      const resp = await this.$api.get(`/roles/${this.roleId}`, {
+        showProgress: true,
+      });
       this.role = resp.data;
     },
 

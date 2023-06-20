@@ -24,7 +24,7 @@
             class="col"
             :error="!!formError.username"
             :error-message="formError.username"
-            @update:model-value="(val: string) => onModelUpdated('username', val)"
+            @update:model-value="(val: string  | number | null) => onModelUpdated('username', val)"
           />
         </div>
         <div>
@@ -42,7 +42,7 @@
             class="col"
             :error="!!formError.mobile"
             :error-message="formError.mobile"
-            @update:model-value="(val: string) => onModelUpdated('mobile', val)"
+            @update:model-value="(val: string  | number | null) => onModelUpdated('mobile', val)"
           />
         </div>
         <div>
@@ -60,7 +60,7 @@
             class="col"
             :error="!!formError.email"
             :error-message="formError.email"
-            @update:model-value="(val: string) => onModelUpdated('email', val)"
+            @update:model-value="(val: string  | number | null) => onModelUpdated('email', val)"
           />
         </div>
       </div>
@@ -78,7 +78,7 @@
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="(val: string) => onModelUpdated('name', val)"
+        @update:model-value="(val: string  | number | null) => onModelUpdated('name', val)"
       />
     </div>
     <div v-if="!isUpdate">

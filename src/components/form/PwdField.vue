@@ -11,7 +11,7 @@
     :error="!!error"
     :error-message="error"
     @update:model-value="
-      (value: string) => {
+      (value: string  | number | null) => {
         $emit('update:modelValue', value);
       }
     "

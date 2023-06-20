@@ -29,7 +29,7 @@
         hide-bottom-space
         :error="!!formError.name"
         :error-message="formError.name"
-        @update:model-value="(val: string) => onModelUpdated('name', val)"
+        @update:model-value="(val: string  | number | null) => onModelUpdated('name', val)"
       />
     </div>
     <div>
@@ -46,7 +46,7 @@
         hide-bottom-space
         :error="!!formError.code"
         :error-message="formError.code"
-        @update:model-value="(val: string) => onModelUpdated('code', val)"
+        @update:model-value="(val: string  | number | null) => onModelUpdated('code', val)"
       />
     </div>
     <div>
@@ -80,7 +80,7 @@
         type="textarea"
         placeholder="请填写权限描述"
         hide-bottom-space
-        @update:model-value="(val: string) => onModelUpdated('description', val)"
+        @update:model-value="(val: string  | number | null) => onModelUpdated('description', val)"
       />
     </div>
   </div>
@@ -169,7 +169,7 @@ export default defineComponent({
       });
     },
 
-    onModelUpdated(field: string, val: string | string[] | null) {
+    onModelUpdated(field: string, val: string | number | string[] | null) {
       this.$emit(
         'update:modelValue',
         Object.assign({}, this.modelValue, {

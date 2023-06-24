@@ -30,7 +30,7 @@
           @end="dragging = false"
         >
           <template #item="{ element }">
-            <q-item class="draggable-item">
+            <q-item class="bg-secondary draggable-item">
               <q-item-section avatar>
                 <q-icon size="xs" name="menu" />
               </q-item-section>
@@ -262,7 +262,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .draggable-item {
   margin-bottom: 3px;
-  background-color: #f4f4f4;
   cursor: move;
 }
 </style>

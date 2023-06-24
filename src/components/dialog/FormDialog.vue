@@ -38,8 +38,7 @@
             :disable="!canSubmit"
             type="submit"
             class="primary-btn"
-          >
-          </q-btn>
+          />
         </q-card-actions>
       </q-form>
     </q-card>

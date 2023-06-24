@@ -30,6 +30,7 @@
           dense
           label="管理标签"
           class="q-ml-sm q-px-md secondary-btn"
+          @click="openTagManagement"
         />
         <q-btn
           unelevated
@@ -116,6 +117,7 @@
       :action="FormAction.create"
       @refresh="refreshPermissionData"
     />
+    <tag-management ref="tagManagement" width="500px" title="管理权限标签" />
   </page-wrapper>
 </template>
 
@@ -131,6 +133,7 @@ import {
   FilterColumn,
   FilterOperator,
 } from 'components/table/type';
+import { TagManagementComponent } from 'components/tag/type';
 
 const columns: QTableProps['columns'] = [
   {
@@ -272,6 +275,10 @@ export default defineComponent({
 
     goToPermissionProfile(evt: Event, permId: string) {
       this.$router.push(`/perm_profile/${permId}`);
+    },
+
+    openTagManagement() {
+      (this.$refs.tagManagement as TagManagementComponent).show();
     },
   },
 });

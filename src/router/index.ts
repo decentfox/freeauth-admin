@@ -7,6 +7,7 @@ import {
 import { LoadingBar, Notify } from 'quasar';
 import { route } from 'quasar/wrappers';
 
+import { appStore } from 'stores/app-store';
 import { authStore } from 'stores/auth-store';
 
 import routes from './routes';
@@ -37,8 +38,9 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach(async (to) => {
+  Router.beforeEach(async (to, from, next) => {
     LoadingBar.start();
+
     const auth = authStore();
     const requiredPerms = to.meta.requiredPerms;
     if (auth.authenticated && requiredPerms) {
@@ -51,10 +53,22 @@ export default route(function (/* { store, ssrContext } */) {
         return '/';
       }
     }
+
+    const app = appStore();
+    if (to.meta.keepAlive && (!to.query.nonce || app.keepAliveDisabled)) {
+      const nonce = new Date().getTime();
+      const query = Object.assign({ nonce: nonce }, to.query);
+      next({ path: to.path, query: query });
+    } else {
+      next();
+    }
   });
 
   Router.afterEach(() => {
     LoadingBar.stop();
+
+    const app = appStore();
+    app.keepAliveDisabled = false;
   });
 
   return Router;

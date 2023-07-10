@@ -36,6 +36,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/user/UserAdminPanel.vue'),
         meta: {
           requiredPerms: ['manage:users'],
+          keepAlive: true,
         },
       },
       {
@@ -58,6 +59,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/role/RoleAdminPanel.vue'),
         meta: {
           requiredPerms: ['manage:roles'],
+          keepAlive: true,
         },
       },
       {
@@ -73,6 +75,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/permission/PermAdminPanel.vue'),
         meta: {
           requiredPerms: ['manage:perms'],
+          keepAlive: true,
         },
       },
       {

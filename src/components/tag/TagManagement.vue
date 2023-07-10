@@ -228,7 +228,7 @@ export default defineComponent({
         .dialog({
           component: ConfirmDialog,
           componentProps: {
-            title: '删除应用',
+            title: '删除标签',
             content: `您正在请求删除标签【${tag.name}】，数据删除后将无法进行恢复，您确认要继续删除吗？`,
             buttons: [
               { label: '取消', class: 'secondary-btn' },
@@ -247,7 +247,7 @@ export default defineComponent({
                 method: 'DELETE',
                 url: '/permission_tags',
                 data: { ids: [tag.id] },
-                successMsg: '删除应用成功',
+                successMsg: '删除标签成功',
               });
             } finally {
               this.loadTags();

@@ -91,7 +91,16 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/app_admin_panel',
-        component: () => import('pages/AppAdminPanel.vue'),
+        component: () => import('pages/application/AppAdminPanel.vue'),
+        meta: {
+          requiredPerms: ['manage:apps'],
+          keepAlive: true,
+        },
+      },
+      {
+        path: '/app_profile/:appId',
+        component: () => import('pages/application/AppProfile.vue'),
+        props: true,
         meta: {
           requiredPerms: ['manage:apps'],
         },
@@ -103,8 +112,8 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // Please always leave this as the last one,
+  // but you can also remove it if needed.
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

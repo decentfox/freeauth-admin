@@ -94,14 +94,13 @@
         </data-table>
       </q-tab-panel>
       <q-tab-panel name="perms">
-        <div class="q-pa-sm row items-center">
+        <div v-if="applicationChips.length" class="q-pa-sm row items-center">
           <div class="text-caption">应用：</div>
           <q-scroll-area
             :thumb-style="thumbStyle"
             style="height: 32px; width: calc(100% - 40px)"
           >
             <div class="row no-wrap q-gutter-col-xs">
-              <!-- TODO Chip -->
               <chip-group
                 :chips="(applicationChips as ChipGroupItem[])"
                 icon="wysiwyg"
@@ -112,7 +111,7 @@
             </div>
           </q-scroll-area>
         </div>
-        <div class="q-pa-sm q-pb-md row">
+        <div v-if="tagChips.length" class="q-pa-sm q-pb-md row">
           <div class="text-caption q-py-xs">标签：</div>
           <div class="q-gutter-col-xs" style="width: calc(100% - 40px)">
             <chip-group
@@ -219,10 +218,10 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { QTableProps, VueStyleObjectProp } from 'quasar';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ChipGroupItem } from 'src/components/common/type';
 
 import { Application } from 'components/application/type';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ChipGroupItem } from 'components/common/type';
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';

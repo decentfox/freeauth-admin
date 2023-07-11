@@ -9,6 +9,8 @@ export interface Application {
   secret_key?: string;
   /** 应用是否为预设应用 */
   is_protected?: boolean;
+  /** 应用是否被禁用 */
+  is_deleted?: boolean;
 }
 
 export interface ApplicationPostData {
@@ -20,4 +22,19 @@ export interface ApplicationPostData {
 
 export interface ApplicationPostError {
   name?: string;
+}
+
+export interface AppOperationsType {
+  methods: {
+    toggleApplicationsStatus: (
+      applications: Application[],
+      isDeleted: boolean,
+      handler?: (...args: [string]) => void
+    ) => void;
+    deleteApplications: (
+      applications: Application[],
+      handler?: (...args: [string]) => void
+    ) => void;
+    resetAppSecret: (appId: string) => void;
+  };
 }

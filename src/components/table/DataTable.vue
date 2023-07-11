@@ -252,6 +252,12 @@ export default defineComponent({
     this.fetchRows();
   },
 
+  activated() {
+    if (!this.loading) {
+      this.fetchRows();
+    }
+  },
+
   methods: {
     async fetchRows() {
       if (!this.url || this.loading) {

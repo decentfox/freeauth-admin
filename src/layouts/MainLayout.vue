@@ -96,6 +96,7 @@
               class="q-my-md"
               :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-9'"
               active-class="active-link"
+              @click="goToPage(item)"
             >
               <q-item-section avatar>
                 <q-icon :name="item.icon" size="xs" class="q-ml-sm" />
@@ -110,16 +111,30 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component, route }">
+        <keep-alive>
+          <component
+            :is="Component"
+            v-if="route.meta.keepAlive"
+            :key="route.fullPath"
+          />
+        </keep-alive>
+        <component
+          :is="Component"
+          v-if="!route.meta.keepAlive"
+          :key="route.fullPath"
+        />
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { mapActions, mapState } from 'pinia';
+import { mapActions, mapState, mapWritableState } from 'pinia';
 
-import { MainMenuSection } from 'components/common/type';
+import { MainMenuLink, MainMenuSection } from 'components/common/type';
+import { appStore } from 'stores/app-store';
 import { authStore } from 'stores/auth-store';
 
 const menuLinkList: MainMenuSection[] = [
@@ -207,6 +222,7 @@ export default defineComponent({
 
   computed: {
     ...mapState(authStore, ['authenticated']),
+    ...mapWritableState(appStore, ['keepAliveDisabled']),
 
     mainMenu() {
       return menuLinkList
@@ -234,6 +250,13 @@ export default defineComponent({
     async onSignOut() {
       await this.signOut();
       this.$router.replace('/login');
+    },
+
+    goToPage(menu: MainMenuLink) {
+      this.keepAliveDisabled = true;
+      if (menu.link) {
+        this.$router.push(menu.link);
+      }
     },
   },
 });

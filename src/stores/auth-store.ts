@@ -10,7 +10,7 @@ interface AuthError {
 
 export const authStore = defineStore('auth', {
   state: () => ({
-    user: <User>{},
+    currentUser: <User>{},
     authenticated: false,
     resetPwdRequired: false,
   }),
@@ -26,14 +26,14 @@ export const authStore = defineStore('auth', {
           hideProgress: true,
         }
       );
-      this.user = { id: '' };
+      this.currentUser = { id: '' };
       this.authenticated = false;
     },
 
     async fetchProfile() {
       try {
         const resp = await api.get('/me');
-        this.user = resp.data;
+        this.currentUser = resp.data;
         this.authenticated = true;
         this.resetPwdRequired = false;
       } catch (e) {
@@ -50,8 +50,8 @@ export const authStore = defineStore('auth', {
 
     hasAnyPermission(permList: string[]) {
       return (
-        this.user.perms?.includes('*') ||
-        permList.filter((p) => this.user.perms?.includes(p)).length > 0
+        this.currentUser.perms?.includes('*') ||
+        permList.filter((p) => this.currentUser.perms?.includes(p)).length > 0
       );
     },
   },

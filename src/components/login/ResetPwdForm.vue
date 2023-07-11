@@ -1,5 +1,5 @@
 <template>
-  <q-form ref="form" class="q-gutter-md">
+  <q-form ref="form" class="q-px-md q-gutter-md">
     <pwd-field
       v-model="password"
       placeholder="请输入新密码"

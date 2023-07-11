@@ -10,15 +10,13 @@
     >
       <template #type-select>
         <q-select
-          v-model="selectedAppId"
+          v-model="selectedApp"
           :options="appOptions"
           dense
           filled
           class="full-width q-pr-sm"
           option-label="name"
           option-value="id"
-          emit-value
-          map-options
           style="max-width: 250px"
           prefix="应用："
           @update:model-value="loadPermissionsbyApp"
@@ -32,13 +30,24 @@
           class="q-ml-sm q-px-md secondary-btn"
           @click="openTagManagement"
         />
-        <q-btn
-          unelevated
-          dense
-          label="创建权限"
-          class="q-ml-sm q-px-md primary-btn"
-          @click="openPermissionForm"
-        />
+        <div>
+          <q-btn
+            unelevated
+            dense
+            label="创建权限"
+            class="q-ml-sm q-px-md primary-btn"
+            :disable="selectedApp.is_protected"
+            @click="openPermissionForm"
+          />
+          <q-tooltip
+            v-if="selectedApp.is_protected"
+            anchor="bottom right"
+            self="top right"
+            max-width="200px"
+          >
+            所选应用即为当前所在系统 FreeAuth，权限的变更应通过代码实现
+          </q-tooltip>
+        </div>
       </template>
       <template #body-cell-name="props">
         <q-td
@@ -113,7 +122,7 @@
     </data-table>
     <perm-form
       ref="createPermForm"
-      :app-id="selectedAppId"
+      :app-id="selectedApp.id"
       :action="FormAction.create"
       @refresh="refreshPermissionData"
     />
@@ -238,7 +247,7 @@ export default defineComponent({
     return {
       columns: columns,
       filterColumns: filterColumns,
-      selectedAppId: ref(''),
+      selectedApp: ref<Application>({ id: '' }),
       appOptions: ref<Application[]>([]),
 
       FormAction,
@@ -253,7 +262,7 @@ export default defineComponent({
     async loadApplicationOptions() {
       const resp = await this.$api.get('/applications/options');
       this.appOptions = resp.data;
-      this.selectedAppId = this.appOptions[0].id;
+      this.selectedApp = this.appOptions[0];
       this.loadPermissionsbyApp();
     },
 
@@ -261,7 +270,7 @@ export default defineComponent({
       setTimeout(() => {
         const pt = this.$refs.permissionTable as DataTableComponent;
         pt.setApiInfo('/permissions/query', 'POST');
-        pt.onExternalFiltered('application_id', this.selectedAppId);
+        pt.onExternalFiltered('application_id', this.selectedApp.id);
       }, 20);
     },
 

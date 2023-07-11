@@ -9,6 +9,7 @@
         </q-item-section>
         <q-space />
         <q-btn
+          v-if="!hideClose"
           v-close-popup
           dense
           flat
@@ -77,6 +78,11 @@ export default defineComponent({
     canSubmit: {
       type: Boolean,
       default: true,
+    },
+    /** 表单弹窗是否隐藏右上角关闭图标 */
+    hideClose: {
+      type: Boolean,
+      default: false,
     },
   },
 

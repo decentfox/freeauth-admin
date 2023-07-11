@@ -1,5 +1,5 @@
 <template>
-  <q-card bordered class="q-pa-md guard-frame">
+  <q-card bordered class="q-pa-lg guard-frame">
     <guard-header description="为了保证账户安全，请设置您的新密码。" />
     <div class="q-pt-lg bg-white">
       <reset-pwd-form :color="loginSettings.guardPrimaryColor" />

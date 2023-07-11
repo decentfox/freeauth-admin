@@ -6,7 +6,7 @@
       style="height: calc(100vh - 82px)"
     >
       <template #before>
-        <div class="q-pa-md">
+        <div class="q-px-sm">
           <q-list v-if="ready">
             <login-setting-panel
               v-model="basicExpanded"
@@ -298,7 +298,7 @@
         </div>
       </template>
       <template #after>
-        <div class="q-mx-xl q-my-md">
+        <div class="q-mx-xl q-my-sm">
           <signup-and-login-frame
             v-model="currentGuardMode"
             v-model:signup-mode="currentSignupMode"

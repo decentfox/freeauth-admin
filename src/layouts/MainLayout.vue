@@ -31,7 +31,13 @@
         </q-toolbar-title>
 
         <div class="q-pl-md q-gutter-xs row no-wrap items-center">
-          <q-btn flat label="帮助文档" class="text-black-white" />
+          <q-btn
+            rounded
+            flat
+            dense
+            label="帮助文档"
+            class="text-black-white q-px-sm"
+          />
           <q-btn
             round
             flat
@@ -40,7 +46,7 @@
             @click="$q.dark.isActive ? $q.dark.set(false) : $q.dark.set(true)"
           >
             <q-icon
-              size="22px"
+              size="24px"
               :name="$q.dark.isActive ? 'sunny' : 'dark_mode'"
             />
             <q-tooltip>
@@ -48,9 +54,10 @@
             </q-tooltip>
           </q-btn>
           <dropdown-button
-            round
+            rounded
             btn-icon="account_circle"
-            btn-icon-size="22px"
+            btn-class="q-px-sm text-black-white"
+            :btn-label="currentUser.username"
             :buttons="[
               {
                 label: '个人信息',
@@ -63,6 +70,7 @@
                 actionType: 'logout',
               },
             ]"
+            @profile="goToProfile"
             @logout="onSignOut"
           />
         </div>
@@ -217,7 +225,7 @@ export default defineComponent({
   },
 
   computed: {
-    ...mapState(authStore, ['authenticated']),
+    ...mapState(authStore, ['authenticated', 'currentUser']),
     ...mapWritableState(appStore, ['keepAliveDisabled']),
 
     mainMenu() {
@@ -253,6 +261,10 @@ export default defineComponent({
       if (menu.link) {
         this.$router.push(menu.link);
       }
+    },
+
+    goToProfile() {
+      this.$router.push(`/user_profile/${this.currentUser.id}`);
     },
   },
 });

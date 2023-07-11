@@ -200,8 +200,8 @@
 
               <template #after>
                 <div
-                  class="q-px-md scroll frame-table"
-                  style="height: calc(100vh - 70px)"
+                  class="q-pl-md scroll frame-table"
+                  style="height: calc(100vh - 120px)"
                 >
                   <data-table
                     ref="userTable"

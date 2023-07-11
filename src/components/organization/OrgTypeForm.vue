@@ -15,7 +15,7 @@
             v-model="orgTypeFormData.name"
             filled
             dense
-            placeholder="请填写组织类型名称，如：合作商家"
+            placeholder="请填写组织类型名称，如：内部组织、合作商家"
             hide-bottom-space
             :error="!!orgTypeFormError.name"
             :error-message="orgTypeFormError.name"

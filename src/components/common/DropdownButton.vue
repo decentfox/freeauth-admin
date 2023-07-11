@@ -1,6 +1,13 @@
 <template>
-  <q-btn flat dense :class="btnClass" :style="btnStyle">
-    <q-icon v-if="btnIcon" :size="btnIconSize" :name="btnIcon" />{{ btnLabel }}
+  <q-btn
+    no-caps
+    flat
+    dense
+    :class="btnClass"
+    :style="btnStyle"
+    :label="btnLabel"
+    :icon="btnIcon"
+  >
     <q-menu class="q-px-xs" anchor="bottom right" self="top right">
       <q-list dense>
         <q-item
@@ -42,10 +49,6 @@ export default defineComponent({
     btnIcon: {
       type: String,
       default: 'more_horiz',
-    },
-    btnIconSize: {
-      type: String,
-      default: '18px',
     },
     btnLabel: {
       type: String,

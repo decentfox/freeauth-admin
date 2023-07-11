@@ -67,7 +67,7 @@
                     actionType: 'delete_type',
                     disable: scope.opt.is_protected,
                     disableHint: scope.opt.is_protected
-                      ? '系统内置类型，不支持删除'
+                      ? '系统内置组织类型，不支持删除'
                       : '',
                   },
                 ]"
@@ -83,10 +83,9 @@
       <slot name="create-action">
         <dropdown-button
           v-if="editable"
-          btn-label="创建"
           btn-icon="add"
           btn-class="q-ml-sm secondary-btn"
-          btn-style="width: 75px; height: 40px"
+          btn-style="width: 40px; height: 40px"
           :buttons="[
             {
               label: '组织类型',

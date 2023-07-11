@@ -22,6 +22,8 @@
             label: !user.is_deleted ? '禁用账号' : '启用账号',
             icon: !user.is_deleted ? 'remove_circle_outline' : 'task_alt',
             actionType: !user.is_deleted ? 'disable' : 'enable',
+            disable: user.id === currentUser.id,
+            disableHint: '该账号为您当前登录正在使用账号',
           },
           {
             label: '重置密码',
@@ -32,6 +34,8 @@
             label: '删除账号',
             icon: 'delete_outline',
             actionType: 'delete',
+            disable: user.id === currentUser.id,
+            disableHint: '该账号为您当前登录正在使用账号',
           },
         ]"
         @disable="toggleUsersStatus([user], true, refreshUserData)"
@@ -228,11 +232,11 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { mapState } from 'pinia';
 import { QTableProps } from 'quasar';
 
 import { FormAction } from 'components/form/type';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Role } from 'components/role/type';
 import { DataTableComponent } from 'components/table/type';
 import {
   SetOrganizationsComponent,
@@ -240,6 +244,7 @@ import {
   User,
 } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
+import { authStore } from 'stores/auth-store';
 
 const roleColumns: QTableProps['columns'] = [
   {
@@ -383,6 +388,10 @@ export default defineComponent({
       permColumns: permColumns,
       FormAction,
     };
+  },
+
+  computed: {
+    ...mapState(authStore, ['currentUser']),
   },
 
   mounted() {

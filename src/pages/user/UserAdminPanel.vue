@@ -55,11 +55,15 @@
                   ? 'remove_circle_outline'
                   : 'task_alt',
                 actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                disable: props.row.id === currentUser.id,
+                disableHint: '该账号为您当前登录正在使用账号',
               },
               {
                 label: '删除账号',
                 icon: 'delete_outline',
                 actionType: 'delete',
+                disable: props.row.id === currentUser.id,
+                disableHint: '该账号为您当前登录正在使用账号',
               },
             ]"
             @disable="toggleUsersStatus([props.row], true, refreshUserData)"
@@ -81,6 +85,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { mapState } from 'pinia';
 import { date, QTableProps } from 'quasar';
 
 import { FormAction, FormComponent } from 'components/form/type';
@@ -92,6 +97,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User } from 'components/user/type';
 import { UserOperationsMixin } from 'components/user/UserOperations';
+import { authStore } from 'stores/auth-store';
 
 const columns: QTableProps['columns'] = [
   {
@@ -245,6 +251,10 @@ export default defineComponent({
       filterColumns: filterColumns,
       FormAction,
     };
+  },
+
+  computed: {
+    ...mapState(authStore, ['currentUser']),
   },
 
   methods: {

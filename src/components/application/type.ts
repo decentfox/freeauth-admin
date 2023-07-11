@@ -7,6 +7,8 @@ export interface Application {
   description?: string;
   /** 应用密钥 */
   secret_key?: string;
+  /** 应用是否为预设应用 */
+  is_protected?: boolean;
 }
 
 export interface ApplicationPostData {

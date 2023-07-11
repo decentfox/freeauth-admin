@@ -28,10 +28,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: '/common_settings',
-        component: () => import('pages/CommonSettings.vue'),
-      },
-      {
         path: '/user_admin_panel',
         component: () => import('pages/user/UserAdminPanel.vue'),
         meta: {
@@ -99,6 +95,10 @@ const routes: RouteRecordRaw[] = [
         meta: {
           requiredPerms: ['manage:apps'],
         },
+      },
+      {
+        path: '/more',
+        component: () => import('pages/MoreFeatures.vue'),
       },
     ],
   },

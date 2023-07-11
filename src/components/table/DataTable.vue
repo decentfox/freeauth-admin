@@ -50,19 +50,19 @@
           v-if="!hideImport"
           unelevated
           dense
+          disable
           class="secondary-btn q-px-md"
         >
           <q-icon size="18px" name="upload" />导入
-          <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
         <q-btn
           v-if="!hideExport"
           unelevated
           dense
+          disable
           class="secondary-btn q-px-md"
         >
           <q-icon size="18px" name="download" />导出
-          <q-tooltip>敬请期待</q-tooltip>
         </q-btn>
       </div>
       <slot name="table-action"></slot>

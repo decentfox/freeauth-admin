@@ -45,6 +45,10 @@
                     ? 'remove_circle_outline'
                     : 'task_alt',
                   actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                  disable: props.row.is_protected,
+                  disableHint: props.row.is_protected
+                    ? '该应用为您当前所在应用，不支持禁用'
+                    : '',
                 },
                 {
                   label: '删除应用',
@@ -52,7 +56,7 @@
                   actionType: 'delete',
                   disable: props.row.is_protected,
                   disableHint: props.row.is_protected
-                    ? '系统预留应用，不支持删除'
+                    ? '该应用为您当前所在应用，不支持删除'
                     : '',
                 },
               ]"
@@ -137,6 +141,12 @@ const columns: QTableProps['columns'] = [
     field: 'description',
     style: 'max-width: 400px',
     headerStyle: 'max-width: 400px',
+  },
+  {
+    name: 'id',
+    label: 'AppID',
+    align: 'left',
+    field: 'id',
   },
   {
     name: 'created_at',

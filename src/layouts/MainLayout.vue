@@ -159,11 +159,6 @@ const menuLinkList: MainMenuSection[] = [
         link: '/audit_logs',
         requiredPerms: ['manage:audit_logs'],
       },
-      {
-        title: '参数设置',
-        icon: 'settings_suggest',
-        link: '/common_settings',
-      },
     ],
   },
   {
@@ -199,8 +194,9 @@ const menuLinkList: MainMenuSection[] = [
         requiredPerms: ['manage:apps'],
       },
       {
-        title: '单点登录',
+        title: '更多功能',
         icon: 'pin_end',
+        link: '/more',
       },
     ],
   },

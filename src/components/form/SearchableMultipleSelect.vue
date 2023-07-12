@@ -109,6 +109,12 @@ export default defineComponent({
     };
   },
 
+  watch: {
+    modelValue(val) {
+      this.selected = val;
+    },
+  },
+
   created() {
     this.selected = this.modelValue;
   },

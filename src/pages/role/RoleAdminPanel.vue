@@ -79,6 +79,8 @@
                         ? 'remove_circle_outline'
                         : 'task_alt',
                       actionType: !props.row.is_deleted ? 'disable' : 'enable',
+                      disable: props.row.is_protected && !props.row.is_deleted,
+                      disableHint: '该角色为系统预设管理员角色，不支持禁用',
                     },
                     {
                       label: '添加主体',
@@ -94,6 +96,8 @@
                       label: '删除角色',
                       icon: 'delete_outline',
                       actionType: 'delete',
+                      disable: props.row.is_protected,
+                      disableHint: '该角色为系统预设管理员角色，不支持删除',
                     },
                   ]"
                   @click.stop

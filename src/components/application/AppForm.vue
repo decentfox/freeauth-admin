@@ -35,6 +35,7 @@ import { defineComponent, PropType, ref } from 'vue';
 import { FormDialogComponent } from '../dialog/type';
 import { FormAction } from '../form/type';
 
+import AppSecretFormDialog from './AppSecretFormDialog.vue';
 import { Application, ApplicationPostData, ApplicationPostError } from './type';
 
 export default defineComponent({
@@ -85,12 +86,20 @@ export default defineComponent({
     async createApp() {
       try {
         this.appFormError = {};
-        await this.$api.post('/applications', this.appFormData, {
+        const resp = await this.$api.post('/applications', this.appFormData, {
           successMsg: '应用创建成功',
         });
         (this.$refs.appDialog as FormDialogComponent).hide();
         this.$emit('refresh');
         this.resetAppForm();
+        const app = resp.data;
+        this.$q.dialog({
+          component: AppSecretFormDialog,
+          componentProps: {
+            appId: app.id,
+            appSecret: app.secret,
+          },
+        });
       } catch (e) {
         this.appFormError = (e as Error).cause || {};
       }

@@ -1,5 +1,5 @@
 <template>
-  <page-wrapper>
+  <page-wrapper page-title="组织管理">
     <q-splitter v-model="splitterModel" unit="px" :limits="[250, 400]">
       <!--the first splitted screen-->
       <template #before>
@@ -40,7 +40,7 @@
             <q-tab-panel
               name="users"
               class="scroll q-pa-none frame-table"
-              style="height: calc(100vh - 150px)"
+              style="height: calc(100vh - 180px)"
             >
               <data-table
                 ref="userTable"

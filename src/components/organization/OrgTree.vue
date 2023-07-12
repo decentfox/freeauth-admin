@@ -9,10 +9,9 @@
       <template #create-action>
         <dropdown-button
           v-if="editable"
-          btn-label="创建"
           btn-icon="add"
           btn-class="q-ml-sm secondary-btn"
-          btn-style="width: 75px; height: 40px"
+          btn-style="width: 40px; height: 40px"
           :buttons="[
             {
               label: '组织类型',
@@ -61,7 +60,7 @@
     <q-tab-panel
       name="structure"
       class="scroll q-px-none"
-      style="height: calc(100vh - 240px)"
+      style="height: calc(100vh - 270px)"
     >
       <q-tree
         ref="orgTree"

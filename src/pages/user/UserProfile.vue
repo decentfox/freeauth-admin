@@ -22,13 +22,15 @@
             label: !user.is_deleted ? '禁用账号' : '启用账号',
             icon: !user.is_deleted ? 'remove_circle_outline' : 'task_alt',
             actionType: !user.is_deleted ? 'disable' : 'enable',
-            disable: user.id === currentUser.id,
+            disable: user.id === currentUser.id && !user.is_deleted,
             disableHint: '该账号为您当前登录正在使用账号',
           },
           {
             label: '重置密码',
             icon: 'restart_alt',
-            actionType: 'reset_password',
+            actionType: 'reset',
+            disable: !user.email,
+            disableHint: '新密码以邮件形式进行发送，请先补充邮箱信息',
           },
           {
             label: '删除账号',
@@ -40,6 +42,7 @@
         ]"
         @disable="toggleUsersStatus([user], true, refreshUserData)"
         @enable="toggleUsersStatus([user], false, refreshUserData)"
+        @reset="resetUserPassword(user.id)"
         @delete="deleteUsers([user], refreshUserData)"
       />
     </template>

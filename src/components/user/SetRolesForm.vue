@@ -83,6 +83,7 @@ export default defineComponent({
         this.$emit('userUpdated');
         this.resetSetRolesForm();
       } catch (e) {
+        this.selectedRoles = this.user.roles || [];
         this.setRolesFormError = (e as Error).cause || {};
       }
     },

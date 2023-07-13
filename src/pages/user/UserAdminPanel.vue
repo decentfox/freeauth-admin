@@ -263,7 +263,9 @@ export default defineComponent({
     },
 
     refreshUserData() {
-      (this.$refs.userTable as DataTableComponent).fetchRows();
+      const tb = this.$refs.userTable as DataTableComponent;
+      tb.resetSelected();
+      tb.fetchRows();
     },
 
     goToUserProfile(evt: Event, userId: string) {

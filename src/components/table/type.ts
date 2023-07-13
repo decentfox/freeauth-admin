@@ -9,6 +9,8 @@ export interface DataTableComponent {
   onExternalFiltered: (key: string, value: string | boolean | string[]) => void;
   /** 移除外部传入的过滤键值，取消对该字段的过滤 */
   removeExternalFilter: (key: string) => void;
+  /** 释放所有勾选行 */
+  resetSelected: () => void;
 }
 
 export type Pagination = {

@@ -232,5 +232,15 @@ export const UserOperationsMixin: UserOperationsType = {
         }
       });
     },
+
+    async resetUserPassword(userId: string) {
+      await api.put(
+        `/users/${userId}/reset_pwd`,
+        {},
+        {
+          successMsg: '密码重置成功，请及时查看邮件',
+        }
+      );
+    },
   },
 };

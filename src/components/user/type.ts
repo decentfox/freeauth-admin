@@ -73,6 +73,7 @@ export interface UserOperationsType {
       organizations: Organization[],
       handler?: (...args: [string]) => void
     ) => void;
+    resetUserPassword: (userId: string) => void;
   };
 }
 

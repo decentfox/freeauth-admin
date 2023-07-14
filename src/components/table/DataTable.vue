@@ -76,7 +76,10 @@
           v-if="batchActions && selected.length > 0"
           class="row col-12 justify-center"
         >
-          <q-card flat>
+          <q-card flat class="row items-center">
+            <q-item-label class="q-mr-md">
+              您已选中 {{ selected.length }} 项
+            </q-item-label>
             <q-btn
               v-for="(action, i) in batchActions"
               :key="i"
@@ -84,6 +87,12 @@
               :label="action"
               class="primary-btn q-ma-sm"
               @click="$emit(action.replace(' ', '-'), selected)"
+            />
+            <q-btn
+              unelevated
+              class="secondary-btn q-ma-sm"
+              label="取消"
+              @click="resetSelected"
             />
           </q-card>
         </div>
@@ -334,6 +343,10 @@ export default defineComponent({
     clearRows() {
       this.rows = [];
       this.setApiInfo('', 'GET');
+    },
+
+    resetSelected() {
+      this.selected = [];
     },
   },
 });

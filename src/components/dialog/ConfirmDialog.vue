@@ -13,7 +13,8 @@
         <q-space />
       </q-item>
       <q-card-section class="q-pt-sm q-pb-md">
-        {{ content }}
+        <!-- eslint-disable vue/no-v-html -->
+        <div v-html="content" />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn

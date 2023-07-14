@@ -28,7 +28,7 @@
         :label="GuardModeLabel[guardMode]"
         class="q-my-sm full-width text-body1 primary-btn"
         :style="{ backgroundColor: `${color} !important` }"
-        @click="submit"
+        @click="presubmit"
       />
     </div>
   </q-form>
@@ -36,6 +36,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+
+import ConfirmDialog from '../dialog/ConfirmDialog.vue';
 
 import {
   AuthError,
@@ -74,7 +76,17 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    agreementTitle: {
+      type: String,
+      default: '隐私协议与服务条款',
+    },
+    agreementLink: {
+      type: String,
+      default: '/',
+    },
   },
+
+  emits: ['agreePolicy'],
 
   setup() {
     return {
@@ -98,18 +110,46 @@ export default defineComponent({
     },
 
     canSubmit(): boolean {
-      return (
-        this.isPreview ||
-        (!!this.account && !!this.password && this.policyChecked)
-      );
+      return this.isPreview || (!!this.account && !!this.password);
     },
   },
 
   methods: {
-    async submit() {
+    presubmit() {
       if (this.isPreview) {
         return;
       }
+      if (!this.policyChecked) {
+        this.$q
+          .dialog({
+            component: ConfirmDialog,
+            componentProps: {
+              title: '使用须知',
+              content: `为保障您的权益，请先阅读《<a href='${this.agreementLink}' target='_blank' rel='noopener noreferrer' class='text-grey-10'>${this.agreementTitle}</a>》。`,
+              buttons: [
+                { label: '取消', class: 'secondary-btn' },
+                {
+                  label: '已阅读并同意',
+                  actionType: 'agree',
+                  class: 'accent-btn',
+                },
+              ],
+            },
+          })
+          .onOk(async ({ type }) => {
+            if (type === 'agree') {
+              this.$emit('agreePolicy');
+              this.submit();
+            } else if (type == 'read') {
+              window.open(this.agreementLink);
+            }
+          });
+      } else {
+        this.submit();
+      }
+    },
+
+    async submit() {
       this.submitting = true;
       try {
         await this.$api.post(

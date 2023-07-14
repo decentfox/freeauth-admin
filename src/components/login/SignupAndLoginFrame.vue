@@ -34,6 +34,9 @@
                 :policy-checked="
                   loginSettings.agreementEnabled ? policyChecked : true
                 "
+                :agreement-title="loginSettings.agreementTitle"
+                :agreement-link="loginSettings.agreementLink"
+                @agree-policy="policyChecked = true"
               />
               <div v-if="signinEnabled" class="flex flex-center">
                 <q-btn
@@ -82,6 +85,9 @@
                 :policy-checked="
                   loginSettings.agreementEnabled ? policyChecked : true
                 "
+                :agreement-title="loginSettings.agreementTitle"
+                :agreement-link="loginSettings.agreementLink"
+                @agree-policy="policyChecked = true"
               />
               <pwd-auth-form
                 v-else
@@ -92,6 +98,9 @@
                 :policy-checked="
                   loginSettings.agreementEnabled ? policyChecked : true
                 "
+                :agreement-title="loginSettings.agreementTitle"
+                :agreement-link="loginSettings.agreementLink"
+                @agree-policy="policyChecked = true"
               />
               <div v-if="signinEnabled" class="flex flex-center">
                 <q-btn
@@ -118,20 +127,19 @@
       v-if="loginSettings.agreementEnabled"
       class="absolute-bottom flex flex-center q-pa-lg q-mx-md text-grey-10"
     >
-      <q-checkbox v-model="policyChecked" size="32px">
-        <q-item-label class="ellipsis">
-          <a
-            v-if="loginSettings.agreementLink"
-            :href="loginSettings.agreementLink"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-grey-10"
-          >
-            {{ agreementTitle }}
-          </a>
-          <template v-else>{{ agreementTitle }}</template>
-        </q-item-label>
-      </q-checkbox>
+      <q-checkbox v-model="policyChecked" size="32px" />
+      <q-item-label class="ellipsis">
+        <a
+          v-if="loginSettings.agreementLink"
+          :href="loginSettings.agreementLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-grey-10"
+        >
+          {{ agreementTitle }}
+        </a>
+        <template v-else>{{ agreementTitle }}</template>
+      </q-item-label>
     </div>
   </q-card>
 </template>
@@ -201,9 +209,7 @@ export default defineComponent({
     ]),
 
     agreementTitle() {
-      return (
-        this.loginSettings.agreementTitle || '我已阅读并同意隐私协议与服务条款'
-      );
+      return this.loginSettings.agreementTitle || '隐私协议与服务条款';
     },
 
     loginModeOptions() {

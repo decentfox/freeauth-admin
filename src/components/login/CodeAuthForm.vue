@@ -41,9 +41,6 @@
         >
           {{ codeSeconds ? '重新发送 (' + codeSeconds + ')' : '获取验证码' }}
         </q-btn>
-        <q-tooltip v-if="!!account && codeSeconds === 0 && !policyChecked">
-          请勾选隐私协议与服务条款
-        </q-tooltip>
       </template>
     </q-input>
     <div class="flex flex-center">
@@ -54,7 +51,7 @@
         :label="GuardModeLabel[guardMode]"
         class="q-my-sm full-width text-body1 primary-btn"
         :style="{ backgroundColor: `${color} !important` }"
-        @click="submit"
+        @click="presubmit"
       />
     </div>
   </q-form>
@@ -62,6 +59,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+
+import ConfirmDialog from '../dialog/ConfirmDialog.vue';
 
 import { AuthError, AuthMode, GuardMode, GuardModeLabel } from './type';
 
@@ -94,7 +93,17 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    agreementTitle: {
+      type: String,
+      default: '隐私协议与服务条款',
+    },
+    agreementLink: {
+      type: String,
+      default: '/',
+    },
   },
+
+  emits: ['agreePolicy'],
 
   setup() {
     return {
@@ -120,13 +129,11 @@ export default defineComponent({
     },
 
     canSendCode(): boolean {
-      return !!this.account && this.codeSeconds === 0 && this.policyChecked;
+      return !!this.account && this.codeSeconds === 0;
     },
 
     canSubmit(): boolean {
-      return (
-        this.isPreview || (!!this.account && !!this.code && this.policyChecked)
-      );
+      return this.isPreview || (!!this.account && !!this.code);
     },
 
     codeType(): string | null {
@@ -178,10 +185,39 @@ export default defineComponent({
       }, 1000);
     },
 
-    async submit() {
+    presubmit() {
       if (this.isPreview) {
         return;
       }
+      if (!this.policyChecked) {
+        this.$q
+          .dialog({
+            component: ConfirmDialog,
+            componentProps: {
+              title: '使用须知',
+              content: `为保障您的权益，请先阅读《<a href='${this.agreementLink}' target='_blank' rel='noopener noreferrer' class='text-grey-10'>${this.agreementTitle}</a>》。`,
+              buttons: [
+                { label: '取消', class: 'secondary-btn' },
+                {
+                  label: '已阅读并同意',
+                  actionType: 'agree',
+                  class: 'accent-btn',
+                },
+              ],
+            },
+          })
+          .onOk(async ({ type }) => {
+            if (type === 'agree') {
+              this.$emit('agreePolicy');
+              this.submit();
+            }
+          });
+      } else {
+        this.submit();
+      }
+    },
+
+    async submit() {
       this.submitting = true;
       try {
         await this.$api.post(

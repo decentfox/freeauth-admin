@@ -69,7 +69,7 @@ export default defineComponent({
       }
       this.submitting = true;
       try {
-        await this.$api.post('/reset_pwd', { password: this.password });
+        await this.$api.post('/change_pwd', { password: this.password });
         this.formError = {};
         this.$router.replace('/');
       } catch (e) {

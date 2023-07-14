@@ -17,7 +17,7 @@
         :disabled="!canSubmit"
         :loading="submitting"
         label="确认"
-        class="q-my-sm full-width text-body1 primary-btn"
+        class="q-my-md full-width text-body1 primary-btn"
         :style="{ backgroundColor: `${color} !important` }"
         @click="submit"
       />

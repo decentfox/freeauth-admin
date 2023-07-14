@@ -97,7 +97,8 @@
                     v-model="loginSettings.agreementTitle"
                     filled
                     dense
-                    placeholder="例如：我已阅读并同意隐私协议与服务条款"
+                    prefix="我已阅读并同意"
+                    placeholder="例如：隐私协议与服务条款"
                     hide-bottom-space
                   />
                 </q-item-section>

@@ -44,6 +44,10 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: '/my_profile',
+        component: () => import('pages/MyProfile.vue'),
+      },
+      {
         path: '/audit_logs',
         component: () => import('pages/AuditLogs.vue'),
         meta: {

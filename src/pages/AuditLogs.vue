@@ -43,6 +43,7 @@ enum EventType {
   SignOut = 'SignOut',
   SignUp = 'SignUp',
   ResetPwd = 'ResetPwd',
+  ChangePwd = 'ChangePwd',
 }
 
 const EventTypeMap = {
@@ -50,6 +51,7 @@ const EventTypeMap = {
   [EventType.SignOut]: '登出',
   [EventType.SignUp]: '注册',
   [EventType.ResetPwd]: '重置密码',
+  [EventType.ChangePwd]: '修改密码',
 };
 
 const columns: QTableProps['columns'] = [

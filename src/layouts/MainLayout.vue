@@ -264,7 +264,7 @@ export default defineComponent({
     },
 
     goToProfile() {
-      this.$router.push(`/user_profile/${this.currentUser.id}`);
+      this.$router.push('/my_profile');
     },
   },
 });

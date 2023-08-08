@@ -36,17 +36,8 @@
             dense
             label="创建权限"
             class="q-ml-sm q-px-md primary-btn"
-            :disable="selectedApp.is_protected"
             @click="openPermissionForm"
           />
-          <q-tooltip
-            v-if="selectedApp.is_protected"
-            anchor="bottom right"
-            self="top right"
-            max-width="200px"
-          >
-            所选应用即为当前所在系统 FreeAuth，权限的变更应通过代码实现
-          </q-tooltip>
         </div>
       </template>
       <template #body-cell-name="props">
@@ -56,6 +47,13 @@
           @click="goToPermissionProfile($event, props.row.id)"
         >
           {{ props.row.name }}
+          <q-tooltip
+            v-if="!!props.row.description"
+            anchor="bottom left"
+            self="center start"
+          >
+            {{ props.row.description }}
+          </q-tooltip>
         </q-td>
       </template>
       <template #body-cell-tags="props">

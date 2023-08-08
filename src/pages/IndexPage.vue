@@ -1,6 +1,6 @@
 <template>
   <page-wrapper page-title="首页">
-    <q-item-label header>
+    <q-item-label class="q-pa-sm">
       您好，{{ currentUser.name }}（用户名：{{
         currentUser.username
       }}），欢迎使用 FreeAuth！<br /><br />

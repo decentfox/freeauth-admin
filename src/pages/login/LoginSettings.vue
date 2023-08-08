@@ -3,7 +3,7 @@
     <q-splitter
       v-model="splitterModel"
       disable
-      style="height: calc(100vh - 82px)"
+      style="height: calc(100vh - 120px)"
     >
       <template #before>
         <div class="q-px-sm">
@@ -272,7 +272,7 @@
                     loginSettings.signinPwdValidatingMaxAttempts
                   "
                   toggle-label="登录密码尝试次数"
-                  description="限定周期内允许用户试错次数，超出后当日不再允许登录"
+                  description="同一登录账号，在限定周期内允许输入错误的次数"
                   action-hint="允许试错次数"
                 />
               </q-card-section>

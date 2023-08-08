@@ -95,7 +95,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/app_admin_panel',
-        component: () => import('pages/application/AppAdminPanel.vue'),
+        component: () => import('pages/application/AppAdminIndex.vue'),
         meta: {
           requiredPerms: ['manage:apps'],
           keepAlive: true,

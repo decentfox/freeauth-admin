@@ -1,3 +1,9 @@
+import { Application } from '../application/type';
+import { Enterprise } from '../organization/type';
+import { Permission } from '../permission/type';
+import { Role } from '../role/type';
+import { User } from '../user/type';
+
 export interface DataTableComponent {
   /** 基于当前搜索、筛选、排序、分页参数，手动触发获取数据的请求 */
   fetchRows: () => void;
@@ -11,6 +17,8 @@ export interface DataTableComponent {
   removeExternalFilter: (key: string) => void;
   /** 释放所有勾选行 */
   resetSelected: () => void;
+  /** 表格中的数据 */
+  rows: Permission[] | Enterprise[] | User[] | Application[] | Role[];
 }
 
 export type Pagination = {

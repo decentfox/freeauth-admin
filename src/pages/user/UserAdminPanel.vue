@@ -36,6 +36,21 @@
           {{ props.row.name }}
         </q-td>
       </template>
+      <template #body-cell-roles="props">
+        <q-td :props="props">
+          <q-item-section
+            v-for="(role, idx) in props.row.roles"
+            :key="idx"
+            side
+            @click="goToRoleProfile(role.id)"
+          >
+            <q-item-label class="cursor-pointer text-primary text-weight-bold">
+              <q-icon name="people_alt" />
+              {{ role.name }}
+            </q-item-label>
+          </q-item-section>
+        </q-td>
+      </template>
       <template #body-cell-is_deleted="props">
         <q-td :props="props">
           <boolean-chip
@@ -127,6 +142,12 @@ const columns: QTableProps['columns'] = [
     align: 'left',
     field: 'email',
     sortable: true,
+  },
+  {
+    name: 'roles',
+    label: '角色',
+    align: 'left',
+    field: 'roles',
   },
   {
     name: 'last_login_at',
@@ -270,6 +291,10 @@ export default defineComponent({
 
     goToUserProfile(evt: Event, userId: string) {
       this.$router.push(`/user_profile/${userId}`);
+    },
+
+    goToRoleProfile(rolId: string) {
+      this.$router.push(`/role_profile/${rolId}`);
     },
   },
 });

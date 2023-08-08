@@ -146,8 +146,14 @@
                 :model-value="
                   props.row.roles.map((r:Role) => r.id).includes(role.id)
                 "
-                @update:model-value="(val: boolean) => toggleLinked(val, props.row.id)"
+                :disable="props.row.code === '*' && props.row.application.is_protected && props.row.roles.map((r:Role) => r.id).includes(role.id)"
+                @update:model-value="(val: boolean) => toggleLinked(val, props.row)"
               />
+              <q-tooltip
+                v-if="props.row.code === '*' && props.row.application.is_protected && props.row.roles.map((r:Role) => r.id).includes(role.id)"
+              >
+                不支持解除通配符权限与预设应用 FreeAuth 系统管理员的关系
+              </q-tooltip>
             </q-td>
           </template>
           <template #body-cell-tags="props">
@@ -224,6 +230,7 @@ import { Application } from 'components/application/type';
 import { ChipGroupItem } from 'components/common/type';
 import { FormDialogComponent } from 'components/dialog/type';
 import { FormAction } from 'components/form/type';
+import { Permission } from 'components/permission/type';
 import { RoleOperationsMixin } from 'components/role/RoleOperations';
 import {
   BindUsersToRolesPostData,
@@ -463,15 +470,33 @@ export default defineComponent({
       }
     },
 
-    async toggleLinked(ticked: boolean, permission_id: string) {
+    async toggleLinked(ticked: boolean, permission: Permission) {
       try {
         await this.$api.post(
           ticked ? '/permissions/bind_roles' : '/permissions/unbind_roles',
-          { role_ids: [this.role.id], permission_ids: [permission_id] },
+          { role_ids: [this.role.id], permission_ids: [permission.id] },
           {
             successMsg: ticked ? '关联成功' : '移除成功',
           }
         );
+        if (ticked && permission.code !== '*') {
+          const pt = this.$refs.permissionTable as DataTableComponent;
+          if (
+            pt.rows.filter(
+              (perm: Permission) =>
+                perm.code === '*' &&
+                perm.application?.id === permission.application?.id &&
+                perm.roles &&
+                perm.roles.filter((role: Role) => role.id === this.role.id)
+                  .length > 0
+            ).length > 0
+          ) {
+            this.$q.dialog({
+              title: '温馨提示',
+              message: '该角色已拥有应用程序中的最高权限，无需再配置其他权限',
+            });
+          }
+        }
       } finally {
         const pt = this.$refs.permissionTable as DataTableComponent;
         pt.fetchRows();

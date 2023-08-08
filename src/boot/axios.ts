@@ -3,6 +3,8 @@ import { get } from 'lodash';
 import { Loading, Notify } from 'quasar';
 import { boot } from 'quasar/wrappers';
 
+import { authStore } from 'stores/auth-store';
+
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $axios: AxiosInstance;
@@ -75,6 +77,13 @@ export default boot(({ app, router }) => {
 
       if (err.response.status === 401) {
         router.push('/login');
+        return Promise.reject(errObj);
+      }
+
+      if (err.response.status === 403) {
+        router.push('/');
+        const auth = authStore();
+        auth.fetchProfile();
         return Promise.reject(errObj);
       }
 

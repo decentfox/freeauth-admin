@@ -41,9 +41,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+import { mapActions, mapState } from 'pinia';
 
-import { FormDialogComponent } from '../dialog/type';
-import { FormAction } from '../form/type';
+import { FormDialogComponent } from 'components/dialog/type';
+import { FormAction } from 'components/form/type';
+import { authStore } from 'stores/auth-store';
 
 import { User, UserPostData, UserPostError } from './type';
 
@@ -80,6 +82,10 @@ export default defineComponent({
     };
   },
 
+  computed: {
+    ...mapState(authStore, ['currentUser']),
+  },
+
   watch: {
     user() {
       this.userFormData = {
@@ -93,6 +99,8 @@ export default defineComponent({
   },
 
   methods: {
+    ...mapActions(authStore, ['fetchProfile']),
+
     show() {
       this.userFormDialog = true;
     },
@@ -120,6 +128,9 @@ export default defineComponent({
         await this.$api.put(`/users/${this.user.id}`, this.userFormData, {
           successMsg: '用户信息更新成功',
         });
+        if (this.currentUser.id === this.user.id) {
+          await this.fetchProfile();
+        }
         this.$emit('refresh');
         this.userFormError = {};
       } catch (e) {

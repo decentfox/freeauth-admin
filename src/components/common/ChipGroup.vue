@@ -10,7 +10,7 @@
     :square="square"
     @click="clickChip(chip)"
   >
-    <span class="material-icons-outlined q-pr-xs">
+    <span v-if="!!icon" class="material-icons-outlined q-pr-xs">
       {{ icon }}
     </span>
     {{ chip.name }}

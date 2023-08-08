@@ -158,7 +158,7 @@ export const UserOperationsMixin: UserOperationsType = {
         component: ConfirmDialog,
         componentProps: {
           title: '移除用户',
-          content: `您正在请求对该用户移除${roleDesc}。操作后，用户不在拥有角色关联的权限，但若权限仍然被该用户关联的其他角色所涵盖，该用户仍然具有对应权限。`,
+          content: `您正在请求对该用户移除${roleDesc}。操作后，用户不再拥有该角色所关联的权限，但若这些权限仍被该用户所关联的其他角色所涵盖，该用户则仍然拥有这些权限。`,
           buttons: [
             { label: '取消', class: 'secondary-btn' },
             {

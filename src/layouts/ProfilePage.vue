@@ -28,7 +28,13 @@
       </q-tabs>
     </slot>
     <q-separator inset />
-    <q-tab-panels :model-value="tabValue" animated keep-alive>
+    <q-tab-panels
+      :model-value="tabValue"
+      animated
+      keep-alive
+      class="scroll q-pa-none"
+      style="height: calc(100vh - 250px)"
+    >
       <slot name="panels"></slot>
     </q-tab-panels>
     <slot name="dialog"></slot>

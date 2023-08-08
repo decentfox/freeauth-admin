@@ -96,6 +96,12 @@
                     label: '移除角色',
                     icon: 'person_remove',
                     actionType: 'unbind',
+                    disable:
+                      permission.code === '*' &&
+                      permission.application?.is_protected &&
+                      props.row.is_protected,
+                    disableHint:
+                      '不支持解除通配符权限与预设应用 FreeAuth 系统管理员的关系',
                   },
                 ]"
                 @click.stop

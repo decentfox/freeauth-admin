@@ -482,7 +482,7 @@ export default defineComponent({
         if (ticked && permission.code !== '*') {
           const pt = this.$refs.permissionTable as DataTableComponent;
           if (
-            pt.rows.filter(
+            (pt.rows as Permission[]).filter(
               (perm: Permission) =>
                 perm.code === '*' &&
                 perm.application?.id === permission.application?.id &&
@@ -493,7 +493,8 @@ export default defineComponent({
           ) {
             this.$q.dialog({
               title: '温馨提示',
-              message: '该角色已拥有应用程序中的最高权限，无需再配置其他权限',
+              message:
+                '该角色已拥有应用程序中的最高权限，即“通配符权限”，故无需再配置其他权限',
             });
           }
         }

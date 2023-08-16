@@ -1,7 +1,8 @@
 {
-  "name": "freeauth-ui-quasar",
-  "version": "0.0.1",
-  "description": "FreeAuth management",
+  "name": "freeauth-admin",
+  "version": "1.0.0",
+  "description": "FreeAuth management system based on Quasar2",
+  "license": "Mulan PSL v2",
   "productName": "FreeAuth Management",
   "author": "DecentFoX <service@decentfox.com>",
   "private": true,

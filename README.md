@@ -1,8 +1,17 @@
-# FreeAuth Management (freeauth-ui-quasar)
+<img src="src/assets/logo.png"/>
 
-FreeAuth management
+<p>
+    <em>Make authentication and authorization easy and free.</em>
+</p>
 
-## Install the dependencies
+## Documentation
+
+- [English](https://freeauth.decentfox.com/)
+- [简体中文](https://zh.freeauth.decentfox.com/)
+
+## Development
+
+### Install the dependencies
 
 ```bash
 yarn
